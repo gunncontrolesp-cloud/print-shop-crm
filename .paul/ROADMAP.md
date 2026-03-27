@@ -8,7 +8,7 @@ Six-phase journey from a single-tenant print shop tool to a nationally-sold SaaS
 
 **v0.1 Foundation** (v0.1.0)
 Status: In progress
-Phases: 2 of 3 complete
+Phases: 5 of 6 complete
 
 ## Phases
 
@@ -18,7 +18,7 @@ Phases: 2 of 3 complete
 | 2 | Production + Files + Notifications | 3 | **Complete** | 02-01 ✓ 02-02 ✓ 02-03 ✓ |
 | 3 | Invoicing + Payments | TBD | Not started | - |
 | 4 | Customer Portal | TBD | Not started | - |
-| 5 | Analytics + Inventory | TBD | Not started | - |
+| 5 | Analytics + Inventory | 2 | **Complete** | 05-01 ✓ 05-02 ✓ |
 | 6 | SaaS / Multi-Tenant | TBD | Not started | - |
 
 ## Phase Details
@@ -100,7 +100,7 @@ Phases: 2 of 3 complete
 - Unpaid invoice tracking + dashboard alerts
 
 **Plans:**
-- [ ] 03-01: Invoice generation + management UI
+- [x] 03-01: Invoice generation + management UI
 - [ ] 03-02: PaymentProvider abstraction + Stripe implementation
 - [ ] 03-03: Webhook handling + payment status sync
 
@@ -157,4 +157,4 @@ Phases: 2 of 3 complete
 
 ---
 *Roadmap created: 2026-03-26*
-*Last updated: 2026-03-27 — Phase 2 complete*
+*Last updated: 2026-03-27 — Phase 5 complete*

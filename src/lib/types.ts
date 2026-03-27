@@ -47,3 +47,6 @@ export const JOB_STAGE_SEQUENCE = [
 ] as const
 
 export type JobStage = (typeof JOB_STAGE_SEQUENCE)[number]
+
+export const INVOICE_STATUS_SEQUENCE = ['draft', 'sent', 'paid'] as const
+export type InvoiceStatus = (typeof INVOICE_STATUS_SEQUENCE)[number]

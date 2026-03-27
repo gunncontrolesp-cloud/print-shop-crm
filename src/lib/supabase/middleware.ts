@@ -47,5 +47,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Portal: unauthenticated → /portal/login
+  if (
+    !user &&
+    pathname.startsWith('/portal') &&
+    !pathname.startsWith('/portal/login') &&
+    !pathname.startsWith('/portal/auth')
+  ) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/portal/login'
+    return NextResponse.redirect(url)
+  }
+
+  // Portal login: authenticated → /portal
+  if (user && pathname === '/portal/login') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/portal'
+    return NextResponse.redirect(url)
+  }
+
   return supabaseResponse
 }

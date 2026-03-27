@@ -13,9 +13,9 @@ Print shop staff can manage the full job lifecycle — from quote to production 
 | Attribute | Value |
 |-----------|-------|
 | Type | Application |
-| Version | 0.0.0 |
-| Status | Initializing |
-| Last Updated | 2026-03-26 |
+| Version | 0.1.0 |
+| Status | v0.1 Foundation — 5 of 6 phases complete |
+| Last Updated | 2026-03-27 |
 
 ## Requirements
 
@@ -40,16 +40,21 @@ Print shop staff can manage the full job lifecycle — from quote to production 
 - ✓ File uploads via S3 presigned URLs (content-type allowlist, 100 MB limit) — Phase 2
 - ✓ n8n Cloud notification hooks — quote sent, order approved, job ready for pickup — Phase 2
 - ✓ Inbound /api/webhooks/n8n route (shared secret validation) — Phase 2
+- ✓ Invoice generation from completed order — Phase 3
+- ✓ PaymentProvider abstraction (Stripe implementation) + payment links via email — Phase 3
+- ✓ Stripe webhook handling (checkout.session.completed → mark invoice paid) — Phase 3
+- ✓ Customer portal (magic link auth, order tracking, file downloads) — Phase 4
+- ✓ Proof approval workflow (approve/request changes, n8n notify, production board badge) — Phase 4
+- ✓ Embedded Stripe checkout in portal (inline payment, no redirect) — Phase 4
+- ✓ Revenue analytics dashboard (monthly revenue chart, order volume, top customers) — Phase 5
+- ✓ Inventory tracking + low-stock alerts via n8n — Phase 5
 
 ### Active (In Progress)
 
 None.
 
 ### Planned (Next)
-- [ ] Phase 3 — Invoicing + Payments (PaymentProvider abstraction)  ← NEXT
-- [ ] Phase 4 — Customer portal + proof approval
-- [ ] Phase 5 — Analytics dashboard + inventory
-- [ ] Phase 6 — Multi-tenant SaaS conversion
+- [ ] Phase 6 — Multi-tenant SaaS conversion ($99/$149/$299/mo)  ← NEXT
 
 ### Out of Scope
 
@@ -114,6 +119,10 @@ Greenfield build. No existing systems to integrate with. Supabase handles auth +
 | Presigned URL upload pattern | Server generates URL + s3Key, client PUTs directly to S3, server records metadata | 2026-03-27 | Active |
 | OrderFilesPanel client boundary | useRouter contained in client component; order detail page stays server component | 2026-03-27 | Active |
 | n8n utility as plain module | notifyN8n is imported by server actions — not a server action itself; fire-and-forget, never throws | 2026-03-27 | Active |
+| Stripe v21 ui_mode='embedded_page' | SDK renamed 'embedded' → 'embedded_page'; TypeScript types enforce correct value | 2026-03-27 | Active |
+| CSS bar charts, no library | Recharts/chart.js deferred to Phase 6 polish; CSS flex bars adequate for v0.1 analytics | 2026-03-27 | Active |
+| JS aggregation for analytics | Fetch rows + aggregate in JS avoids Supabase RPC; adequate at small-shop scale | 2026-03-27 | Active |
+| Low-stock alert on adjust only | Initial stock is intentional; alert fires when stock is consumed, not on item creation | 2026-03-27 | Active |
 
 ## Success Metrics
 
@@ -149,4 +158,4 @@ Greenfield build. No existing systems to integrate with. Supabase handles auth +
 
 ---
 *PROJECT.md — Updated when requirements or context change*
-*Last updated: 2026-03-27 after Phase 2*
+*Last updated: 2026-03-27 after Phase 5*

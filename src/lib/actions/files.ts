@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
 
@@ -91,6 +91,32 @@ export async function recordUploadedFile(
   revalidatePath(`/dashboard/orders/${orderId}`)
 
   return data
+}
+
+export async function createPresignedDownloadUrl(fileId: string): Promise<string> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // RLS ensures only the file owner can retrieve it
+  const { data: file, error } = await supabase
+    .from('files')
+    .select('s3_key, name')
+    .eq('id', fileId)
+    .single()
+
+  if (error || !file) throw new Error('File not found')
+
+  const client = getS3Client()
+  const command = new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET_NAME!,
+    Key: file.s3_key,
+    ResponseContentDisposition: `attachment; filename="${file.name}"`,
+  })
+
+  return await getSignedUrl(client, command, { expiresIn: 3600 })
 }
 
 export async function deleteFile(fileId: string) {

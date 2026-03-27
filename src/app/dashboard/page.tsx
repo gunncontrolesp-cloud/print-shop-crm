@@ -18,6 +18,8 @@ export default async function DashboardPage() {
     { count: customerCount },
     { data: orders },
     { count: openQuoteCount },
+    { count: unpaidInvoiceCount },
+    { data: inventoryItems },
   ] = await Promise.all([
     supabase.from('customers').select('*', { count: 'exact', head: true }),
     supabase
@@ -28,7 +30,16 @@ export default async function DashboardPage() {
       .from('quotes')
       .select('*', { count: 'exact', head: true })
       .in('status', ['draft', 'sent']),
+    supabase
+      .from('invoices')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['draft', 'sent']),
+    supabase.from('inventory_items').select('id, quantity, low_stock_threshold'),
   ])
+
+  const lowStockCount = (inventoryItems ?? []).filter(
+    (item) => Number(item.quantity) <= Number(item.low_stock_threshold)
+  ).length
 
   const allOrders = orders ?? []
 
@@ -66,6 +77,18 @@ export default async function DashboardPage() {
           label="In Production"
           value={inProductionCount}
           href="/dashboard/orders"
+          accent="orange"
+        />
+        <StatCard
+          label="Unpaid Invoices"
+          value={unpaidInvoiceCount ?? 0}
+          href="/dashboard/invoices"
+          accent="red"
+        />
+        <StatCard
+          label="Low Stock Items"
+          value={lowStockCount}
+          href="/dashboard/inventory"
           accent="orange"
         />
       </div>
@@ -217,7 +240,7 @@ function StatCard({
   label: string
   value: number
   href: string
-  accent?: 'blue' | 'yellow' | 'orange'
+  accent?: 'blue' | 'yellow' | 'orange' | 'red'
 }) {
   const accentClass =
     accent === 'blue'
@@ -226,6 +249,8 @@ function StatCard({
       ? 'text-yellow-600'
       : accent === 'orange'
       ? 'text-orange-600'
+      : accent === 'red'
+      ? 'text-red-600'
       : 'text-gray-900'
 
   return (

@@ -62,3 +62,61 @@ export async function notifyJobReady(
     customerPhone,
   })
 }
+
+export async function notifyProofDecision(
+  jobId: string,
+  orderId: string,
+  decision: 'approved' | 'changes_requested',
+  comments: string,
+  customerEmail: string,
+  customerName: string
+): Promise<void> {
+  await notifyN8n(process.env.N8N_WEBHOOK_PROOF_DECISION, 'proof.decision_submitted', {
+    jobId,
+    orderId,
+    decision,
+    comments,
+    customerEmail,
+    customerName,
+  })
+}
+
+export async function notifyInvoicePaid(
+  invoiceId: string,
+  customerEmail: string,
+  customerName: string
+): Promise<void> {
+  await notifyN8n(process.env.N8N_WEBHOOK_INVOICE_PAID, 'invoice.paid', {
+    invoiceId,
+    customerEmail,
+    customerName,
+  })
+}
+
+export async function notifyLowStock(
+  itemId: string,
+  itemName: string,
+  quantity: number,
+  threshold: number
+): Promise<void> {
+  await notifyN8n(process.env.N8N_WEBHOOK_LOW_STOCK, 'inventory.low_stock', {
+    itemId,
+    itemName,
+    quantity,
+    threshold,
+  })
+}
+
+export async function notifyInvoicePaymentLink(
+  invoiceId: string,
+  customerEmail: string,
+  customerName: string,
+  paymentLinkUrl: string
+): Promise<void> {
+  await notifyN8n(process.env.N8N_WEBHOOK_INVOICE_PAYMENT_LINK, 'invoice.payment_link_sent', {
+    invoiceId,
+    customerEmail,
+    customerName,
+    paymentLinkUrl,
+  })
+}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { updateJobStage, completeJob } from '@/lib/actions/jobs'
+import { resetProofDecision } from '@/lib/actions/proof'
 import { JOB_STAGE_SEQUENCE, type JobStage } from '@/lib/types'
 
 type Job = {
@@ -10,6 +11,8 @@ type Job = {
   order_id: string
   stage: JobStage
   notes: string | null
+  proof_decision: string | null
+  proof_comments: string | null
   completed_at: string | null
   created_at: string
   orders: {
@@ -117,6 +120,20 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                         {new Date(job.created_at).toLocaleDateString('en-US')}
                       </p>
 
+                      {job.proof_decision === 'approved' && (
+                        <p className="text-xs text-green-600 font-medium mt-1">✓ Proof approved</p>
+                      )}
+                      {job.proof_decision === 'changes_requested' && (
+                        <div className="mt-1">
+                          <p className="text-xs text-orange-600 font-medium">Changes requested</p>
+                          {job.proof_comments && (
+                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                              {job.proof_comments}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
                       <div className="mt-2 flex flex-col gap-1">
                         {nextStage && (
                           <button
@@ -127,6 +144,16 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                             Move to {STAGES.find((s) => s.id === nextStage)?.label}
                           </button>
                         )}
+                        {stage.id === 'proofing' &&
+                          job.proof_decision === 'changes_requested' && (
+                            <button
+                              type="button"
+                              onClick={() => resetProofDecision(job.id)}
+                              className="w-full text-xs px-2 py-1 rounded font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition-colors"
+                            >
+                              Reset Proof
+                            </button>
+                          )}
                         {stage.id === 'ready_for_pickup' && (
                           <button
                             type="button"

@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { updateOrderStatus, deleteOrder } from '@/lib/actions/orders'
-import type { OrderStatus, LineItem } from '@/lib/types'
+import { createInvoice } from '@/lib/actions/invoices'
+import type { OrderStatus, LineItem, InvoiceStatus } from '@/lib/types'
 import { getNextStatus } from '@/lib/types'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { OrderFilesPanel } from '@/components/file-uploader'
@@ -83,6 +84,12 @@ export default async function OrderDetailPage({
     .select('id, name, size_bytes, created_at')
     .eq('order_id', id)
     .order('created_at', { ascending: false })
+
+  const { data: invoice } = await supabase
+    .from('invoices')
+    .select('id, amount, status, due_date')
+    .eq('order_id', id)
+    .single()
 
   const currentIdx = STATUS_SEQUENCE.indexOf(currentStatus)
 
@@ -232,6 +239,51 @@ export default async function OrderDetailPage({
           <p className="text-sm text-gray-900 whitespace-pre-wrap">{order.notes}</p>
         </div>
       )}
+
+      {/* Invoice */}
+      <div className="mb-6">
+        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Invoice</h2>
+        {invoice ? (
+          <div className="rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
+            <div>
+              <span className="text-sm font-medium text-gray-900">
+                #{invoice.id.slice(0, 8).toUpperCase()}
+              </span>
+              <span className="ml-3 text-sm text-gray-700">${Number(invoice.amount).toFixed(2)}</span>
+              <span
+                className={`ml-3 text-xs px-2 py-0.5 rounded capitalize font-medium ${
+                  (invoice.status as InvoiceStatus) === 'paid'
+                    ? 'bg-green-100 text-green-700'
+                    : (invoice.status as InvoiceStatus) === 'sent'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                {invoice.status}
+              </span>
+              {invoice.due_date && (
+                <span className="ml-3 text-xs text-gray-400">
+                  Due {new Date(invoice.due_date).toLocaleDateString('en-US')}
+                </span>
+              )}
+            </div>
+            <Link
+              href={`/dashboard/invoices/${invoice.id}`}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              View invoice →
+            </Link>
+          </div>
+        ) : isAdmin ? (
+          <form action={createInvoice.bind(null, id)}>
+            <button type="submit" className={buttonVariants({ variant: 'outline' as 'default' })}>
+              Generate Invoice
+            </button>
+          </form>
+        ) : (
+          <p className="text-sm text-gray-400">No invoice yet.</p>
+        )}
+      </div>
 
       {/* Files */}
       <div className="mb-6">
