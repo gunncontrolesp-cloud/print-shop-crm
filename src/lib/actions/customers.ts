@@ -3,13 +3,16 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getTenantId } from '@/lib/tenant'
 
 export async function createCustomer(formData: FormData) {
   const supabase = await createClient()
+  const tenantId = await getTenantId()
 
   const { data, error } = await supabase
     .from('customers')
     .insert({
+      tenant_id: tenantId,
       name: formData.get('name') as string,
       business_name: (formData.get('business_name') as string) || null,
       email: (formData.get('email') as string) || null,

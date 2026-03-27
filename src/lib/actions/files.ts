@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
+import { getTenantId } from '@/lib/tenant'
 
 const ALLOWED_TYPES = [
   'application/pdf',
@@ -73,9 +74,12 @@ export async function recordUploadedFile(
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
+  const tenantId = await getTenantId()
+
   const { data, error } = await supabase
     .from('files')
     .insert({
+      tenant_id: tenantId,
       order_id: orderId,
       name,
       s3_key: s3Key,

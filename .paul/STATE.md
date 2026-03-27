@@ -5,32 +5,32 @@
 See: .paul/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Print shop staff can manage the full job lifecycle — from quote to production to delivery — without paper, spreadsheets, or missed notifications.
-**Current focus:** v0.1 Foundation — Phase 6: SaaS / Multi-Tenant
+**Current focus:** v0.1 Foundation — COMPLETE ✓
 
 ## Current Position
 
-Milestone: v0.1 Foundation (v0.1.0)
-Phase: 6 of 6 (SaaS / Multi-Tenant) — Not started
-Plan: Phase 5 complete — ready for Phase 6
-Status: Ready for next PLAN
-Last activity: 2026-03-27 — Phase 5 complete (analytics + inventory)
+Milestone: v0.1 Foundation (v0.1.0) — **COMPLETE**
+Phase: 6 of 6 (SaaS / Multi-Tenant) — **Complete**
+Plan: All 6 phases complete
+Status: v0.1 Foundation milestone complete — ready for deployment
+Last activity: 2026-03-27 — Plan 06-03 complete (Stripe subscriptions + tier gates)
 
 Progress:
-- Milestone: [█████████░] 97%
-- Phase 5: [██████████] 100% ✓
+- Milestone: [██████████] 100% ✓
+- Phase 6: [██████████] 100% ✓
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Loop complete — ready for next PLAN]
+  ✓        ✓        ✓     [Milestone complete]
 ```
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 17
 - Average duration: —
 
 ## Accumulated Context
@@ -62,9 +62,17 @@ PLAN ──▶ APPLY ──▶ UNIFY
 | JS aggregation for analytics | 05-01 | Avoids Supabase RPC; adequate at small-shop scale |
 | Low-stock alert on adjust only | 05-02 | Alert fires when stock consumed, not on item creation |
 | quantity CHECK >= 0 + Math.max | 05-02 | Schema + app layer both prevent negative inventory |
+| Seed tenant via hardcoded UUID | 06-01 | DO block UPDATEs before columns exist; hardcoded UUID + sequential UPDATEs is safe |
+| users.tenant_id nullable | 06-01 | Users mid-onboarding have no tenant yet; NOT NULL would block signup flow |
+| Customer portal policies via auth_user_id | 06-01 | Customers not in public.users; is_authenticated() correctly returns false for them |
+| Service role in middleware tenant check | 06-01 | Edge middleware can't use cookies-based server client; service role bypasses RLS chicken-and-egg |
+| Service role for all onboarding writes | 06-02 | get_my_tenant_id() returns NULL before tenant assigned; anon client blocked by RLS on all three writes |
+| Pro as default tier in onboarding | 06-02 | Mid-tier default captures most value; users can choose explicitly |
+| Store stripe_customer_id on checkout initiation | 06-03 | Avoids timing gap between checkout start and webhook; idempotent |
+| Tier gate only on gated routes | 06-03 | Avoids second DB call on every /dashboard request; common routes don't pay the cost |
 
 ### Git State
-Last commit: 47ae68f
+Last commit: 4ece439
 Branch: main
 Feature branches merged: none
 
@@ -72,18 +80,21 @@ Feature branches merged: none
 
 None.
 
-### Blockers/Concerns
+### Blockers/Concerns (deployment prerequisites)
 
-- All migrations (000001–000004 + 20260327000002–20260327000005) not yet applied to Supabase — required before runtime testing
-- AWS credentials + n8n webhook URLs needed in `.env.local` before S3 uploads and notifications work
-- STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET + NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY needed in `.env.local` before payment flow works at runtime
+- All migrations (000001–000004 + 20260327000002–000007) must be applied to Supabase before runtime
+- AWS credentials + n8n webhook URLs needed in `.env.local`
+- STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET + NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY needed in `.env.local`
+- STRIPE_PRICE_STARTER_ID + STRIPE_PRICE_PRO_ID + STRIPE_PRICE_PREMIUM_ID needed in `.env.local` (create prices in Stripe dashboard first)
+- SUPABASE_SERVICE_ROLE_KEY needed in `.env.local`
 - Stripe webhook endpoint must be registered in Stripe dashboard pointing to /api/webhooks/stripe
+- Stripe Billing Portal must be configured in Stripe dashboard (Settings → Billing → Customer portal)
 
 ## Session Continuity
 
 Last session: 2026-03-27
-Stopped at: Phase 5 complete — analytics + inventory unified
-Next action: /paul:plan for Phase 6 (SaaS / Multi-Tenant — 06-01: multi-tenant data isolation + RLS)
+Stopped at: v0.1 Foundation milestone complete — all 6 phases shipped
+Next action: Deployment setup (apply migrations, configure env vars, deploy to Vercel)
 Resume file: .paul/ROADMAP.md
 
 ---

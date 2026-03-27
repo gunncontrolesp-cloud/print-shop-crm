@@ -3,6 +3,12 @@ import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyInvoicePaid } from '@/lib/n8n'
 
+function planTierFromPriceId(priceId: string): string {
+  if (priceId === process.env.STRIPE_PRICE_PREMIUM_ID) return 'premium'
+  if (priceId === process.env.STRIPE_PRICE_PRO_ID) return 'pro'
+  return 'starter'
+}
+
 export async function POST(request: Request) {
   const rawBody = await request.text()
   const sig = request.headers.get('stripe-signature')
@@ -34,6 +40,35 @@ export async function POST(request: Request) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
       const supabase = createServiceClient()
+
+      // ── Subscription checkout (Phase 6) ──────────────────────────────────
+      if (session.mode === 'subscription') {
+        const tenantId = session.metadata?.tenant_id
+        if (!tenantId) {
+          console.warn('[stripe webhook] subscription session missing tenant_id metadata')
+          break
+        }
+        const planTier = session.metadata?.plan_tier ?? 'starter'
+        const customerId =
+          typeof session.customer === 'string' ? session.customer : session.customer?.id ?? null
+        const subscriptionId =
+          typeof session.subscription === 'string'
+            ? session.subscription
+            : session.subscription?.id ?? null
+
+        await supabase
+          .from('tenants')
+          .update({
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            plan_tier: planTier,
+          })
+          .eq('id', tenantId)
+
+        break
+      }
+
+      // ── Invoice payment (Phase 3/4) ───────────────────────────────────────
 
       // Try payment link first (Phase 3 Payment Links)
       const paymentLinkId =
@@ -86,6 +121,42 @@ export async function POST(request: Request) {
       revalidatePath('/portal/invoices')
       break
     }
+
+    case 'customer.subscription.updated': {
+      const subscription = event.data.object as Stripe.Subscription
+      const customerId =
+        typeof subscription.customer === 'string'
+          ? subscription.customer
+          : subscription.customer.id
+
+      const priceId = subscription.items.data[0]?.price?.id ?? ''
+      const planTier = planTierFromPriceId(priceId)
+
+      const supabase = createServiceClient()
+      await supabase
+        .from('tenants')
+        .update({ plan_tier: planTier, stripe_subscription_id: subscription.id })
+        .eq('stripe_customer_id', customerId)
+
+      break
+    }
+
+    case 'customer.subscription.deleted': {
+      const subscription = event.data.object as Stripe.Subscription
+      const customerId =
+        typeof subscription.customer === 'string'
+          ? subscription.customer
+          : subscription.customer.id
+
+      const supabase = createServiceClient()
+      await supabase
+        .from('tenants')
+        .update({ plan_tier: 'starter', stripe_subscription_id: null })
+        .eq('stripe_customer_id', customerId)
+
+      break
+    }
+
     default:
       // silently ignore — Stripe sends many event types
   }

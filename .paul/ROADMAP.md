@@ -7,8 +7,8 @@ Six-phase journey from a single-tenant print shop tool to a nationally-sold SaaS
 ## Current Milestone
 
 **v0.1 Foundation** (v0.1.0)
-Status: In progress
-Phases: 5 of 6 complete
+Status: **Complete** ✓
+Phases: 6 of 6 complete
 
 ## Phases
 
@@ -19,7 +19,7 @@ Phases: 5 of 6 complete
 | 3 | Invoicing + Payments | TBD | Not started | - |
 | 4 | Customer Portal | TBD | Not started | - |
 | 5 | Analytics + Inventory | 2 | **Complete** | 05-01 ✓ 05-02 ✓ |
-| 6 | SaaS / Multi-Tenant | TBD | Not started | - |
+| 6 | SaaS / Multi-Tenant | 3 | **Complete** | 06-01 ✓ 06-02 ✓ 06-03 ✓ |
 
 ## Phase Details
 
@@ -151,9 +151,9 @@ Phases: 5 of 6 complete
 - Tier feature gates (Starter: Phase 1 features; Pro: + Phase 2-3; Premium: + Phase 4-5)
 
 **Plans:**
-- [ ] 06-01: Multi-tenant data isolation + RLS
-- [ ] 06-02: Onboarding flow
-- [ ] 06-03: Stripe subscription billing + tier gates
+- [x] 06-01: Multi-tenant data isolation + RLS
+- [x] 06-02: Onboarding flow
+- [x] 06-03: Stripe subscription billing + tier gates
 
 ---
 *Roadmap created: 2026-03-26*

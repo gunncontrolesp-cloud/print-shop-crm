@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { LineItem, OrderStatus } from '@/lib/types'
 import { getNextStatus } from '@/lib/types'
 import { notifyOrderApproved } from '@/lib/n8n'
+import { getTenantId } from '@/lib/tenant'
 
 export async function convertQuoteToOrder(quoteId: string) {
   const supabase = await createClient()
@@ -14,6 +15,8 @@ export async function convertQuoteToOrder(quoteId: string) {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
+
+  const tenantId = await getTenantId()
 
   const { data: quote } = await supabase
     .from('quotes')
@@ -38,6 +41,7 @@ export async function convertQuoteToOrder(quoteId: string) {
   const { data: order, error } = await supabase
     .from('orders')
     .insert({
+      tenant_id: tenantId,
       quote_id: quoteId,
       customer_id: quote.customer_id,
       line_items: quote.line_items,
@@ -105,7 +109,9 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
       .single()
 
     if (!existingJob) {
+      const jobTenantId = await getTenantId()
       await supabase.from('jobs').insert({
+        tenant_id: jobTenantId,
         order_id: id,
         stage: 'design',
       })

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { notifyLowStock } from '@/lib/n8n'
+import { getTenantId } from '@/lib/tenant'
 
 export async function createInventoryItem(formData: FormData) {
   const supabase = await createClient()
@@ -11,7 +12,10 @@ export async function createInventoryItem(formData: FormData) {
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
+  const tenantId = await getTenantId()
+
   await supabase.from('inventory_items').insert({
+    tenant_id: tenantId,
     name: formData.get('name') as string,
     category: (formData.get('category') as string) || 'supplies',
     quantity: Number(formData.get('quantity')),

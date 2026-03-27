@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getStripeProvider } from '@/lib/payments/stripe-provider'
 import { notifyInvoicePaymentLink } from '@/lib/n8n'
+import { getTenantId } from '@/lib/tenant'
 
 async function requireAdmin() {
   const supabase = await createClient()
@@ -25,6 +26,7 @@ async function requireAdmin() {
 
 export async function createInvoice(orderId: string) {
   const { supabase, user } = await requireAdmin()
+  const tenantId = await getTenantId()
 
   const { data: order } = await supabase
     .from('orders')
@@ -45,6 +47,7 @@ export async function createInvoice(orderId: string) {
   const { data, error } = await supabase
     .from('invoices')
     .insert({
+      tenant_id: tenantId,
       order_id: orderId,
       amount: order.total,
       status: 'draft',

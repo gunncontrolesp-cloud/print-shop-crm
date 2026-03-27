@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { LineItem } from '@/lib/types'
 import { notifyQuoteSent } from '@/lib/n8n'
+import { getTenantId } from '@/lib/tenant'
 
 export async function createQuote(formData: FormData) {
   const supabase = await createClient()
@@ -14,6 +15,7 @@ export async function createQuote(formData: FormData) {
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
+  const tenantId = await getTenantId()
   const customer_id = formData.get('customer_id') as string
   const notes = (formData.get('notes') as string) || null
   const lineItemsRaw = formData.get('line_items') as string
@@ -24,6 +26,7 @@ export async function createQuote(formData: FormData) {
   const { data, error } = await supabase
     .from('quotes')
     .insert({
+      tenant_id: tenantId,
       customer_id,
       notes,
       line_items,
