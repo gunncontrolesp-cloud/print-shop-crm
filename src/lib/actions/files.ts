@@ -1,10 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { getTenantId } from '@/lib/tenant'
+
+const BUCKET = 'order-files'
 
 const ALLOWED_TYPES = [
   'application/pdf',
@@ -15,16 +16,6 @@ const ALLOWED_TYPES = [
   'application/postscript',
   'application/illustrator',
 ]
-
-function getS3Client() {
-  return new S3Client({
-    region: process.env.AWS_REGION!,
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-    },
-  })
-}
 
 export async function createPresignedUploadUrl(
   orderId: string,
@@ -47,18 +38,16 @@ export async function createPresignedUploadUrl(
   }
 
   const { randomUUID } = await import('crypto')
-  const s3Key = `uploads/${orderId}/${randomUUID()}-${filename}`
+  const storagePath = `${orderId}/${randomUUID()}-${filename}`
 
-  const client = getS3Client()
-  const command = new PutObjectCommand({
-    Bucket: process.env.S3_BUCKET_NAME!,
-    Key: s3Key,
-    ContentType: contentType,
-  })
+  const serviceClient = createServiceClient()
+  const { data, error } = await serviceClient.storage
+    .from(BUCKET)
+    .createSignedUploadUrl(storagePath)
 
-  const presignedUrl = await getSignedUrl(client, command, { expiresIn: 300 })
+  if (error || !data) throw new Error('Failed to create upload URL')
 
-  return { presignedUrl, s3Key }
+  return { presignedUrl: data.signedUrl, s3Key: storagePath }
 }
 
 export async function recordUploadedFile(
@@ -104,7 +93,6 @@ export async function createPresignedDownloadUrl(fileId: string): Promise<string
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  // RLS ensures only the file owner can retrieve it
   const { data: file, error } = await supabase
     .from('files')
     .select('s3_key, name')
@@ -113,14 +101,14 @@ export async function createPresignedDownloadUrl(fileId: string): Promise<string
 
   if (error || !file) throw new Error('File not found')
 
-  const client = getS3Client()
-  const command = new GetObjectCommand({
-    Bucket: process.env.S3_BUCKET_NAME!,
-    Key: file.s3_key,
-    ResponseContentDisposition: `attachment; filename="${file.name}"`,
-  })
+  const serviceClient = createServiceClient()
+  const { data, error: signError } = await serviceClient.storage
+    .from(BUCKET)
+    .createSignedUrl(file.s3_key, 3600, { download: file.name })
 
-  return await getSignedUrl(client, command, { expiresIn: 3600 })
+  if (signError || !data) throw new Error('Failed to create download URL')
+
+  return data.signedUrl
 }
 
 export async function deleteFile(fileId: string) {
@@ -134,13 +122,12 @@ export async function deleteFile(fileId: string) {
 
   if (fetchError || !file) throw new Error('File not found')
 
-  const client = getS3Client()
-  await client.send(
-    new DeleteObjectCommand({
-      Bucket: process.env.S3_BUCKET_NAME!,
-      Key: file.s3_key,
-    })
-  )
+  const serviceClient = createServiceClient()
+  const { error: storageError } = await serviceClient.storage
+    .from(BUCKET)
+    .remove([file.s3_key])
+
+  if (storageError) throw new Error(storageError.message)
 
   const { error: deleteError } = await supabase.from('files').delete().eq('id', fileId)
   if (deleteError) throw new Error(deleteError.message)

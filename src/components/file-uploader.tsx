@@ -91,7 +91,7 @@ function FileUploader({
         headers: { 'Content-Type': file.type },
       })
 
-      if (!uploadRes.ok) throw new Error('Upload to S3 failed')
+      if (!uploadRes.ok) throw new Error('Upload failed')
 
       await recordUploadedFile(orderId, file.name, s3Key, file.type, file.size)
       onUploaded()
