@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
@@ -44,9 +43,10 @@ export async function updateSession(request: NextRequest) {
 
   // Staff logged in: check tenant + tier gates
   if (user && pathname.startsWith('/dashboard')) {
-    const serviceClient = createSupabaseClient(
+    const serviceClient = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { cookies: { getAll: () => [], setAll: () => {} } }
     )
     const { data: userRecord } = await serviceClient
       .from('users')
@@ -95,9 +95,10 @@ export async function updateSession(request: NextRequest) {
 
   // Onboarding: user with tenant already set → /dashboard (only from root; /subscribe must pass through)
   if (user && pathname === '/onboarding') {
-    const serviceClient = createSupabaseClient(
+    const serviceClient = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { cookies: { getAll: () => [], setAll: () => {} } }
     )
     const { data: userRecord } = await serviceClient
       .from('users')
