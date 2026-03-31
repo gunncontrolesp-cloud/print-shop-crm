@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { deleteCustomer } from '@/lib/actions/customers'
+import { DeleteCustomerButton } from './delete-button'
 
 export default async function CustomerDetailPage({
   params,
@@ -56,19 +57,7 @@ export default async function CustomerDetailPage({
             Edit
           </Link>
           {isAdmin && (
-            <form action={deleteAction}>
-              <button
-                type="submit"
-                className={buttonVariants({ variant: 'destructive' })}
-                onClick={(e) => {
-                  if (!confirm('Delete this customer? This cannot be undone.')) {
-                    e.preventDefault()
-                  }
-                }}
-              >
-                Delete
-              </button>
-            </form>
+            <DeleteCustomerButton action={deleteAction} />
           )}
         </div>
       </div>
