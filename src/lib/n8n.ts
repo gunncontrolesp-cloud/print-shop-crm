@@ -3,10 +3,13 @@ export async function notifyN8n(
   event: string,
   payload: Record<string, unknown>
 ): Promise<void> {
-  if (!webhookUrl) return
+  if (!webhookUrl) {
+    console.warn('[n8n] missing webhook URL for event:', event)
+    return
+  }
 
   try {
-    await fetch(webhookUrl, {
+    const res = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -18,6 +21,7 @@ export async function notifyN8n(
         timestamp: new Date().toISOString(),
       }),
     })
+    console.log('[n8n]', event, res.status, webhookUrl)
   } catch (err) {
     console.error('[n8n]', event, err instanceof Error ? err.message : err)
   }
