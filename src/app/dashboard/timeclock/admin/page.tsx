@@ -70,12 +70,20 @@ export default async function AdminTimeClockPage() {
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Timecard Admin</h1>
-        <a
-          href="/dashboard/timeclock"
-          className={buttonVariants({ variant: 'outline' })}
-        >
-          My Time Clock
-        </a>
+        <div className="flex gap-2">
+          <a
+            href="/dashboard/timeclock/reports"
+            className={buttonVariants({ variant: 'outline' })}
+          >
+            Reports
+          </a>
+          <a
+            href="/dashboard/timeclock"
+            className={buttonVariants({ variant: 'outline' })}
+          >
+            My Time Clock
+          </a>
+        </div>
       </div>
 
       {/* Currently clocked in */}

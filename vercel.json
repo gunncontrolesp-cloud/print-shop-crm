@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/timeclock-check",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

@@ -11,12 +11,12 @@ See: .paul/PROJECT.md (updated 2026-03-27)
 
 Milestone: v0.2 Timecards
 Phase: 2.1 (Employee Timecards) — In Progress
-Plan: 02.1-02 created, awaiting approval
+Plan: 02.1-03 created, awaiting approval
 Status: PLAN created, ready for APPLY
-Last activity: 2026-04-02 — Created .paul/phases/02.1-timecards/02.1-02-PLAN.md
+Last activity: 2026-04-02 — Created .paul/phases/02.1-timecards/02.1-03-PLAN.md
 
 Progress:
-- Phase 2.1: [███░░░░░░░] 33% (1/3 plans complete)
+- Phase 2.1: [██████░░░░] 67% (2/3 plans complete)
 
 ## Loop Position
 
@@ -92,9 +92,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-02
-Stopped at: Plan 02.1-01 loop closed (PLAN ✓ → APPLY ✓ → UNIFY ✓)
-Next action: /paul:plan 02.1-02 — Admin timecard dashboard + editing + approval workflow
-Resume file: .paul/phases/02.1-timecards/
+Stopped at: Plan 02.1-02 loop closed (PLAN ✓ → APPLY ✓ → UNIFY ✓)
+Next action: /paul:plan for 02.1-03 — Notifications (missed clock-out) + reports
+Resume file: .paul/phases/02.1-timecards/02.1-02-SUMMARY.md
 
 ---
 *STATE.md — Updated after every significant action*

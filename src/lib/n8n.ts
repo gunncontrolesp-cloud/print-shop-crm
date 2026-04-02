@@ -93,6 +93,22 @@ export async function notifyInvoicePaid(
   })
 }
 
+export async function notifyMissedClockOut(
+  userId: string,
+  employeeName: string,
+  employeeEmail: string,
+  clockedInAt: string,
+  hoursElapsed: number
+): Promise<void> {
+  await notifyN8n(process.env.N8N_TIMECLOCK_MISSED_CLOCKOUT_URL, 'timeclock.missed_clockout', {
+    userId,
+    employeeName,
+    employeeEmail,
+    clockedInAt,
+    hoursElapsed,
+  })
+}
+
 export async function notifyLowStock(
   itemId: string,
   itemName: string,
