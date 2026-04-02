@@ -61,5 +61,8 @@ export type TimeEntry = {
   task_stage: string | null
   output_qty: number | null
   notes: string | null
+  status: 'pending' | 'approved'
+  approved_by: string | null
+  approved_at: string | null
   created_at: string
 }
