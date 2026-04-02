@@ -10,6 +10,7 @@ const navItems = [
   { label: 'Quotes', href: '/dashboard/quotes' },
   { label: 'Orders', href: '/dashboard/orders' },
   { label: 'Production', href: '/dashboard/production' },
+  { label: 'Time Clock', href: '/dashboard/timeclock' },
   { label: 'Inventory', href: '/dashboard/inventory' },
   { label: 'Invoices', href: '/dashboard/invoices' },
   { label: 'Analytics', href: '/dashboard/analytics' },
