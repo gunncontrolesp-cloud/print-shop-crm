@@ -80,9 +80,9 @@ Phases: 6 of 6 complete
 - Reports — weekly hours by employee, labor cost per job
 
 **Plans:**
-- [ ] 02.1-01: Data model + clock in/out + employee UI
-- [ ] 02.1-02: Admin dashboard + editing + approval workflow
-- [ ] 02.1-03: Notifications (missed clock-out) + reports
+- [x] 02.1-01: Data model + clock in/out + employee UI
+- [x] 02.1-02: Admin dashboard + editing + approval workflow
+- [x] 02.1-03: Notifications (missed clock-out) + reports
 
 ---
 
