@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
-const navItems = [
+const allNavItems = [
   { label: 'Dashboard', href: '/dashboard', exact: true },
   { label: 'Customers', href: '/dashboard/customers' },
   { label: 'Quotes', href: '/dashboard/quotes' },
@@ -14,11 +14,13 @@ const navItems = [
   { label: 'Inventory', href: '/dashboard/inventory' },
   { label: 'Invoices', href: '/dashboard/invoices' },
   { label: 'Analytics', href: '/dashboard/analytics' },
-  { label: 'Settings', href: '/dashboard/settings/pricing' },
+  { label: 'Employees', href: '/dashboard/settings/employees', adminOnly: true },
+  { label: 'Settings', href: '/dashboard/settings/pricing', adminOnly: true },
 ]
 
-export function NavSidebar() {
+export function NavSidebar({ role }: { role: string }) {
   const pathname = usePathname()
+  const navItems = allNavItems.filter((item) => !item.adminOnly || role === 'admin')
 
   return (
     <nav className="space-y-1">

@@ -156,10 +156,14 @@ export default async function QuoteDetailPage({
                   <td className="px-4 py-3">{item.description}</td>
                   <td className="px-4 py-3 text-right text-gray-600">{item.qty}</td>
                   <td className="px-4 py-3 text-right text-gray-600 text-xs">
-                    {item.material_id} ×{item.material_multiplier.toFixed(2)}
+                    {item.material_id
+                      ? `${item.material_id} ×${item.material_multiplier.toFixed(2)}`
+                      : '—'}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-600 text-xs">
-                    {item.finishing_id} ×{item.finishing_multiplier.toFixed(2)}
+                    {item.finishing_id
+                      ? `${item.finishing_id} ×${item.finishing_multiplier.toFixed(2)}`
+                      : '—'}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-600">
                     ${item.unit_price.toFixed(4)}

@@ -8,12 +8,12 @@ export type PricingConfig = {
 export type LineItem = {
   id: string
   description: string
-  product_type_id: string
+  product_type_id: string | null
   qty: number
   base_price: number
-  material_id: string
+  material_id: string | null
   material_multiplier: number
-  finishing_id: string
+  finishing_id: string | null
   finishing_multiplier: number
   qty_multiplier: number
   unit_price: number

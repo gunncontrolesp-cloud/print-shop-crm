@@ -41,7 +41,7 @@ export default async function DashboardLayout({
         </div>
 
         <div className="flex-1 px-3 py-4">
-          <NavSidebar />
+          <NavSidebar role={profile?.role ?? 'staff'} />
         </div>
 
         <div className="px-4 py-4 border-t border-gray-200">
