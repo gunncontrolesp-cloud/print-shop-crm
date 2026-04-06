@@ -1,147 +1,99 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { updateShopSettings } from '@/lib/actions/pricing'
+import { updateEmployee, sendPasswordReset } from '@/lib/actions/employees'
 
-export default async function ShopSettingsPage({
-  searchParams,
+export default async function EditEmployeePage({
+  params,
 }: {
-  searchParams: Promise<{ error?: string; success?: string }>
+  params: Promise<{ id: string }>
 }) {
-  const { error: errorMsg, success } = await searchParams
-
+  const { id } = await params
   const supabase = await createClient()
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/dashboard')
 
-  const { data: tenant } = await supabase.from('tenants').select('*').single()
+  const { data: employee } = await supabase
+    .from('users')
+    .select('id, email, name, role')
+    .eq('id', id)
+    .single()
+
+  if (!employee) redirect('/dashboard/settings/employees')
+
+  const isSelf = employee.id === user.id
 
   const inputClass =
     'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
 
   return (
-    <div className="p-8 max-w-xl">
-      {errorMsg && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {decodeURIComponent(errorMsg)}
-        </div>
-      )}
-      {success && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-          Settings saved.
-        </div>
-      )}
-
-      <div className="flex items-center gap-3 mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Shop Settings</h1>
-        <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
-          Admin only
-        </span>
+    <div className="p-8 max-w-lg">
+      <div className="mb-6">
+        <a href="/dashboard/settings/employees" className="text-sm text-gray-500 hover:text-gray-900">
+          ← Employees
+        </a>
+        <h1 className="text-2xl font-semibold text-gray-900 mt-2">Edit Employee</h1>
+        <p className="text-sm text-gray-500">{employee.email}</p>
       </div>
 
-      <form action={updateShopSettings} encType="multipart/form-data" className="space-y-5">
-        {/* Logo */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Shop Logo</label>
-          {tenant?.logo_url && (
-            <div className="mb-2">
-              <img
-                src={`${tenant.logo_url}?cb=${Date.now()}`}
-                alt="Shop logo"
-                className="h-16 object-contain rounded border border-gray-200 p-1 bg-white"
-              />
-            </div>
-          )}
-          <input
-            name="logo"
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/svg+xml"
-            className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-900 file:text-white hover:file:bg-gray-700 file:cursor-pointer"
-          />
-          <p className="text-xs text-gray-400">PNG, JPG, WebP or SVG. Appears on invoices.</p>
-        </div>
+      <form action={updateEmployee} className="space-y-4">
+        <input type="hidden" name="id" value={employee.id} />
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">Shop Name</label>
+          <label className="text-sm font-medium text-gray-700">Name</label>
           <input
-            name="shop_name"
-            defaultValue={tenant?.shop_name ?? ''}
-            placeholder="e.g. Acme Print Co."
+            name="name"
+            defaultValue={employee.name ?? ''}
+            placeholder="Full name"
             className={inputClass}
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">Address</label>
-          <textarea
-            name="shop_address"
-            defaultValue={tenant?.shop_address ?? ''}
-            placeholder={'123 Main St\nSuite 100\nCity, ST 00000'}
-            rows={3}
-            className={inputClass}
-          />
+          <label className="text-sm font-medium text-gray-700">Role</label>
+          <select name="role" defaultValue={employee.role} className={inputClass} disabled={isSelf}>
+            <option value="staff">Staff</option>
+            <option value="admin">Admin</option>
+          </select>
+          {isSelf && <p className="text-xs text-gray-400">You cannot change your own role.</p>}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Phone</label>
-            <input
-              name="shop_phone"
-              defaultValue={tenant?.shop_phone ?? ''}
-              placeholder="(555) 000-0000"
-              className={inputClass}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Email</label>
-            <input
-              name="shop_email"
-              type="email"
-              defaultValue={tenant?.shop_email ?? ''}
-              placeholder="hello@yourshop.com"
-              className={inputClass}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Tax Rate (%)</label>
-            <input
-              name="tax_rate"
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              defaultValue={tenant?.tax_rate ?? 0}
-              placeholder="0.00"
-              className={inputClass}
-            />
-            <p className="text-xs text-gray-400">Applied to invoices. Enter 0 for no tax.</p>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">Payment Terms</label>
-            <input
-              name="payment_terms"
-              defaultValue={tenant?.payment_terms ?? 'Due on receipt'}
-              placeholder="e.g. Net 30, Due on receipt"
-              className={inputClass}
-            />
-            <p className="text-xs text-gray-400">Shown on invoices.</p>
-          </div>
-        </div>
-
-        <div className="pt-2">
+        <div className="flex gap-3 pt-2">
           <button
             type="submit"
             className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors"
           >
-            Save Settings
+            Save Changes
           </button>
+          <a
+            href="/dashboard/settings/employees"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </a>
         </div>
       </form>
+
+      {!isSelf && (
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <h2 className="text-sm font-semibold text-gray-700 mb-1">Password Reset</h2>
+          <p className="text-sm text-gray-500 mb-3">
+            Send this employee a link to reset their password.
+          </p>
+          <form action={sendPasswordReset}>
+            <input type="hidden" name="email" value={employee.email} />
+            <button
+              type="submit"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Send Reset Link
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
