@@ -41,7 +41,28 @@ export default async function ShopSettingsPage({
         </span>
       </div>
 
-      <form action={updateShopSettings} className="space-y-5">
+      <form action={updateShopSettings} encType="multipart/form-data" className="space-y-5">
+        {/* Logo */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-gray-700">Shop Logo</label>
+          {tenant?.logo_url && (
+            <div className="mb-2">
+              <img
+                src={`${tenant.logo_url}?cb=${Date.now()}`}
+                alt="Shop logo"
+                className="h-16 object-contain rounded border border-gray-200 p-1 bg-white"
+              />
+            </div>
+          )}
+          <input
+            name="logo"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-900 file:text-white hover:file:bg-gray-700 file:cursor-pointer"
+          />
+          <p className="text-xs text-gray-400">PNG, JPG, WebP or SVG. Appears on invoices.</p>
+        </div>
+
         <div className="space-y-1.5">
           <label className="text-sm font-medium text-gray-700">Shop Name</label>
           <input
