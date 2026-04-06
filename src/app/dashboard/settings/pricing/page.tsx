@@ -1,76 +1,126 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { updatePricingConfig } from '@/lib/actions/pricing'
+import { updateShopSettings } from '@/lib/actions/pricing'
 
-export default async function PricingSettingsPage() {
+export default async function ShopSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; success?: string }>
+}) {
+  const { error: errorMsg, success } = await searchParams
+
   const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
+  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/dashboard')
 
-  const { data: pricingRow } = await supabase
-    .from('pricing_config')
-    .select('id, config')
-    .single()
+  const { data: tenant } = await supabase.from('tenants').select('*').single()
 
-  const configJson = JSON.stringify(pricingRow?.config ?? {}, null, 2)
+  const inputClass =
+    'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
 
   return (
-    <div className="p-8 max-w-3xl">
-      <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-2xl font-semibold text-gray-900">Pricing Configuration</h1>
+    <div className="p-8 max-w-xl">
+      {errorMsg && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {decodeURIComponent(errorMsg)}
+        </div>
+      )}
+      {success && (
+        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          Settings saved.
+        </div>
+      )}
+
+      <div className="flex items-center gap-3 mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">Shop Settings</h1>
         <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">
           Admin only
         </span>
       </div>
-      <p className="text-sm text-gray-500 mb-6">
-        Edit the pricing config JSON below. Changes apply to all new quotes immediately after saving.
-      </p>
 
-      <form action={updatePricingConfig}>
-        <input type="hidden" name="id" value={pricingRow?.id ?? ''} />
-        <textarea
-          name="config"
-          defaultValue={configJson}
-          rows={28}
-          spellCheck={false}
-          className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 font-mono text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
-        />
-        <div className="mt-3 flex gap-3 items-center">
+      <form action={updateShopSettings} className="space-y-5">
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-gray-700">Shop Name</label>
+          <input
+            name="shop_name"
+            defaultValue={tenant?.shop_name ?? ''}
+            placeholder="e.g. Acme Print Co."
+            className={inputClass}
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-gray-700">Address</label>
+          <textarea
+            name="shop_address"
+            defaultValue={tenant?.shop_address ?? ''}
+            placeholder={'123 Main St\nSuite 100\nCity, ST 00000'}
+            rows={3}
+            className={inputClass}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Phone</label>
+            <input
+              name="shop_phone"
+              defaultValue={tenant?.shop_phone ?? ''}
+              placeholder="(555) 000-0000"
+              className={inputClass}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Email</label>
+            <input
+              name="shop_email"
+              type="email"
+              defaultValue={tenant?.shop_email ?? ''}
+              placeholder="hello@yourshop.com"
+              className={inputClass}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Tax Rate (%)</label>
+            <input
+              name="tax_rate"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              defaultValue={tenant?.tax_rate ?? 0}
+              placeholder="0.00"
+              className={inputClass}
+            />
+            <p className="text-xs text-gray-400">Applied to invoices. Enter 0 for no tax.</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Payment Terms</label>
+            <input
+              name="payment_terms"
+              defaultValue={tenant?.payment_terms ?? 'Due on receipt'}
+              placeholder="e.g. Net 30, Due on receipt"
+              className={inputClass}
+            />
+            <p className="text-xs text-gray-400">Shown on invoices.</p>
+          </div>
+        </div>
+
+        <div className="pt-2">
           <button
             type="submit"
             className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors"
           >
-            Save Changes
+            Save Settings
           </button>
-          <span className="text-xs text-gray-400">
-            Must be valid JSON — invalid JSON will throw an error.
-          </span>
         </div>
       </form>
-
-      <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50 px-4 py-4">
-        <h2 className="text-sm font-semibold text-gray-700 mb-2">Pricing Formula</h2>
-        <code className="block text-xs text-gray-600 leading-6">
-          unit_price = base_price × qty_multiplier × material_multiplier × finishing_multiplier
-          <br />
-          line_total = unit_price × qty
-        </code>
-        <p className="mt-2 text-xs text-gray-500">
-          <strong>qty_multiplier</strong> is selected from qty_breaks based on the ordered quantity.
-          The break with the matching min/max range applies.
-        </p>
-      </div>
     </div>
   )
 }
