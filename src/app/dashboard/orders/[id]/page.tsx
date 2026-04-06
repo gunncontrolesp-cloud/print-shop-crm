@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { updateOrderStatus, deleteOrder } from '@/lib/actions/orders'
+import { updateOrderStatus, deleteOrder, archiveOrder } from '@/lib/actions/orders'
 import { createInvoice } from '@/lib/actions/invoices'
+import { resetProofDecision } from '@/lib/actions/proof'
 import type { OrderStatus, LineItem, InvoiceStatus } from '@/lib/types'
 import { getNextStatus } from '@/lib/types'
 import { buttonVariants } from '@/components/ui/button-variants'
@@ -91,12 +92,23 @@ export default async function OrderDetailPage({
     .eq('order_id', id)
     .single()
 
+  const { data: job } = await supabase
+    .from('jobs')
+    .select('id, stage, proof_decision, proof_comments')
+    .eq('order_id', id)
+    .is('completed_at', null)
+    .maybeSingle()
+
   const currentIdx = STATUS_SEQUENCE.indexOf(currentStatus)
 
   const nextAction = nextStatus
     ? updateOrderStatus.bind(null, id, nextStatus)
     : null
   const deleteAction = deleteOrder.bind(null, id)
+  const archiveAction = archiveOrder.bind(null, id)
+  const resetProofAction = job?.proof_decision === 'changes_requested'
+    ? resetProofDecision.bind(null, job.id)
+    : null
 
   const canAdvance =
     nextStatus !== null &&
@@ -146,7 +158,14 @@ export default async function OrderDetailPage({
               Delivered ✓
             </span>
           )}
-          {isAdmin && currentStatus !== 'delivered' && (
+          {isAdmin && !order.archived_at && (
+            <form action={archiveAction}>
+              <button type="submit" className={buttonVariants({ variant: 'outline' as 'default' })}>
+                Archive
+              </button>
+            </form>
+          )}
+          {isAdmin && (
             <form action={deleteAction}>
               <button type="submit" className={buttonVariants({ variant: 'destructive' })}>
                 Delete
@@ -237,6 +256,41 @@ export default async function OrderDetailPage({
         <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 mb-4">
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Notes</p>
           <p className="text-sm text-gray-900 whitespace-pre-wrap">{order.notes}</p>
+        </div>
+      )}
+
+      {/* Proof status */}
+      {job && job.stage === 'proofing' && (
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Proof Approval</h2>
+          <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+            {!job.proof_decision && (
+              <p className="text-sm text-gray-500">Awaiting customer review.</p>
+            )}
+            {job.proof_decision === 'approved' && (
+              <p className="text-sm text-green-700 font-medium">✓ Customer approved the proof</p>
+            )}
+            {job.proof_decision === 'changes_requested' && (
+              <div className="space-y-2">
+                <p className="text-sm text-orange-700 font-medium">Customer requested changes</p>
+                {job.proof_comments && (
+                  <p className="text-sm text-gray-600 bg-orange-50 rounded px-3 py-2">
+                    {job.proof_comments}
+                  </p>
+                )}
+                {resetProofAction && (
+                  <form action={resetProofAction}>
+                    <button
+                      type="submit"
+                      className="mt-1 text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                    >
+                      Upload new proof &amp; reset for review
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

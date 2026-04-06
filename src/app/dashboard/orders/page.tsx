@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { buttonVariants } from '@/components/ui/button-variants'
 import {
   Table,
   TableBody,
@@ -25,6 +24,7 @@ export default async function OrdersPage() {
   const { data: orders } = await supabase
     .from('orders')
     .select('id, status, total, created_at, customers(name, business_name)')
+    .is('archived_at', null)
     .order('created_at', { ascending: false })
 
   return (

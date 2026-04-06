@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import type { LineItem, OrderStatus } from '@/lib/types'
+import type { OrderStatus } from '@/lib/types'
 import { getNextStatus } from '@/lib/types'
 import { notifyOrderApproved } from '@/lib/n8n'
 import { getTenantId } from '@/lib/tenant'
@@ -137,8 +137,42 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
   redirect(`/dashboard/orders/${id}`)
 }
 
+export async function archiveOrder(id: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (profile?.role !== 'admin') throw new Error('Admin only')
+
+  const { error } = await supabase
+    .from('orders')
+    .update({ archived_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/dashboard/orders')
+  redirect('/dashboard/orders')
+}
+
 export async function deleteOrder(id: string) {
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (profile?.role !== 'admin') throw new Error('Admin only')
 
   const { error } = await supabase.from('orders').delete().eq('id', id)
 
