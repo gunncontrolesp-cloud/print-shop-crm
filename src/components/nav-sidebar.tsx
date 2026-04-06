@@ -13,7 +13,7 @@ const allNavItems = [
   { label: 'Time Clock', href: '/dashboard/timeclock' },
 
   { label: 'Invoices', href: '/dashboard/invoices' },
-  { label: 'Analytics', href: '/dashboard/analytics' },
+  { label: 'Analytics', href: '/dashboard/analytics', adminOnly: true },
   { label: 'Product Catalog', href: '/dashboard/settings/catalog', adminOnly: true },
   { label: 'Employees', href: '/dashboard/settings/employees', adminOnly: true },
   { label: 'Settings', href: '/dashboard/settings/pricing', adminOnly: true },
