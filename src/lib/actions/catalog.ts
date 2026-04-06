@@ -83,3 +83,14 @@ export async function restoreProduct(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/settings/catalog')
   redirect('/dashboard/settings/catalog')
 }
+
+export async function deleteProduct(formData: FormData): Promise<void> {
+  const id = formData.get('id') as string
+  await requireAdmin()
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('products').delete().eq('id', id)
+  if (error) redirect(`/dashboard/settings/catalog?error=${encodeURIComponent(error.message)}`)
+  revalidatePath('/dashboard/settings/catalog')
+  redirect('/dashboard/settings/catalog?success=deleted')
+}

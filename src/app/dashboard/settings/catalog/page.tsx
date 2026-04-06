@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { buttonVariants } from '@/components/ui/button-variants'
-import { addProduct, archiveProduct, restoreProduct } from '@/lib/actions/catalog'
+import { addProduct, archiveProduct, restoreProduct, deleteProduct } from '@/lib/actions/catalog'
 
 export default async function CatalogPage({
   searchParams,
@@ -44,7 +44,9 @@ export default async function CatalogPage({
               ? 'Product updated.'
               : success === 'archived'
                 ? 'Product archived.'
-                : 'Done.'}
+                : success === 'deleted'
+                  ? 'Product deleted.'
+                  : 'Done.'}
         </div>
       )}
 
@@ -151,6 +153,15 @@ export default async function CatalogPage({
                           Archive
                         </button>
                       </form>
+                      <form action={deleteProduct}>
+                        <input type="hidden" name="id" value={product.id} />
+                        <button
+                          type="submit"
+                          className="inline-flex items-center h-7 px-2.5 text-[0.8rem] font-medium rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </form>
                     </div>
                   </td>
                 </tr>
@@ -177,12 +188,20 @@ export default async function CatalogPage({
                       ${Number(product.unit_price).toFixed(2)}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <form action={restoreProduct}>
-                        <input type="hidden" name="id" value={product.id} />
-                        <button type="submit" className="text-xs text-blue-600 hover:underline">
-                          Restore
-                        </button>
-                      </form>
+                      <div className="flex items-center justify-end gap-3">
+                        <form action={restoreProduct}>
+                          <input type="hidden" name="id" value={product.id} />
+                          <button type="submit" className="text-xs text-blue-600 hover:underline">
+                            Restore
+                          </button>
+                        </form>
+                        <form action={deleteProduct}>
+                          <input type="hidden" name="id" value={product.id} />
+                          <button type="submit" className="text-xs text-red-600 hover:underline">
+                            Delete
+                          </button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 ))}
