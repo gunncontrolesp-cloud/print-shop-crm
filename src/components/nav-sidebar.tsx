@@ -14,6 +14,7 @@ const allNavItems = [
   { label: 'Inventory', href: '/dashboard/inventory' },
   { label: 'Invoices', href: '/dashboard/invoices' },
   { label: 'Analytics', href: '/dashboard/analytics' },
+  { label: 'Product Catalog', href: '/dashboard/settings/catalog', adminOnly: true },
   { label: 'Employees', href: '/dashboard/settings/employees', adminOnly: true },
   { label: 'Settings', href: '/dashboard/settings/pricing', adminOnly: true },
 ]

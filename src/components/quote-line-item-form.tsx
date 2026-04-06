@@ -3,101 +3,59 @@
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { LineItem, PricingConfig } from '@/lib/types'
-
-function getQtyMultiplier(
-  qty: number,
-  breaks: PricingConfig['qty_breaks']
-): number {
-  const match = breaks.find(
-    (b) => qty >= b.min && (b.max === null || qty <= b.max)
-  )
-  return match?.multiplier ?? 1
-}
-
-function calcLineItem(
-  productTypeId: string,
-  qty: number,
-  materialId: string,
-  finishingId: string,
-  description: string,
-  config: PricingConfig
-): LineItem {
-  const product = config.product_types.find((p) => p.id === productTypeId)
-  const material = config.materials.find((m) => m.id === materialId)
-  const finishing = config.finishing.find((f) => f.id === finishingId)
-
-  const base_price = product?.base_price ?? 0
-  const material_multiplier = material?.multiplier ?? 1
-  const finishing_multiplier = finishing?.multiplier ?? 1
-  const qty_multiplier = getQtyMultiplier(qty, config.qty_breaks)
-
-  const unit_price =
-    Math.round(
-      base_price * qty_multiplier * material_multiplier * finishing_multiplier * 10000
-    ) / 10000
-  const line_total = Math.round(unit_price * qty * 100) / 100
-
-  return {
-    id: crypto.randomUUID(),
-    description,
-    product_type_id: productTypeId,
-    qty,
-    base_price,
-    material_id: materialId,
-    material_multiplier,
-    finishing_id: finishingId,
-    finishing_multiplier,
-    qty_multiplier,
-    unit_price,
-    line_total,
-  }
-}
+import type { LineItem, Product } from '@/lib/types'
 
 export function QuoteLineItemForm({
-  config,
+  products,
   onAdd,
 }: {
-  config: PricingConfig
+  products: Product[]
   onAdd: (item: LineItem) => void
 }) {
-  const defaultProduct = config.product_types?.[0]
-  const defaultMaterial = config.materials?.[0]
-  const defaultFinishing = config.finishing?.[0]
-
   const [mode, setMode] = useState<'catalog' | 'custom'>('catalog')
 
   // Catalog mode state
-  const [productTypeId, setProductTypeId] = useState(defaultProduct?.id ?? '')
-  const [qty, setQty] = useState(100)
-  const [materialId, setMaterialId] = useState(defaultMaterial?.id ?? '')
-  const [finishingId, setFinishingId] = useState(defaultFinishing?.id ?? '')
-  const [description, setDescription] = useState(defaultProduct?.label ?? '')
+  const [productId, setProductId] = useState(products[0]?.id ?? '')
+  const [catalogQty, setCatalogQty] = useState(1)
+  const [catalogDescription, setCatalogDescription] = useState(products[0]?.name ?? '')
 
   // Custom mode state
   const [customDescription, setCustomDescription] = useState('')
   const [customQty, setCustomQty] = useState(1)
   const [customUnitPrice, setCustomUnitPrice] = useState('')
 
-  const preview = calcLineItem(productTypeId, qty, materialId, finishingId, description, config)
+  const selectedProduct = products.find((p) => p.id === productId)
+  const catalogUnitPrice = Number(selectedProduct?.unit_price ?? 0)
+  const catalogTotal = Math.round(catalogUnitPrice * catalogQty * 100) / 100
 
   const customUnitPriceNum = parseFloat(customUnitPrice) || 0
   const customLineTotal = Math.round(customQty * customUnitPriceNum * 100) / 100
 
   function handleProductChange(id: string) {
-    setProductTypeId(id)
-    const product = config.product_types.find((p) => p.id === id)
-    if (product) setDescription(product.label)
+    setProductId(id)
+    const p = products.find((pr) => pr.id === id)
+    if (p) setCatalogDescription(p.name)
   }
 
   function handleAddCatalog() {
-    if (!description.trim() || qty <= 0) return
-    onAdd(preview)
-    setQty(100)
-    setProductTypeId(defaultProduct?.id ?? '')
-    setDescription(defaultProduct?.label ?? '')
-    setMaterialId(defaultMaterial?.id ?? '')
-    setFinishingId(defaultFinishing?.id ?? '')
+    if (!selectedProduct || catalogQty <= 0 || !catalogDescription.trim()) return
+    onAdd({
+      id: crypto.randomUUID(),
+      description: catalogDescription.trim(),
+      product_type_id: selectedProduct.id,
+      qty: catalogQty,
+      base_price: catalogUnitPrice,
+      material_id: null,
+      material_multiplier: 1,
+      finishing_id: null,
+      finishing_multiplier: 1,
+      qty_multiplier: 1,
+      unit_price: catalogUnitPrice,
+      line_total: catalogTotal,
+    })
+    setCatalogQty(1)
+    setProductId(products[0]?.id ?? '')
+    setCatalogDescription(products[0]?.name ?? '')
   }
 
   function handleAddCustom() {
@@ -155,95 +113,72 @@ export function QuoteLineItemForm({
       </div>
 
       {mode === 'catalog' ? (
-        <>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="li-product">Product Type</Label>
-              <select
-                id="li-product"
-                value={productTypeId}
-                onChange={(e) => handleProductChange(e.target.value)}
-                className={selectClass}
-              >
-                {config.product_types.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label} (${p.base_price.toFixed(4)}/unit)
-                  </option>
-                ))}
-              </select>
-            </div>
+        products.length === 0 ? (
+          <p className="text-sm text-gray-500 py-2">
+            No products in catalog yet.{' '}
+            <a href="/dashboard/settings/catalog" className="text-gray-900 underline font-medium">
+              Add products in Settings → Product Catalog
+            </a>
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="li-product">Product</Label>
+                <select
+                  id="li-product"
+                  value={productId}
+                  onChange={(e) => handleProductChange(e.target.value)}
+                  className={selectClass}
+                >
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} — ${Number(p.unit_price).toFixed(2)}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="li-desc">Description</Label>
-              <Input
-                id="li-desc"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Line item description"
-              />
-            </div>
+              <div className="space-y-1">
+                <Label htmlFor="li-desc">Description</Label>
+                <Input
+                  id="li-desc"
+                  value={catalogDescription}
+                  onChange={(e) => setCatalogDescription(e.target.value)}
+                  placeholder="Line item description"
+                />
+              </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="li-qty">Quantity</Label>
-              <Input
-                id="li-qty"
-                type="number"
-                min={1}
-                value={qty}
-                onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-              />
-            </div>
+              <div className="space-y-1">
+                <Label htmlFor="li-qty">Quantity</Label>
+                <Input
+                  id="li-qty"
+                  type="number"
+                  min={1}
+                  value={catalogQty}
+                  onChange={(e) => setCatalogQty(Math.max(1, parseInt(e.target.value) || 1))}
+                />
+              </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="li-material">Material</Label>
-              <select
-                id="li-material"
-                value={materialId}
-                onChange={(e) => setMaterialId(e.target.value)}
-                className={selectClass}
-              >
-                {config.materials.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label} (×{m.multiplier.toFixed(2)})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="li-finishing">Finishing</Label>
-              <select
-                id="li-finishing"
-                value={finishingId}
-                onChange={(e) => setFinishingId(e.target.value)}
-                className={selectClass}
-              >
-                {config.finishing.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.label} (×{f.multiplier.toFixed(2)})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-1">
-              <Label>Price Preview</Label>
-              <div className="flex items-center h-9 px-3 rounded-lg border border-gray-200 bg-white text-sm text-gray-900">
-                ${preview.unit_price.toFixed(4)}/unit × {qty} ={' '}
-                <span className="ml-1 font-semibold">${preview.line_total.toFixed(2)}</span>
+              <div className="space-y-1">
+                <Label>Total</Label>
+                <div className="flex items-center h-9 px-3 rounded-lg border border-gray-200 bg-white text-sm text-gray-900">
+                  ${catalogUnitPrice.toFixed(2)}/unit × {catalogQty} ={' '}
+                  <span className="ml-1 font-semibold">${catalogTotal.toFixed(2)}</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleAddCatalog}
-            disabled={!description.trim() || qty <= 0}
-            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            + Add Line Item
-          </button>
-        </>
+            <button
+              type="button"
+              onClick={handleAddCatalog}
+              disabled={!selectedProduct || catalogQty <= 0 || !catalogDescription.trim()}
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              + Add Line Item
+            </button>
+          </>
+        )
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3">

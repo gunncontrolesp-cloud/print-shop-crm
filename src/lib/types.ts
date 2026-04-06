@@ -51,6 +51,17 @@ export type JobStage = (typeof JOB_STAGE_SEQUENCE)[number]
 export const INVOICE_STATUS_SEQUENCE = ['draft', 'sent', 'paid'] as const
 export type InvoiceStatus = (typeof INVOICE_STATUS_SEQUENCE)[number]
 
+export type Product = {
+  id: string
+  tenant_id: string
+  name: string
+  description: string | null
+  unit_price: number
+  category: string
+  active: boolean
+  created_at: string
+}
+
 export type TimeEntry = {
   id: string
   tenant_id: string

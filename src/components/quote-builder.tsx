@@ -3,17 +3,17 @@
 import { useState, useRef } from 'react'
 import { QuoteLineItemForm } from '@/components/quote-line-item-form'
 import { Label } from '@/components/ui/label'
-import type { LineItem, PricingConfig } from '@/lib/types'
+import type { LineItem, Product } from '@/lib/types'
 
 type Customer = { id: string; name: string; business_name: string | null }
 
 export function QuoteBuilder({
   customers,
-  config,
+  products,
   createQuote,
 }: {
   customers: Customer[]
-  config: PricingConfig
+  products: Product[]
   createQuote: (formData: FormData) => Promise<void>
 }) {
   const [lineItems, setLineItems] = useState<LineItem[]>([])
@@ -51,7 +51,7 @@ export function QuoteBuilder({
       </div>
 
       {/* Line Items */}
-      <QuoteLineItemForm config={config} onAdd={addLineItem} />
+      <QuoteLineItemForm products={products} onAdd={addLineItem} />
 
       {/* Line Items Table */}
       {lineItems.length > 0 && (
@@ -72,7 +72,7 @@ export function QuoteBuilder({
                   <td className="px-3 py-2">{item.description}</td>
                   <td className="px-3 py-2 text-right text-gray-600">{item.qty}</td>
                   <td className="px-3 py-2 text-right text-gray-600">
-                    ${item.unit_price.toFixed(4)}
+                    ${item.unit_price.toFixed(2)}
                   </td>
                   <td className="px-3 py-2 text-right font-medium">
                     ${item.line_total.toFixed(2)}
