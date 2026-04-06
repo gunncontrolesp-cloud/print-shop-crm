@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { buttonVariants } from '@/components/ui/button-variants'
 
 async function setPassword(formData: FormData): Promise<void> {
@@ -18,7 +18,14 @@ async function setPassword(formData: FormData): Promise<void> {
   const { error: pwError } = await supabase.auth.updateUser({ password })
   if (pwError) redirect(`/auth/set-password?error=${encodeURIComponent(pwError.message)}`)
 
-  await supabase.from('users').update({ name }).eq('id', user.id)
+  // Upsert user record — repairs trigger failures and applies invite metadata (tenant_id, role)
+  const tenantId = user.user_metadata?.tenant_id as string | undefined
+  const role = (user.user_metadata?.role as string) ?? 'staff'
+  const serviceClient = createServiceClient()
+  await serviceClient.from('users').upsert(
+    { id: user.id, name, ...(tenantId ? { tenant_id: tenantId, role } : {}) },
+    { onConflict: 'id' }
+  )
 
   redirect('/dashboard')
 }

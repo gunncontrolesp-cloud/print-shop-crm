@@ -34,7 +34,7 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else {
-        setError('Account created. An admin will assign your role. You can now sign in.')
+        setError('Account created! Sign in to set up your shop.')
         setMode('signin')
       }
     }
