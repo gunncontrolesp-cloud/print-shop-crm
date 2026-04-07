@@ -2,17 +2,13 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
-export default async function PortalLayout({ children }: { children: React.ReactNode }) {
+export default async function PortalProtectedLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Individual pages handle their own auth redirect.
-  // Layout just provides nav shell when authenticated.
-  if (!user) {
-    return <>{children}</>
-  }
+  if (!user) redirect('/portal/login')
 
   const serviceClient = createServiceClient()
   const { data: customer } = await serviceClient
