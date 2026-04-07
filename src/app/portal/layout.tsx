@@ -8,7 +8,11 @@ export default async function PortalLayout({ children }: { children: React.React
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) redirect('/portal/login')
+  // Individual pages handle their own auth redirect.
+  // Layout just provides nav shell when authenticated.
+  if (!user) {
+    return <>{children}</>
+  }
 
   const serviceClient = createServiceClient()
   const { data: customer } = await serviceClient
