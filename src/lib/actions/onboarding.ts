@@ -74,5 +74,61 @@ export async function createTenant(formData: FormData) {
 
   if (pricingError) throw new Error(pricingError.message)
 
+  // 4. Seed default product catalog
+  const defaultProducts = [
+    // Business Stationery
+    { name: 'Business Cards', category: 'Business Stationery', description: 'Standard 3.5" x 2" business cards' },
+    { name: 'Letterhead', category: 'Business Stationery', description: '8.5" x 11" branded letterhead' },
+    { name: 'Envelopes', category: 'Business Stationery', description: '#10 standard envelopes' },
+    { name: 'Note Cards', category: 'Business Stationery', description: 'Folded note cards with envelopes' },
+    { name: 'Presentation Folders', category: 'Business Stationery', description: '9" x 12" folders with pockets' },
+    // Flyers & Marketing
+    { name: 'Flyers — Half Page', category: 'Flyers & Marketing', description: '5.5" x 8.5" single-sided flyers' },
+    { name: 'Flyers — Full Page', category: 'Flyers & Marketing', description: '8.5" x 11" single-sided flyers' },
+    { name: 'Postcards (4x6)', category: 'Flyers & Marketing', description: 'Standard 4" x 6" postcards' },
+    { name: 'Postcards (6x9)', category: 'Flyers & Marketing', description: 'Large 6" x 9" postcards' },
+    { name: 'Door Hangers', category: 'Flyers & Marketing', description: '4.25" x 11" door hangers with hole' },
+    { name: 'Rack Cards', category: 'Flyers & Marketing', description: '4" x 9" rack display cards' },
+    { name: 'EDDM Mailers', category: 'Flyers & Marketing', description: 'Every Door Direct Mail oversized mailers' },
+    // Brochures
+    { name: 'Brochures — Bi-Fold', category: 'Brochures', description: '8.5" x 11" folded to 5.5" x 8.5"' },
+    { name: 'Brochures — Tri-Fold', category: 'Brochures', description: '8.5" x 11" folded to 3.67" x 8.5"' },
+    { name: 'Brochures — Z-Fold', category: 'Brochures', description: '8.5" x 11" accordion z-fold' },
+    // Booklets & Multi-Page
+    { name: 'Booklets — Saddle Stitch', category: 'Booklets & Multi-Page', description: 'Staple-bound booklets, 8 pages minimum' },
+    { name: 'Catalogs', category: 'Booklets & Multi-Page', description: 'Perfect-bound or saddle-stitch product catalogs' },
+    { name: 'Newsletters', category: 'Booklets & Multi-Page', description: '8.5" x 11" folded newsletter' },
+    { name: 'Notepads', category: 'Booklets & Multi-Page', description: 'Glue-top notepads, 25 or 50 sheets' },
+    { name: 'NCR Forms', category: 'Booklets & Multi-Page', description: 'Carbonless copy forms, 2-part or 3-part' },
+    // Posters & Signage
+    { name: 'Posters', category: 'Posters & Signage', description: 'Full-color posters, various sizes' },
+    { name: 'Vinyl Banners', category: 'Posters & Signage', description: 'Durable outdoor vinyl banners with grommets' },
+    { name: 'Retractable Banner Stand', category: 'Posters & Signage', description: '33" x 80" roll-up display banner with stand' },
+    { name: 'Foam Board Signs', category: 'Posters & Signage', description: 'Mounted foam board signs, rigid display' },
+    { name: 'Yard Signs', category: 'Posters & Signage', description: 'Corrugated plastic yard signs with H-stakes' },
+    { name: 'Window Clings', category: 'Posters & Signage', description: 'Static-cling window decals' },
+    { name: 'A-Frame Signs', category: 'Posters & Signage', description: 'Sidewalk A-frame with printed inserts' },
+    // Labels & Stickers
+    { name: 'Custom Labels', category: 'Labels & Stickers', description: 'Custom-shaped or sheet labels' },
+    { name: 'Stickers', category: 'Labels & Stickers', description: 'Die-cut or square/round stickers' },
+    { name: 'Roll Labels', category: 'Labels & Stickers', description: 'Labels on a roll for automated application' },
+    { name: 'Magnets', category: 'Labels & Stickers', description: 'Business card or custom-size magnets' },
+    // Specialty & Finishing
+    { name: 'Greeting Cards', category: 'Specialty', description: 'Folded greeting cards with envelopes' },
+    { name: 'Calendars', category: 'Specialty', description: 'Wall or desk calendars, 12-month' },
+    { name: 'Canvas Prints', category: 'Specialty', description: 'Gallery-wrapped canvas prints' },
+    { name: 'Photo Prints', category: 'Specialty', description: 'High-resolution photo prints' },
+    { name: 'T-Shirts', category: 'Specialty', description: 'Screen-printed or heat-transfer t-shirts' },
+  ].map((p) => ({
+    tenant_id: tenant.id,
+    name: p.name,
+    category: p.category,
+    description: p.description,
+    unit_price: 0,
+    active: true,
+  }))
+
+  await service.from('products').insert(defaultProducts)
+
   redirect('/onboarding/subscribe')
 }
