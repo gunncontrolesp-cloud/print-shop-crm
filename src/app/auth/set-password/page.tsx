@@ -22,10 +22,11 @@ async function setPassword(formData: FormData): Promise<void> {
   const tenantId = user.user_metadata?.tenant_id as string | undefined
   const role = (user.user_metadata?.role as string) ?? 'staff'
   const serviceClient = createServiceClient()
-  await serviceClient.from('users').upsert(
-    { id: user.id, name, ...(tenantId ? { tenant_id: tenantId, role } : {}) },
+  const { error: upsertError } = await serviceClient.from('users').upsert(
+    { id: user.id, email: user.email, name, ...(tenantId ? { tenant_id: tenantId, role } : {}) },
     { onConflict: 'id' }
   )
+  if (upsertError) redirect(`/auth/set-password?error=${encodeURIComponent(upsertError.message)}`)
 
   redirect('/dashboard')
 }

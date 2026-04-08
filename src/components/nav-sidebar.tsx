@@ -10,7 +10,9 @@ const allNavItems = [
   { label: 'Quotes', href: '/dashboard/quotes' },
   { label: 'Orders', href: '/dashboard/orders' },
   { label: 'Production', href: '/dashboard/production' },
-  { label: 'Time Clock', href: '/dashboard/timeclock' },
+  { label: 'Time Clock', href: '/dashboard/timeclock', exact: true },
+  { label: 'Timecards', href: '/dashboard/timeclock/admin', adminOnly: true },
+  { label: 'Time Reports', href: '/dashboard/timeclock/reports', adminOnly: true },
 
   { label: 'Invoices', href: '/dashboard/invoices' },
   { label: 'Analytics', href: '/dashboard/analytics', adminOnly: true },
