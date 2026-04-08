@@ -44,23 +44,26 @@ export async function sendPasswordReset(formData: FormData): Promise<void> {
 export async function updateEmployee(formData: FormData): Promise<void> {
   const id = formData.get('id') as string
   const name = ((formData.get('name') as string) ?? '').trim()
-  const role = formData.get('role') as string
+  const role = formData.get('role') as string | null
 
   if (!id) throw new Error('Missing employee ID')
-  if (role !== 'admin' && role !== 'staff') throw new Error('Invalid role')
+  if (role !== null && role !== 'admin' && role !== 'staff') throw new Error('Invalid role')
 
   const { user } = await requireAdmin()
 
-  if (id === user.id && role !== 'admin') {
+  if (id === user.id && role !== null && role !== 'admin') {
     throw new Error('Cannot remove your own admin role')
   }
 
   const tenantId = await getTenantId()
   const serviceClient = createServiceClient()
 
+  const updates: Record<string, string | null> = { name: name || null }
+  if (role !== null) updates.role = role
+
   const { error } = await serviceClient
     .from('users')
-    .update({ name: name || null, role })
+    .update(updates)
     .eq('id', id)
     .eq('tenant_id', tenantId)
 
