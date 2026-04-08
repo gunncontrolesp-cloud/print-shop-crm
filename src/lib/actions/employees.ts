@@ -31,7 +31,7 @@ export async function sendPasswordReset(formData: FormData): Promise<void> {
 
   const supabase = await createClient()
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://print-shop-crm.vercel.app/auth/callback',
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
   })
 
   if (error) {
@@ -108,7 +108,7 @@ export async function inviteEmployee(formData: FormData): Promise<void> {
       tenant_id: tenantId,
       role: 'staff',
     },
-    redirectTo: 'https://print-shop-crm.vercel.app/auth/callback',
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
   })
 
   if (error) {
