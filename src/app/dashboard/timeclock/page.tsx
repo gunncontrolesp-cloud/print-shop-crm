@@ -32,18 +32,46 @@ export default async function TimeClockPage() {
     .eq('user_id', user!.id)
     .is('clocked_out_at', null)
     .limit(1)
-    .single()
+    .maybeSingle()
 
+  // Last 7 days of closed entries
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const { data: recentEntries } = await supabase
     .from('time_entries')
     .select('*')
     .eq('user_id', user!.id)
     .not('clocked_out_at', 'is', null)
+    .gte('clocked_in_at', since)
     .order('clocked_in_at', { ascending: false })
-    .limit(5)
 
   const isClockedIn = !!openEntry
   const entries = (recentEntries ?? []) as TimeEntry[]
+
+  // Today's hours (closed entries only — open entry adds live time separately)
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+  const todayMinutes = entries
+    .filter((e) => new Date(e.clocked_in_at) >= todayStart && !!e.clocked_out_at)
+    .reduce((sum, e) => {
+      return sum + Math.floor(
+        (new Date(e.clocked_out_at!).getTime() - new Date(e.clocked_in_at).getTime()) / 60000
+      )
+    }, 0)
+
+  // Week's hours (Mon–Sun)
+  const weekStart = new Date()
+  weekStart.setHours(0, 0, 0, 0)
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1))
+  const weekMinutes = entries
+    .filter((e) => new Date(e.clocked_in_at) >= weekStart && !!e.clocked_out_at)
+    .reduce((sum, e) => {
+      return sum + Math.floor(
+        (new Date(e.clocked_out_at!).getTime() - new Date(e.clocked_in_at).getTime()) / 60000
+      )
+    }, 0)
+
+  const todayHours = (todayMinutes / 60).toFixed(1)
+  const weekHours = (weekMinutes / 60).toFixed(1)
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex flex-col items-center">
@@ -52,7 +80,7 @@ export default async function TimeClockPage() {
 
         {/* Status card */}
         <div
-          className={`rounded-2xl p-8 mb-6 text-center shadow-sm ${
+          className={`rounded-2xl p-8 mb-4 text-center shadow-sm ${
             isClockedIn ? 'bg-green-50 border-2 border-green-200' : 'bg-white border-2 border-gray-200'
           }`}
         >
@@ -81,6 +109,18 @@ export default async function TimeClockPage() {
           )}
         </div>
 
+        {/* Today / Week totals */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 text-center">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-0.5">Today</p>
+            <p className="text-2xl font-bold text-gray-900">{todayHours}h</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 px-4 py-3 text-center">
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-0.5">This Week</p>
+            <p className="text-2xl font-bold text-gray-900">{weekHours}h</p>
+          </div>
+        </div>
+
         {/* Action button */}
         {isClockedIn ? (
           <form action={clockOut}>
@@ -106,7 +146,7 @@ export default async function TimeClockPage() {
         {entries.length > 0 && (
           <div className="mt-10">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              Recent Entries
+              Last 7 Days
             </h2>
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full text-sm">
