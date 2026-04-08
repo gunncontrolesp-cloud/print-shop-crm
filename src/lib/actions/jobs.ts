@@ -5,27 +5,44 @@ import { createClient } from '@/lib/supabase/server'
 import { JOB_STAGE_SEQUENCE, type JobStage } from '@/lib/types'
 import { notifyJobReady } from '@/lib/n8n'
 
-export async function updateJobStage(jobId: string, stage: JobStage) {
+export async function updateJobStage(
+  jobId: string,
+  stage: JobStage
+): Promise<{ error?: string }> {
   const supabase = await createClient()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   const { data: job } = await supabase
     .from('jobs')
-    .select('stage')
+    .select('stage, order_id')
     .eq('id', jobId)
     .single()
 
-  if (!job) throw new Error('Job not found')
+  if (!job) return { error: 'Job not found' }
 
   const currentIdx = JOB_STAGE_SEQUENCE.indexOf(job.stage as JobStage)
   const targetIdx = JOB_STAGE_SEQUENCE.indexOf(stage)
 
   if (targetIdx !== currentIdx + 1) {
-    throw new Error(`Invalid stage transition: ${job.stage} → ${stage}`)
+    return { error: `Invalid stage transition: ${job.stage} → ${stage}` }
+  }
+
+  // Payment gate: invoice must be paid before moving to printing
+  if (stage === 'printing') {
+    const { data: invoice } = await supabase
+      .from('invoices')
+      .select('status')
+      .eq('order_id', job.order_id)
+      .eq('status', 'paid')
+      .maybeSingle()
+
+    if (!invoice) {
+      return { error: 'Invoice must be paid before moving to Printing' }
+    }
   }
 
   const { error } = await supabase
@@ -33,7 +50,7 @@ export async function updateJobStage(jobId: string, stage: JobStage) {
     .update({ stage })
     .eq('id', jobId)
 
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
 
   if (stage === 'ready_for_pickup') {
     const { data: jobWithOrder } = await supabase
@@ -56,6 +73,7 @@ export async function updateJobStage(jobId: string, stage: JobStage) {
 
   revalidatePath('/dashboard/production')
   revalidatePath('/dashboard/orders')
+  return {}
 }
 
 export async function completeJob(jobId: string) {

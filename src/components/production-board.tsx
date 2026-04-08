@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { updateJobStage, completeJob } from '@/lib/actions/jobs'
 import { resetProofDecision } from '@/lib/actions/proof'
@@ -19,6 +19,7 @@ type Job = {
     total: number
     line_items: unknown[]
     customers: { name: string } | null
+    invoices: { status: string }[] | null
   } | null
 }
 
@@ -40,6 +41,18 @@ const STAGE_BUTTON_CLASSES: Record<JobStage, string> = {
 
 export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
+
+  function handleMoveStage(jobId: string, stage: JobStage) {
+    startTransition(async () => {
+      const result = await updateJobStage(jobId, stage)
+      if (result?.error) {
+        setActionError(result.error)
+        setTimeout(() => setActionError(null), 5000)
+      }
+    })
+  }
 
   useEffect(() => {
     const supabase = createClient()
@@ -73,12 +86,19 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
   const activeJobs = jobs.filter((j) => !j.completed_at)
 
   return (
+    <div>
+    {actionError && (
+      <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-center gap-2">
+        <span className="font-medium">Blocked:</span> {actionError}
+      </div>
+    )}
     <div className="grid grid-cols-5 gap-4 min-h-[500px]">
       {STAGES.map((stage) => {
         const stageJobs = activeJobs.filter((j) => j.stage === stage.id)
         const nextStage = JOB_STAGE_SEQUENCE[
           JOB_STAGE_SEQUENCE.indexOf(stage.id) + 1
         ] as JobStage | undefined
+
 
         return (
           <div key={stage.id} className="flex flex-col">
@@ -103,6 +123,8 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                   const lineItemCount = Array.isArray(job.orders?.line_items)
                     ? job.orders!.line_items.length
                     : 0
+                  const invoicePaid = job.orders?.invoices?.some((i) => i.status === 'paid') ?? false
+                  const blockedByPayment = nextStage === 'printing' && !invoicePaid
 
                   return (
                     <div
@@ -120,6 +142,10 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                         {new Date(job.created_at).toLocaleDateString('en-US')}
                       </p>
 
+                      {stage.id === 'proofing' && !invoicePaid && (
+                        <p className="text-xs text-red-600 font-medium mt-1">⚠ Invoice unpaid</p>
+                      )}
+
                       {job.proof_decision === 'approved' && (
                         <p className="text-xs text-green-600 font-medium mt-1">✓ Proof approved</p>
                       )}
@@ -135,14 +161,19 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                       )}
 
                       <div className="mt-2 flex flex-col gap-1">
-                        {nextStage && (
+                        {nextStage && !blockedByPayment && (
                           <button
                             type="button"
-                            onClick={() => updateJobStage(job.id, nextStage)}
+                            onClick={() => handleMoveStage(job.id, nextStage)}
                             className={`w-full text-xs px-2 py-1 rounded font-medium transition-colors ${STAGE_BUTTON_CLASSES[nextStage]}`}
                           >
                             Move to {STAGES.find((s) => s.id === nextStage)?.label}
                           </button>
+                        )}
+                        {blockedByPayment && (
+                          <div className="w-full text-xs px-2 py-1 rounded font-medium bg-gray-100 text-gray-400 border border-gray-200 text-center cursor-not-allowed">
+                            Locked — invoice not paid
+                          </div>
                         )}
                         {stage.id === 'proofing' &&
                           job.proof_decision === 'changes_requested' && (
@@ -172,6 +203,7 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
           </div>
         )
       })}
+    </div>
     </div>
   )
 }
