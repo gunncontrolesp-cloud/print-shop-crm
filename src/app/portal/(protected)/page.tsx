@@ -25,8 +25,7 @@ export default async function PortalHomePage() {
     const { data: unlinked } = await serviceClient
       .from('customers')
       .select('id, name, business_name')
-      .eq('email', user.email!)
-      .is('auth_user_id', null)
+      .ilike('email', user.email!)
       .single()
 
     if (unlinked) {
