@@ -60,6 +60,21 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(url)
     }
 
+    // Invited staff who landed on /dashboard via hash token — send to set-password
+    // (detect by: has tenant_id but no name set, and not already on set-password)
+    if (!pathname.startsWith('/auth/set-password')) {
+      const { data: fullRecord } = await serviceClient
+        .from('users')
+        .select('name')
+        .eq('id', user.id)
+        .single()
+      if (!fullRecord?.name) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/set-password'
+        return NextResponse.redirect(url)
+      }
+    }
+
     // Tier gate — only fetch tenant for gated routes to avoid extra DB call on every request
     const PRO_ROUTES = ['/dashboard/production', '/dashboard/invoices']
     const PREMIUM_ROUTES = ['/dashboard/analytics', '/dashboard/inventory']
