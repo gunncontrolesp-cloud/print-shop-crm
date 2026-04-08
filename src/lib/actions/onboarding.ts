@@ -63,7 +63,7 @@ export async function createTenant(formData: FormData) {
   // 2. Link user to tenant — upsert handles trigger failures where the row was never created
   const { error: userError } = await service
     .from('users')
-    .upsert({ id: user.id, tenant_id: tenant.id, role: 'admin' }, { onConflict: 'id' })
+    .upsert({ id: user.id, email: user.email, tenant_id: tenant.id, role: 'admin' }, { onConflict: 'id' })
 
   if (userError) throw new Error(userError.message)
 
