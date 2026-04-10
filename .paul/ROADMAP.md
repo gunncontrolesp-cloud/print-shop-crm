@@ -16,8 +16,8 @@ Phases: 6 of 6 complete
 |-------|------|-------|--------|-----------|
 | 1 | Foundation — Customers, Quotes, Orders | 5 | **Complete** | 01-01 ✓ 01-02 ✓ 01-03 ✓ 01-04 ✓ 01-05 ✓ |
 | 2 | Production + Files + Notifications | 3 | **Complete** | 02-01 ✓ 02-02 ✓ 02-03 ✓ |
-| 3 | Invoicing + Payments | TBD | Not started | - |
-| 4 | Customer Portal | TBD | Not started | - |
+| 3 | Invoicing + Payments | 3 | **Complete** | 03-01 ✓ 03-02 ✓ 03-03 ✓ |
+| 4 | Customer Portal | 4 | **Complete** | 04-01 ✓ 04-02 ✓ 04-03 ✓ 04-04 ✓ |
 | 5 | Analytics + Inventory | 2 | **Complete** | 05-01 ✓ 05-02 ✓ |
 | 6 | SaaS / Multi-Tenant | 3 | **Complete** | 06-01 ✓ 06-02 ✓ 06-03 ✓ |
 

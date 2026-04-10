@@ -10,20 +10,20 @@ See: .paul/PROJECT.md (updated 2026-03-27)
 ## Current Position
 
 Milestone: v0.2 Timecards
-Phase: 2.1 (Employee Timecards) — **COMPLETE** ✓
-Plan: All 3 plans complete
-Status: Phase 2.1 closed — ready for next phase
-Last activity: 2026-04-03 — Daily cron, missed clock-out alert, reports page shipped
+Phase: 2.2 (Employee Management) — In Progress
+Plan: 02.2-01 created, awaiting approval
+Status: PLAN created, ready for APPLY
+Last activity: 2026-04-03 — Plan 02.2-01 created
 
 Progress:
-- Phase 2.1: [██████████] 100% (3/3 plans complete)
+- Phase 2.2: [░░░░░░░░░░] 0% (0/2 plans complete)
 
 ## Loop Position
 
 Current loop state:
 ```
 PLAN ──▶ APPLY ──▶ UNIFY
-  ✓        ✓        ✓     [Phase 2.1 complete]
+  ✓        ○        ○     [Plan 02.2-01 created, awaiting approval]
 ```
 
 ## Performance Metrics
@@ -92,9 +92,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-03
-Stopped at: Phase 2.1 complete — all 3 plans shipped and verified in production
-Next action: Decide next phase (Phase 3 Invoicing/Payments is next on roadmap)
-Resume file: .paul/phases/02.1-timecards/02.1-03-SUMMARY.md
+Stopped at: Plan 02.2-01 created — employee list + edit
+Next action: Approve plan, then run /paul:apply
+Resume file: .paul/phases/02.2-employees/02.2-01-PLAN.md
 
 ---
 *STATE.md — Updated after every significant action*
