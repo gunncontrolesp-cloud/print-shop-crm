@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,7 +13,34 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+
+  // Handle hash-fragment invite tokens (Supabase implicit flow)
+  // When an invite link lands here with #access_token=... in the URL,
+  // exchange it for a session and redirect to set-password.
+  useEffect(() => {
+    const hash = window.location.hash
+    if (!hash.includes('access_token')) return
+
+    const params = new URLSearchParams(hash.slice(1))
+    const accessToken = params.get('access_token')
+    const refreshToken = params.get('refresh_token')
+    const type = params.get('type')
+
+    if (!accessToken || !refreshToken) return
+
+    const supabase = createClient()
+    supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
+      if (error) {
+        setError(error.message)
+        return
+      }
+      if (type === 'invite') {
+        router.replace('/auth/set-password')
+      } else {
+        router.replace('/dashboard')
+      }
+    })
+  }, [router])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -21,22 +48,11 @@ export default function LoginPage() {
     setLoading(true)
 
     const supabase = createClient()
-
-    if (mode === 'signin') {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        setError(error.message)
-      } else {
-        router.push('/dashboard')
-      }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      setError(error.message)
     } else {
-      const { error } = await supabase.auth.signUp({ email, password })
-      if (error) {
-        setError(error.message)
-      } else {
-        setError('Account created! Sign in to set up your shop.')
-        setMode('signin')
-      }
+      router.push('/dashboard')
     }
 
     setLoading(false)
@@ -47,9 +63,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Print Shop CRM</CardTitle>
-          <CardDescription>
-            {mode === 'signin' ? 'Sign in to your account' : 'Create a new account'}
-          </CardDescription>
+          <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -71,34 +85,9 @@ export default function LoginPage() {
               <p className="text-sm text-red-600">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Sign Up'}
+              {loading ? 'Please wait...' : 'Sign In'}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-gray-600">
-            {mode === 'signin' ? (
-              <>
-                Need an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => { setMode('signup'); setError(null) }}
-                  className="text-blue-600 hover:underline"
-                >
-                  Sign up
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => { setMode('signin'); setError(null) }}
-                  className="text-blue-600 hover:underline"
-                >
-                  Sign in
-                </button>
-              </>
-            )}
-          </p>
         </CardContent>
       </Card>
     </main>
