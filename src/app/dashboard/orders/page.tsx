@@ -1,21 +1,14 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { ShoppingCart, ArrowRight } from 'lucide-react'
 
-const statusStyles: Record<string, string> = {
-  pending: 'bg-gray-100 text-gray-600',
-  approved: 'bg-blue-100 text-blue-700',
-  printing: 'bg-yellow-100 text-yellow-700',
-  finishing: 'bg-orange-100 text-orange-700',
-  completed: 'bg-green-100 text-green-700',
-  delivered: 'bg-teal-100 text-teal-700',
+const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
+  pending:  { label: 'Pending',   className: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' },
+  approved: { label: 'Approved',  className: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200' },
+  printing: { label: 'Printing',  className: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200' },
+  finishing:{ label: 'Finishing', className: 'bg-orange-50 text-orange-700 ring-1 ring-orange-200' },
+  completed:{ label: 'Completed', className: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
+  delivered:{ label: 'Delivered', className: 'bg-teal-50 text-teal-700 ring-1 ring-teal-200' },
 }
 
 export default async function OrdersPage() {
@@ -28,75 +21,82 @@ export default async function OrdersPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Orders</h1>
+    <div className="p-8 max-w-6xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{orders?.length ?? 0} active orders</p>
+        </div>
       </div>
 
       {!orders || orders.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
-          <p className="text-base">No orders yet.</p>
-          <p className="text-sm mt-1">
-            Orders are created by converting an{' '}
-            <Link href="/dashboard/quotes" className="text-blue-600 hover:underline">
-              approved quote
-            </Link>
-            .
-          </p>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex flex-col items-center py-20 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
+              <ShoppingCart className="h-6 w-6 text-slate-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-700 mb-1">No orders yet</p>
+            <p className="text-sm text-slate-400">
+              Orders are created by converting an{' '}
+              <Link href="/dashboard/quotes" className="text-indigo-600 hover:underline">approved quote</Link>.
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg border border-gray-200">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="w-16" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Order</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+                <th className="w-16" />
+              </tr>
+            </thead>
+            <tbody>
               {orders.map((order) => {
                 const customer = (
                   Array.isArray(order.customers) ? order.customers[0] : order.customers
                 ) as { name: string; business_name: string | null } | null
+                const cfg = STATUS_CONFIG[order.status] ?? { label: order.status, className: 'bg-slate-100 text-slate-600' }
                 return (
-                  <TableRow key={order.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">
-                      {customer?.name ?? '—'}
+                  <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                    <td className="px-5 py-3.5 font-mono text-xs text-slate-400">
+                      #{order.id.slice(0, 8).toUpperCase()}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="font-medium text-slate-900">{customer?.name ?? '—'}</span>
                       {customer?.business_name && (
-                        <span className="block text-xs text-gray-400">
-                          {customer.business_name}
-                        </span>
+                        <span className="block text-xs text-slate-400">{customer.business_name}</span>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-block text-xs px-2 py-0.5 rounded capitalize font-medium ${statusStyles[order.status] ?? ''}`}
-                      >
-                        {order.status}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cfg.className}`}>
+                        {cfg.label}
                       </span>
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
+                    </td>
+                    <td className="px-5 py-3.5 text-right font-medium text-slate-900">
                       ${Number(order.total).toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-gray-500 text-sm">
-                      {new Date(order.created_at).toLocaleDateString('en-US')}
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className="px-5 py-3.5 text-slate-500 text-xs">
+                      {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
                       <Link
                         href={`/dashboard/orders/${order.id}`}
-                        className="text-sm text-blue-600 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700"
                       >
-                        View
+                        View <ArrowRight className="h-3 w-3" />
                       </Link>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 )
               })}
-            </TableBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
       )}
     </div>

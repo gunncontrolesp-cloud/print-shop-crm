@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { buttonVariants } from '@/components/ui/button-variants'
 import { inviteEmployee, removeEmployee } from '@/lib/actions/employees'
+import { UserCog } from 'lucide-react'
 
 export default async function EmployeesPage({
   searchParams,
@@ -11,9 +11,7 @@ export default async function EmployeesPage({
   const { error: errorMsg, success } = await searchParams
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
@@ -24,7 +22,6 @@ export default async function EmployeesPage({
 
   if (profile?.role !== 'admin') redirect('/dashboard')
 
-  // "Admins can view tenant users" RLS policy returns all users in the admin's tenant
   const { data: employees } = await supabase
     .from('users')
     .select('id, email, name, role, created_at')
@@ -33,21 +30,22 @@ export default async function EmployeesPage({
   const list = employees ?? []
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto">
       {errorMsg && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {errorMsg}
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           {success === 'removed' ? 'Employee removed.' : success === 'reset' ? 'Password reset link sent.' : 'Invite sent successfully.'}
         </div>
       )}
+
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Employees</h1>
-          <p className="text-sm text-gray-500 mt-1">All staff accounts in your shop</p>
+          <h1 className="text-2xl font-bold text-slate-900">Employees</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{list.length} staff account{list.length !== 1 ? 's' : ''}</p>
         </div>
         <form action={inviteEmployee} className="flex gap-2">
           <input
@@ -55,60 +53,68 @@ export default async function EmployeesPage({
             name="email"
             required
             placeholder="staff@example.com"
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 w-56"
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-56 bg-white"
           />
-          <button type="submit" className={buttonVariants({ size: 'sm' })}>
+          <button
+            type="submit"
+            className="flex items-center px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+          >
             Invite
           </button>
         </form>
       </div>
 
       {list.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400 text-sm">
-          No employees found
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex flex-col items-center py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
+              <UserCog className="h-6 w-6 text-slate-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-700 mb-1">No employees yet</p>
+            <p className="text-sm text-slate-400">Invite your first team member above.</p>
+          </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Employee</th>
-                <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Email</th>
-                <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Role</th>
-                <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Since</th>
-                <th className="px-4 py-2.5 text-right text-gray-500 font-medium">Actions</th>
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Employee</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Role</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Since</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {list.map((emp) => (
-                <tr key={emp.id}>
-                  <td className="px-4 py-3 font-medium text-gray-800">
-                    {emp.name || emp.email}
+                <tr key={emp.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                        {(emp.name || emp.email).charAt(0).toUpperCase()}
+                      </div>
+                      <span className="font-medium text-slate-900">{emp.name || emp.email}</span>
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600">{emp.email}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex text-xs font-semibold px-2 py-0.5 rounded-full ${
-                        emp.role === 'admin'
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
-                    >
+                  <td className="px-5 py-3.5 text-slate-500 text-xs">{emp.email}</td>
+                  <td className="px-5 py-3.5">
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                      emp.role === 'admin'
+                        ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                        : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'
+                    }`}>
                       {emp.role}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">
-                    {new Date(emp.created_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
+                  <td className="px-5 py-3.5 text-slate-500 text-xs">
+                    {new Date(emp.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
+                  <td className="px-5 py-3.5 text-right">
+                    <div className="flex items-center justify-end gap-2">
                       <a
                         href={`/dashboard/settings/employees/${emp.id}/edit`}
-                        className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                        className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                       >
                         Edit
                       </a>
@@ -117,8 +123,7 @@ export default async function EmployeesPage({
                           <input type="hidden" name="id" value={emp.id} />
                           <button
                             type="submit"
-                            className={buttonVariants({ variant: 'outline', size: 'sm' })}
-                            style={{ color: '#dc2626', borderColor: '#dc2626' }}
+                            className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-rose-600 bg-white border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors"
                           >
                             Remove
                           </button>

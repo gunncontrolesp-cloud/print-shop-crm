@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { adminClockOut, adminApproveEntry } from '@/lib/actions/timeclock'
-import { buttonVariants } from '@/components/ui/button-variants'
 import type { TimeEntry } from '@/lib/types'
 
 function formatDuration(start: string, end: string | null): string {
@@ -23,27 +22,18 @@ function formatDate(ts: string): string {
 export default async function AdminTimeClockPage() {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
+  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/dashboard/timeclock')
 
-  // Fetch open entries (currently clocked in)
   const { data: openEntries } = await supabase
     .from('time_entries')
     .select('*')
     .is('clocked_out_at', null)
     .order('clocked_in_at', { ascending: true })
 
-  // Fetch recent closed entries
   const { data: closedEntries } = await supabase
     .from('time_entries')
     .select('*')
@@ -51,76 +41,74 @@ export default async function AdminTimeClockPage() {
     .order('clocked_in_at', { ascending: false })
     .limit(50)
 
-  // Fetch user names for all entries
   const allEntries = [...(openEntries ?? []), ...(closedEntries ?? [])]
   const userIds = [...new Set(allEntries.map((e) => e.user_id))]
-
   const { data: usersData } = userIds.length
     ? await supabase.from('users').select('id, name, email').in('id', userIds)
     : { data: [] }
 
-  const userMap = Object.fromEntries(
-    (usersData ?? []).map((u) => [u.id, u.name || u.email])
-  )
+  const userMap = Object.fromEntries((usersData ?? []).map((u) => [u.id, u.name || u.email]))
 
   const open = (openEntries ?? []) as TimeEntry[]
   const closed = (closedEntries ?? []) as TimeEntry[]
 
-  // Missing punches: open entries from a previous calendar day
   const todayStr = new Date().toDateString()
-  const missingPunches = open.filter(
-    (e) => new Date(e.clocked_in_at).toDateString() !== todayStr
-  )
+  const missingPunches = open.filter((e) => new Date(e.clocked_in_at).toDateString() !== todayStr)
 
-  // Summary: total hours worked today across all closed entries today
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
-  const todayEntries = closed.filter(
-    (e) => new Date(e.clocked_in_at) >= todayStart
-  )
+  const todayEntries = closed.filter((e) => new Date(e.clocked_in_at) >= todayStart)
   const totalMinutesToday = todayEntries.reduce((sum, e) => {
     if (!e.clocked_out_at) return sum
-    return sum + Math.floor(
-      (new Date(e.clocked_out_at).getTime() - new Date(e.clocked_in_at).getTime()) / 60000
-    )
+    return sum + Math.floor((new Date(e.clocked_out_at).getTime() - new Date(e.clocked_in_at).getTime()) / 60000)
   }, 0)
   const totalHoursToday = (totalMinutesToday / 60).toFixed(1)
-
   const pendingCount = closed.filter((e) => e.status === 'pending').length
 
+  const thClass = 'px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide'
+
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Timecard Admin</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Timecard Admin</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Manage employee time entries</p>
+        </div>
         <div className="flex gap-2">
-          <a href="/dashboard/timeclock/reports" className={buttonVariants({ variant: 'outline' })}>
+          <a
+            href="/dashboard/timeclock/reports"
+            className="flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+          >
             Reports
           </a>
-          <a href="/dashboard/timeclock" className={buttonVariants({ variant: 'outline' })}>
-            My Time Clock
+          <a
+            href="/dashboard/timeclock"
+            className="flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+          >
+            My Clock
           </a>
         </div>
       </div>
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-        <div className="bg-white rounded-xl border border-gray-200 px-4 py-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Clocked In Now</p>
-          <p className="text-3xl font-bold text-gray-900">{open.length - missingPunches.length}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Clocked In Now</p>
+          <p className="text-3xl font-bold text-slate-900 tabular-nums">{open.length - missingPunches.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-gray-200 px-4 py-4">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Hours Today</p>
-          <p className="text-3xl font-bold text-gray-900">{totalHoursToday}</p>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Total Hours Today</p>
+          <p className="text-3xl font-bold text-slate-900 tabular-nums">{totalHoursToday}</p>
         </div>
-        <div className={`rounded-xl border px-4 py-4 ${missingPunches.length > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200'}`}>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Missing Punches</p>
-          <p className={`text-3xl font-bold ${missingPunches.length > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+        <div className={`rounded-xl border shadow-sm px-4 py-4 ${missingPunches.length > 0 ? 'bg-rose-50 border-rose-200' : 'bg-white border-slate-200'}`}>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Missing Punches</p>
+          <p className={`text-3xl font-bold tabular-nums ${missingPunches.length > 0 ? 'text-rose-600' : 'text-slate-900'}`}>
             {missingPunches.length}
           </p>
         </div>
-        <div className={`rounded-xl border px-4 py-4 ${pendingCount > 0 ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-200'}`}>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Pending Approvals</p>
-          <p className={`text-3xl font-bold ${pendingCount > 0 ? 'text-yellow-700' : 'text-gray-900'}`}>
+        <div className={`rounded-xl border shadow-sm px-4 py-4 ${pendingCount > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'}`}>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Pending Approvals</p>
+          <p className={`text-3xl font-bold tabular-nums ${pendingCount > 0 ? 'text-amber-700' : 'text-slate-900'}`}>
             {pendingCount}
           </p>
         </div>
@@ -128,42 +116,34 @@ export default async function AdminTimeClockPage() {
 
       {/* Missing punches alert */}
       {missingPunches.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-sm font-semibold text-red-500 uppercase tracking-wide mb-3">
-            Missing Clock-Outs
-          </h2>
-          <div className="bg-white rounded-xl border border-red-200 overflow-hidden">
+        <section className="mb-8">
+          <p className="text-xs font-semibold text-rose-500 uppercase tracking-wide mb-3">Missing Clock-Outs</p>
+          <div className="bg-white rounded-xl border border-rose-200 overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-red-50">
-                <tr>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Employee</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Clocked In</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Elapsed</th>
-                  <th className="px-4 py-2.5 text-right text-gray-500 font-medium">Action</th>
+              <thead>
+                <tr className="border-b border-rose-100 bg-rose-50/50">
+                  <th className={thClass}>Employee</th>
+                  <th className={thClass}>Clocked In</th>
+                  <th className={thClass}>Elapsed</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody>
                 {missingPunches.map((entry) => (
-                  <tr key={entry.id}>
-                    <td className="px-4 py-3 font-medium text-gray-800">
-                      {userMap[entry.user_id] ?? entry.user_id}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {formatDate(entry.clocked_in_at)} {formatTime(entry.clocked_in_at)}
-                    </td>
-                    <td className="px-4 py-3 text-red-600 font-medium">
-                      {formatDuration(entry.clocked_in_at, null)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
+                  <tr key={entry.id} className="border-b border-slate-50">
+                    <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatDate(entry.clocked_in_at)} {formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-rose-600 font-medium text-xs tabular-nums">{formatDuration(entry.clocked_in_at, null)}</td>
+                    <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <a
                           href={`/dashboard/timeclock/admin/${entry.id}/edit`}
-                          className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                         >
                           Edit
                         </a>
                         <form action={adminClockOut.bind(null, entry.id)}>
-                          <button type="submit" className={buttonVariants({ variant: 'destructive', size: 'sm' })}>
+                          <button type="submit" className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 transition-colors">
                             Force Clock Out
                           </button>
                         </form>
@@ -178,38 +158,32 @@ export default async function AdminTimeClockPage() {
       )}
 
       {/* Currently clocked in */}
-      <section className="mb-10">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-          Currently Clocked In
-        </h2>
-        {open.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400 text-sm">
+      <section className="mb-8">
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Currently Clocked In</p>
+        {open.filter((e) => new Date(e.clocked_in_at).toDateString() === todayStr).length === 0 ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm shadow-sm">
             No one is currently clocked in
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Employee</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Clocked In</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Duration</th>
-                  <th className="px-4 py-2.5 text-right text-gray-500 font-medium">Action</th>
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className={thClass}>Employee</th>
+                  <th className={thClass}>Clocked In</th>
+                  <th className={thClass}>Duration</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody>
                 {open.filter((e) => new Date(e.clocked_in_at).toDateString() === todayStr).map((entry) => (
-                  <tr key={entry.id}>
-                    <td className="px-4 py-3 font-medium text-gray-800">
-                      {userMap[entry.user_id] ?? entry.user_id}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{formatTime(entry.clocked_in_at)}</td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {formatDuration(entry.clocked_in_at, null)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
+                  <tr key={entry.id} className="border-b border-slate-50">
+                    <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs tabular-nums">{formatDuration(entry.clocked_in_at, null)}</td>
+                    <td className="px-5 py-3.5 text-right">
                       <form action={adminClockOut.bind(null, entry.id)}>
-                        <button type="submit" className={buttonVariants({ variant: 'destructive', size: 'sm' })}>
+                        <button type="submit" className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 transition-colors">
                           Force Clock Out
                         </button>
                       </form>
@@ -224,65 +198,59 @@ export default async function AdminTimeClockPage() {
 
       {/* All timecards */}
       <section>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-          All Timecards
-        </h2>
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">All Timecards</p>
         {closed.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-400 text-sm">
+          <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm shadow-sm">
             No completed time entries yet
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Employee</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Date</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">In</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Out</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Duration</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Status</th>
-                  <th className="px-4 py-2.5 text-right text-gray-500 font-medium">Actions</th>
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className={thClass}>Employee</th>
+                  <th className={thClass}>Date</th>
+                  <th className={thClass}>In</th>
+                  <th className={thClass}>Out</th>
+                  <th className={thClass}>Duration</th>
+                  <th className={thClass}>Status</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody>
                 {closed.map((entry) => (
-                  <tr key={entry.id}>
-                    <td className="px-4 py-3 font-medium text-gray-800">
-                      {userMap[entry.user_id] ?? entry.user_id}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{formatDate(entry.clocked_in_at)}</td>
-                    <td className="px-4 py-3 text-gray-600">{formatTime(entry.clocked_in_at)}</td>
-                    <td className="px-4 py-3 text-gray-600">
+                  <tr key={entry.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                    <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatDate(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs">
                       {entry.clocked_out_at ? formatTime(entry.clocked_out_at) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {entry.clocked_out_at
-                        ? formatDuration(entry.clocked_in_at, entry.clocked_out_at)
-                        : '—'}
+                    <td className="px-5 py-3.5 text-slate-600 text-xs tabular-nums">
+                      {entry.clocked_out_at ? formatDuration(entry.clocked_in_at, entry.clocked_out_at) : '—'}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-3.5">
                       {entry.status === 'approved' ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
                           Approved
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-200">
                           Pending
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <a
                           href={`/dashboard/timeclock/admin/${entry.id}/edit`}
-                          className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                         >
                           Edit
                         </a>
                         {entry.status === 'pending' && (
                           <form action={adminApproveEntry.bind(null, entry.id)}>
-                            <button type="submit" className={buttonVariants({ size: 'sm' as 'default' })}>
+                            <button type="submit" className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
                               Approve
                             </button>
                           </form>
