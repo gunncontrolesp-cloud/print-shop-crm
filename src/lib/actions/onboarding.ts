@@ -130,5 +130,5 @@ export async function createTenant(formData: FormData) {
 
   await service.from('products').insert(defaultProducts)
 
-  redirect('/dashboard')
+  redirect('/onboarding/subscribe')
 }

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { NavSidebar } from '@/components/nav-sidebar'
+import { LogOut, PrinterIcon } from 'lucide-react'
 
 export default async function DashboardLayout({
   children,
@@ -19,7 +20,7 @@ export default async function DashboardLayout({
 
   const { data: profile } = await supabase
     .from('users')
-    .select('email, role')
+    .select('email, role, name')
     .eq('id', user.id)
     .single()
 
@@ -30,35 +31,53 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
+  const displayName = profile?.name ?? profile?.email ?? user.email ?? ''
+  const initials = displayName
+    .split(' ')
+    .map((n: string) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-zinc-50">
       {/* Sidebar */}
-      <aside className="w-60 bg-white border-r border-gray-200 flex flex-col">
-        <div className="px-4 py-5 border-b border-gray-200">
-          <h1 className="text-sm font-semibold text-gray-900 leading-tight">
-            Print Shop CRM
-          </h1>
+      <aside className="w-64 bg-slate-900 flex flex-col shrink-0">
+        {/* Logo */}
+        <div className="flex items-center gap-2.5 px-5 py-5 border-b border-slate-800">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
+            <PrinterIcon className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white leading-tight">PrintShop CRM</p>
+            <p className="text-[10px] text-slate-500 leading-tight capitalize">{profile?.role ?? 'staff'}</p>
+          </div>
         </div>
 
-        <div className="flex-1 px-3 py-4">
+        {/* Nav */}
+        <div className="flex-1 px-3 py-5 overflow-y-auto">
           <NavSidebar role={profile?.role ?? 'staff'} />
         </div>
 
-        <div className="px-4 py-4 border-t border-gray-200">
-          <p className="text-xs text-gray-500 truncate mb-1">
-            {profile?.email ?? user.email}
-          </p>
-          <span className="inline-block text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-600 capitalize mb-3">
-            {profile?.role ?? 'staff'}
-          </span>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="w-full text-left text-xs text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              Sign out →
-            </button>
-          </form>
+        {/* User footer */}
+        <div className="px-3 py-4 border-t border-slate-800">
+          <div className="flex items-center gap-3 px-2 py-2 rounded-md">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-slate-200 truncate">{displayName}</p>
+            </div>
+            <form action={signOut}>
+              <button
+                type="submit"
+                title="Sign out"
+                className="text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            </form>
+          </div>
         </div>
       </aside>
 
