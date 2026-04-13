@@ -21,6 +21,12 @@ export async function updateShopSettings(formData: FormData): Promise<void> {
   const payment_terms = ((formData.get('payment_terms') as string) ?? '').trim() || 'Due on receipt'
   const tax_rate_raw = parseFloat(formData.get('tax_rate') as string)
   const tax_rate = isNaN(tax_rate_raw) ? 0 : Math.min(Math.max(tax_rate_raw, 0), 100)
+  const payment_mode_raw = formData.get('payment_mode') as string
+  const payment_mode = payment_mode_raw === 'deposit' ? 'deposit' : 'full'
+  const deposit_percent_raw = parseFloat(formData.get('deposit_percent') as string)
+  const deposit_percent = isNaN(deposit_percent_raw)
+    ? 50
+    : Math.min(Math.max(deposit_percent_raw, 1), 100)
   const logoFile = formData.get('logo') as File | null
 
   await requireAdmin()
@@ -29,6 +35,7 @@ export async function updateShopSettings(formData: FormData): Promise<void> {
 
   const updateData: Record<string, unknown> = {
     shop_name, shop_address, shop_phone, shop_email, tax_rate, payment_terms,
+    payment_mode, deposit_percent,
   }
 
   if (logoFile && logoFile.size > 0) {
