@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Package,
   UserCog,
+  Monitor,
   Settings,
   type LucideIcon,
 } from 'lucide-react'
@@ -58,6 +59,7 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       { label: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp, adminOnly: true },
       { label: 'Product Catalog', href: '/dashboard/settings/catalog', icon: Package, adminOnly: true },
       { label: 'Employees', href: '/dashboard/settings/employees', icon: UserCog, adminOnly: true },
+      { label: 'Kiosk Staff', href: '/dashboard/settings/staff', icon: Monitor, adminOnly: true },
       { label: 'Settings', href: '/dashboard/settings/pricing', icon: Settings, adminOnly: true },
     ],
   },
