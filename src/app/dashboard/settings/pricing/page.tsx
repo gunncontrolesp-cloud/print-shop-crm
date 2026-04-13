@@ -133,6 +133,49 @@ export default async function ShopSettingsPage({
           </div>
         </div>
 
+        {/* Payment Mode */}
+        <div className="space-y-3">
+          <label className="text-sm font-medium text-gray-700">Payment Mode</label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="radio"
+                name="payment_mode"
+                value="full"
+                defaultChecked={!tenant?.payment_mode || tenant.payment_mode === 'full'}
+                className="accent-gray-900"
+              />
+              Full payment upfront
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="radio"
+                name="payment_mode"
+                value="deposit"
+                defaultChecked={tenant?.payment_mode === 'deposit'}
+                className="accent-gray-900"
+              />
+              Deposit + balance on pickup
+            </label>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700">Deposit Percentage (%)</label>
+            <input
+              name="deposit_percent"
+              type="number"
+              min="1"
+              max="100"
+              step="1"
+              defaultValue={tenant?.deposit_percent ?? 50}
+              placeholder="50"
+              className={inputClass}
+            />
+            <p className="text-xs text-gray-400">
+              Only applies when payment mode is &ldquo;Deposit&rdquo;. Remaining balance is due on pickup.
+            </p>
+          </div>
+        </div>
+
         <div className="pt-2">
           <button
             type="submit"
