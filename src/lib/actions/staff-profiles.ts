@@ -62,7 +62,7 @@ export async function updateStaffProfile(formData: FormData): Promise<void> {
   const name = ((formData.get('name') as string) ?? '').trim()
   const role = formData.get('role') as string
   const pin = ((formData.get('pin') as string) ?? '').trim()
-  const active = formData.get('active') !== 'false'
+  const active = formData.get('active') === 'true'
 
   if (!id) throw new Error('Missing staff profile ID')
   if (!name) throw new Error('Name is required')
