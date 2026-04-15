@@ -13,7 +13,7 @@ BEGIN
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'staff'),
+    COALESCE((NEW.raw_user_meta_data->>'role')::public.user_role, 'staff'::public.user_role),
     -- NULL if tenant_id not in metadata (admin onboarding — set later by createTenant)
     NULLIF((NEW.raw_user_meta_data->>'tenant_id'), '')::uuid
   )

@@ -6,7 +6,7 @@ export default async function ProductionPage() {
 
   const { data: jobs } = await supabase
     .from('jobs')
-    .select('*, orders(total, line_items, customers(name), invoices(status))')
+    .select('*, orders(total, line_items, customers(name))')
     .is('completed_at', null)
     .order('created_at', { ascending: true })
 

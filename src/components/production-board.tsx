@@ -19,7 +19,6 @@ type Job = {
     total: number
     line_items: unknown[]
     customers: { name: string } | null
-    invoices: { status: string }[] | null
   } | null
 }
 
@@ -123,9 +122,6 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                   const lineItemCount = Array.isArray(job.orders?.line_items)
                     ? job.orders!.line_items.length
                     : 0
-                  const invoicePaid = job.orders?.invoices?.some((i) => i.status === 'paid') ?? false
-                  const blockedByPayment = nextStage === 'printing' && !invoicePaid
-
                   return (
                     <div
                       key={job.id}
@@ -142,10 +138,6 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                         {new Date(job.created_at).toLocaleDateString('en-US')}
                       </p>
 
-                      {stage.id === 'proofing' && !invoicePaid && (
-                        <p className="text-xs text-red-600 font-medium mt-1">⚠ Invoice unpaid</p>
-                      )}
-
                       {job.proof_decision === 'approved' && (
                         <p className="text-xs text-green-600 font-medium mt-1">✓ Proof approved</p>
                       )}
@@ -161,7 +153,7 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                       )}
 
                       <div className="mt-2 flex flex-col gap-1">
-                        {nextStage && !blockedByPayment && (
+                        {nextStage && (
                           <button
                             type="button"
                             onClick={() => handleMoveStage(job.id, nextStage)}
@@ -169,11 +161,6 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                           >
                             Move to {STAGES.find((s) => s.id === nextStage)?.label}
                           </button>
-                        )}
-                        {blockedByPayment && (
-                          <div className="w-full text-xs px-2 py-1 rounded font-medium bg-gray-100 text-gray-400 border border-gray-200 text-center cursor-not-allowed">
-                            Locked — invoice not paid
-                          </div>
                         )}
                         {stage.id === 'proofing' &&
                           job.proof_decision === 'changes_requested' && (
