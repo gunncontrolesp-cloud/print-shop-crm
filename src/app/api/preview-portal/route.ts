@@ -50,12 +50,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error?.message ?? 'Failed to generate link' }, { status: 500 })
   }
 
-  // Pre-link auth_user_id so the portal works immediately
+  // Always set auth_user_id to the generated session user (overwrites any prior value)
   await serviceClient
     .from('customers')
     .update({ auth_user_id: data.user.id })
     .eq('id', customerId)
-    .is('auth_user_id', null)
 
   return NextResponse.redirect(data.properties.action_link)
 }
