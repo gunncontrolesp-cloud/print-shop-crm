@@ -69,6 +69,16 @@ export default async function CustomerDetailPage({
           )}
         </div>
         <div className="flex gap-2">
+          {isAdmin && customer.email && (
+            <a
+              href={`/api/preview-portal?customer_id=${id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: 'outline' })}
+            >
+              Preview Portal
+            </a>
+          )}
           <Link
             href={`/dashboard/customers/${id}/edit`}
             className={buttonVariants({ variant: 'outline' })}
