@@ -151,7 +151,7 @@ export default async function PortalOrderDetailPage({
                 {!job.proof_decision && approveProofAction && requestChangesAction && (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-600">
-                      Please review the proof files above and let us know your decision.
+                      Please review the proof files below and let us know your decision.
                     </p>
                     <div className="flex gap-3 flex-wrap">
                       <form action={approveProofAction}>
