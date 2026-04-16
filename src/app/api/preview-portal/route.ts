@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     type: 'magiclink',
     email: customer.email,
     options: {
-      redirectTo: `${origin}/portal/auth/callback`,
+      redirectTo: `${origin}/portal/auth/preview-callback`,
     },
   })
 
