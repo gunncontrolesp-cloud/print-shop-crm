@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -88,6 +89,11 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Please wait...' : 'Sign In'}
             </Button>
+            <div className="text-center">
+              <Link href="/auth/forgot-password" className="text-sm text-gray-500 hover:text-gray-900">
+                Forgot your password?
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

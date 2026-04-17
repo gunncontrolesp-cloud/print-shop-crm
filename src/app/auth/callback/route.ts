@@ -12,7 +12,11 @@ export async function GET(request: NextRequest) {
   }
 
   const isInvite = searchParams.get('invite') === '1'
-  if (isInvite || type === 'invite' || type === 'recovery') {
+  const isRecovery = searchParams.get('recovery') === '1' || type === 'recovery'
+  if (isRecovery) {
+    return NextResponse.redirect(`${origin}/auth/reset-password`)
+  }
+  if (isInvite || type === 'invite') {
     return NextResponse.redirect(`${origin}/auth/set-password`)
   }
 
