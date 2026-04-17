@@ -29,7 +29,7 @@ export default async function EditTimeEntryPage({
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') redirect('/dashboard/timeclock')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard/timeclock')
 
   const { data: entry } = await supabase
     .from('time_entries')

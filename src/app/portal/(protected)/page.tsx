@@ -2,8 +2,14 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import type { OrderStatus } from '@/lib/types'
+import { reorderJob } from '@/lib/actions/orders'
 
-export default async function PortalHomePage() {
+export default async function PortalHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ reordered?: string }>
+}) {
+  const { reordered } = await searchParams
   const supabase = await createClient()
   const {
     data: { user },
@@ -61,6 +67,12 @@ export default async function PortalHomePage() {
     <div>
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">Your Orders</h1>
 
+      {reordered === '1' && (
+        <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          Your reorder request has been submitted. We&apos;ll send you a new quote shortly.
+        </div>
+      )}
+
       {!orders?.length ? (
         <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
           <p className="text-sm text-gray-500">No orders yet.</p>
@@ -74,7 +86,7 @@ export default async function PortalHomePage() {
                 <th className="px-4 py-2.5 text-left font-medium text-gray-600">Status</th>
                 <th className="px-4 py-2.5 text-right font-medium text-gray-600">Total</th>
                 <th className="px-4 py-2.5 text-right font-medium text-gray-600">Date</th>
-                <th className="sr-only">View</th>
+                <th className="sr-only">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 bg-white">
@@ -93,12 +105,24 @@ export default async function PortalHomePage() {
                     {new Date(order.created_at).toLocaleDateString('en-US')}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      href={`/portal/orders/${order.id}`}
-                      className="text-xs text-blue-600 hover:underline"
-                    >
-                      View →
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      {['completed', 'delivered'].includes(order.status) && (
+                        <form action={reorderJob.bind(null, order.id)}>
+                          <button
+                            type="submit"
+                            className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                          >
+                            Reorder
+                          </button>
+                        </form>
+                      )}
+                      <Link
+                        href={`/portal/orders/${order.id}`}
+                        className="text-xs text-blue-600 hover:underline"
+                      >
+                        View →
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

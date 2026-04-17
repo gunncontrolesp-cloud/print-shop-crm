@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  if (type === 'invite' || type === 'recovery') {
+  const isInvite = searchParams.get('invite') === '1'
+  if (isInvite || type === 'invite' || type === 'recovery') {
     return NextResponse.redirect(`${origin}/auth/set-password`)
   }
 

@@ -10,7 +10,7 @@ async function requireAdmin() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/dashboard')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard')
 }
 
 export async function addProduct(formData: FormData): Promise<void> {

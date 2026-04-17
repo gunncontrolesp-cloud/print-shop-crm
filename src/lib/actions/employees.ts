@@ -23,6 +23,24 @@ async function requireAdmin() {
   return { user }
 }
 
+export async function requireElevated() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) throw new Error('Manager access required')
+
+  return { user, role: profile!.role as string }
+}
+
 export async function sendPasswordReset(formData: FormData): Promise<void> {
   const email = formData.get('email') as string
   if (!email) redirect('/dashboard/settings/employees?error=Missing+email')
@@ -47,7 +65,7 @@ export async function updateEmployee(formData: FormData): Promise<void> {
   const role = formData.get('role') as string | null
 
   if (!id) throw new Error('Missing employee ID')
-  if (role !== null && role !== 'admin' && role !== 'staff') throw new Error('Invalid role')
+  if (role !== null && !['admin', 'staff', 'manager'].includes(role)) throw new Error('Invalid role')
 
   const { user } = await requireAdmin()
 
@@ -108,7 +126,7 @@ export async function inviteEmployee(formData: FormData): Promise<void> {
       tenant_id: tenantId,
       role: 'staff',
     },
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?invite=1`,
   })
 
   if (error) {

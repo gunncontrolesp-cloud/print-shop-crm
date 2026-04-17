@@ -2,6 +2,24 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { FileText, Plus, ArrowRight } from 'lucide-react'
 
+function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
+  if (!expiresAt) return <span className="text-xs text-slate-400">—</span>
+  const now = Date.now()
+  const exp = new Date(expiresAt).getTime()
+  const sevenDays = 7 * 24 * 60 * 60 * 1000
+  if (exp < now) {
+    return <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-rose-200">Expired</span>
+  }
+  if (exp < now + sevenDays) {
+    return <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-200">Expires soon</span>
+  }
+  return (
+    <span className="text-xs text-slate-500">
+      {new Date(expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+    </span>
+  )
+}
+
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   draft:    { label: 'Draft',    className: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' },
   sent:     { label: 'Sent',     className: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200' },
@@ -14,7 +32,7 @@ export default async function QuotesPage() {
 
   const { data: quotes } = await supabase
     .from('quotes')
-    .select('id, status, subtotal, created_at, customers(name, business_name)')
+    .select('id, status, subtotal, created_at, expires_at, is_reorder, customers(name, business_name)')
     .order('created_at', { ascending: false })
 
   return (
@@ -56,6 +74,7 @@ export default async function QuotesPage() {
               <tr className="border-b border-slate-100">
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Expiry</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Subtotal</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
                 <th className="w-16" />
@@ -70,7 +89,14 @@ export default async function QuotesPage() {
                 return (
                   <tr key={quote.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3.5">
-                      <span className="font-medium text-slate-900">{customer?.name ?? '—'}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-slate-900">{customer?.name ?? '—'}</span>
+                        {quote.is_reorder && (
+                          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-200">
+                            Reorder
+                          </span>
+                        )}
+                      </div>
                       {customer?.business_name && (
                         <span className="block text-xs text-slate-400">{customer.business_name}</span>
                       )}
@@ -79,6 +105,9 @@ export default async function QuotesPage() {
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cfg.className}`}>
                         {cfg.label}
                       </span>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <ExpiryBadge expiresAt={quote.expires_at ?? null} />
                     </td>
                     <td className="px-5 py-3.5 text-right font-medium text-slate-900">
                       ${Number(quote.subtotal).toFixed(2)}

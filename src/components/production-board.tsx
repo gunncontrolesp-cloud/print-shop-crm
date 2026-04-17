@@ -153,6 +153,12 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                       )}
 
                       <div className="mt-2 flex flex-col gap-1">
+                        <a
+                          href={`/dashboard/jobs/${job.id}`}
+                          className="w-full text-xs px-2 py-1 rounded font-medium bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200 transition-colors text-center"
+                        >
+                          View / Print QR
+                        </a>
                         {nextStage && (
                           <button
                             type="button"

@@ -56,6 +56,7 @@ export default async function EditEmployeePage({
           <label className="text-sm font-medium text-gray-700">Role</label>
           <select name="role" defaultValue={employee.role} className={inputClass} disabled={isSelf}>
             <option value="staff">Staff</option>
+            <option value="manager">Manager</option>
             <option value="admin">Admin</option>
           </select>
           {isSelf && <p className="text-xs text-gray-400">You cannot change your own role.</p>}

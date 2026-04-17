@@ -26,7 +26,7 @@ export default async function AdminTimeClockPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/dashboard/timeclock')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard/timeclock')
 
   const { data: openEntries } = await supabase
     .from('time_entries')

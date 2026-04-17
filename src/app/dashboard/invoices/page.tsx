@@ -14,7 +14,7 @@ export default async function InvoicesPage() {
 
   const { data: invoices } = await supabase
     .from('invoices')
-    .select('id, amount, status, due_date, created_at, orders(id, customers(name, business_name))')
+    .select('id, amount, status, due_date, created_at, accounting_sync_status, orders(id, customers(name, business_name))')
     .order('created_at', { ascending: false })
 
   return (
@@ -50,6 +50,7 @@ export default async function InvoicesPage() {
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Due Date</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Created</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Sync</th>
                 <th className="w-16" />
               </tr>
             </thead>
@@ -84,6 +85,19 @@ export default async function InvoicesPage() {
                     </td>
                     <td className="px-5 py-3.5 text-slate-500 text-xs">
                       {new Date(inv.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      {inv.accounting_sync_status === 'synced' ? (
+                        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+                          Synced
+                        </span>
+                      ) : inv.accounting_sync_status === 'failed' ? (
+                        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-red-50 text-red-700 ring-1 ring-red-200">
+                          Failed
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-3.5 text-right">
                       <Link

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { sendPaymentLink, deleteInvoice } from '@/lib/actions/invoices'
 import { buttonVariants } from '@/components/ui/button-variants'
+import { ResyncButton } from './ResyncButton'
 import type { InvoiceStatus } from '@/lib/types'
 
 const statusBadge: Record<InvoiceStatus, string> = {
@@ -128,7 +129,33 @@ export default async function InvoiceDetailPage({
             </a>
           </div>
         )}
+        <div className="flex justify-between items-center px-4 py-3">
+          <span className="text-sm text-gray-500">Accounting Sync</span>
+          <div className="flex items-center gap-3">
+            {invoice.accounting_sync_status === 'synced' ? (
+              <span className="text-xs px-2 py-0.5 rounded font-medium bg-green-100 text-green-700">
+                Synced {invoice.accounting_synced_at
+                  ? new Date(invoice.accounting_synced_at).toLocaleDateString('en-US')
+                  : ''}
+              </span>
+            ) : invoice.accounting_sync_status === 'failed' ? (
+              <span className="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">
+                Failed
+              </span>
+            ) : (
+              <span className="text-xs px-2 py-0.5 rounded font-medium bg-gray-100 text-gray-500">
+                Pending
+              </span>
+            )}
+          </div>
+        </div>
       </div>
+
+      {isAdmin && (
+        <div className="mb-6">
+          <ResyncButton invoiceId={id} />
+        </div>
+      )}
 
       {/* Linked order */}
       {order && (

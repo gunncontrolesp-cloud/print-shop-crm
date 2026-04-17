@@ -36,6 +36,9 @@ export default async function PortalProtectedLayout({ children }: { children: Re
             <Link href="/portal/invoices" className="text-sm text-gray-600 hover:text-gray-900">
               Invoices
             </Link>
+            <Link href="/portal/assets" className="text-sm text-gray-600 hover:text-gray-900">
+              Assets
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

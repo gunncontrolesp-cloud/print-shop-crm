@@ -123,6 +123,34 @@ export async function notifyLowStock(
   })
 }
 
+export async function notifyReorder(
+  quoteId: string,
+  customerName: string,
+  customerEmail: string,
+  originalOrderId: string
+): Promise<void> {
+  await notifyN8n(process.env.N8N_WEBHOOK_REORDER, 'quote.reorder', {
+    quoteId,
+    customerName,
+    customerEmail,
+    originalOrderId,
+  })
+}
+
+export async function notifyQuoteReminder(
+  quoteId: string,
+  customerEmail: string,
+  customerName: string,
+  subtotal: number
+): Promise<void> {
+  await notifyN8n(process.env.N8N_WEBHOOK_QUOTE_REMINDER, 'quote.reminder', {
+    quoteId,
+    customerEmail,
+    customerName,
+    subtotal,
+  })
+}
+
 export async function notifyInvoicePaymentLink(
   invoiceId: string,
   customerEmail: string,

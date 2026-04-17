@@ -81,7 +81,7 @@ async function requireAdmin() {
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') throw new Error('Admin access required')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) throw new Error('Manager access required')
 
   return { supabase, user }
 }

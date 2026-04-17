@@ -4,7 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { deleteCustomer } from '@/lib/actions/customers'
 import { addCommEntry, deleteCommEntry } from '@/lib/actions/comm-log'
+import { toggleCustomerAsset, createPresignedDownloadUrl } from '@/lib/actions/files'
 import { DeleteCustomerButton } from './delete-button'
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 const TYPE_BADGE: Record<string, { label: string; classes: string }> = {
   note:  { label: 'Note',  classes: 'bg-gray-100 text-gray-600' },
@@ -33,6 +40,7 @@ export default async function CustomerDetailPage({
 
   const { data: { user } } = await supabase.auth.getUser()
   let isAdmin = false
+  let isElevated = false
   if (user) {
     const { data: profile } = await supabase
       .from('users')
@@ -40,7 +48,51 @@ export default async function CustomerDetailPage({
       .eq('id', user.id)
       .single()
     isAdmin = profile?.role === 'admin'
+    isElevated = ['admin', 'manager'].includes(profile?.role ?? '')
   }
+
+  // Fetch all files for this customer across all orders
+  const { data: customerOrders } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('customer_id', id)
+
+  const orderIds = (customerOrders ?? []).map((o: { id: string }) => o.id)
+
+  type CustomerFile = {
+    id: string
+    name: string
+    content_type: string
+    size_bytes: number
+    created_at: string
+    is_customer_asset: boolean
+    order_id: string
+    downloadUrl: string | null
+  }
+
+  let allFiles: CustomerFile[] = []
+  if (orderIds.length > 0) {
+    const { data: rawFiles } = await supabase
+      .from('files')
+      .select('id, name, content_type, size_bytes, created_at, is_customer_asset, order_id')
+      .in('order_id', orderIds)
+      .order('is_customer_asset', { ascending: false })
+      .order('created_at', { ascending: false })
+
+    allFiles = await Promise.all(
+      (rawFiles ?? []).map(async (file) => {
+        try {
+          const url = await createPresignedDownloadUrl(file.id)
+          return { ...file, downloadUrl: url }
+        } catch {
+          return { ...file, downloadUrl: null }
+        }
+      })
+    )
+  }
+
+  const artworkFiles = allFiles.filter((f) => f.is_customer_asset)
+  const otherFiles = allFiles.filter((f) => !f.is_customer_asset)
 
   const { data: commLog } = await supabase
     .from('customer_comm_log')
@@ -124,6 +176,85 @@ export default async function CustomerDetailPage({
           <pre className="text-sm text-gray-900 overflow-auto">
             {JSON.stringify(customer.preferences, null, 2)}
           </pre>
+        </div>
+      )}
+
+      {/* Digital Assets */}
+      {allFiles.length > 0 && (
+        <div className="mt-8 max-w-2xl">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+            Customer Assets
+          </h2>
+
+          {artworkFiles.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs text-gray-500 mb-2">Artwork</p>
+              <div className="rounded-lg border border-emerald-200 overflow-hidden">
+                {artworkFiles.map((file) => (
+                  <div key={file.id} className="flex items-center justify-between px-4 py-3 bg-emerald-50 border-b border-emerald-100 last:border-0">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">{file.name}</p>
+                      <p className="text-xs text-gray-400">
+                        {formatBytes(file.size_bytes)} ·{' '}
+                        <Link href={`/dashboard/orders/${file.order_id}`} className="hover:underline">
+                          Order #{file.order_id.slice(0, 8).toUpperCase()}
+                        </Link>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {file.downloadUrl && (
+                        <a href={file.downloadUrl} className="text-xs font-medium text-blue-600 hover:underline">
+                          Download
+                        </a>
+                      )}
+                      {isElevated && (
+                        <form action={toggleCustomerAsset.bind(null, file.id, false)}>
+                          <button type="submit" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+                            Unmark
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {otherFiles.length > 0 && (
+            <div>
+              <p className="text-xs text-gray-500 mb-2">All Files</p>
+              <div className="rounded-lg border border-gray-200 overflow-hidden">
+                {otherFiles.map((file) => (
+                  <div key={file.id} className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 last:border-0">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">{file.name}</p>
+                      <p className="text-xs text-gray-400">
+                        {formatBytes(file.size_bytes)} ·{' '}
+                        <Link href={`/dashboard/orders/${file.order_id}`} className="hover:underline">
+                          Order #{file.order_id.slice(0, 8).toUpperCase()}
+                        </Link>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {file.downloadUrl && (
+                        <a href={file.downloadUrl} className="text-xs font-medium text-blue-600 hover:underline">
+                          Download
+                        </a>
+                      )}
+                      {isElevated && (
+                        <form action={toggleCustomerAsset.bind(null, file.id, true)}>
+                          <button type="submit" className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                            Mark as Asset
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

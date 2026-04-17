@@ -6,9 +6,8 @@ Six-phase journey from a single-tenant print shop tool to a nationally-sold SaaS
 
 ## Current Milestone
 
-**v0.1 Foundation** (v0.1.0)
-Status: **Complete** ✓
-Phases: 6 of 6 complete
+**v0.2 Growth Features** — In Progress
+Status: Phase 07 next (Manager Role)
 
 ## Phases
 
@@ -16,10 +15,18 @@ Phases: 6 of 6 complete
 |-------|------|-------|--------|-----------|
 | 1 | Foundation — Customers, Quotes, Orders | 5 | **Complete** | 01-01 ✓ 01-02 ✓ 01-03 ✓ 01-04 ✓ 01-05 ✓ |
 | 2 | Production + Files + Notifications | 3 | **Complete** | 02-01 ✓ 02-02 ✓ 02-03 ✓ |
+| 2.1 | Employee Timecards | 3 | **Complete** | 02.1-01 ✓ 02.1-02 ✓ 02.1-03 ✓ |
+| 2.2 | Employee Management | 1 | **Complete** | 02.2-01 ✓ |
 | 3 | Invoicing + Payments | 3 | **Complete** | 03-01 ✓ 03-02 ✓ 03-03 ✓ |
 | 4 | Customer Portal | 4 | **Complete** | 04-01 ✓ 04-02 ✓ 04-03 ✓ 04-04 ✓ |
 | 5 | Analytics + Inventory | 2 | **Complete** | 05-01 ✓ 05-02 ✓ |
 | 6 | SaaS / Multi-Tenant | 3 | **Complete** | 06-01 ✓ 06-02 ✓ 06-03 ✓ |
+| **7** | **Manager Role** | 1 | **Complete** | 07-01 ✓ |
+| **8** | **Quote Reminders + Expiry** | 2 | **Complete** | 08-01 ✓ 08-02 ✓ |
+| **9** | **Digital Asset Management** | 2 | **Complete** | 09-01 ✓ 09-02 ✓ |
+| **10** | **One-Click Reorder** | 1 | **Complete** | 10-01 ✓ |
+| **11** | **QR Scanning (Shop Floor)** | 1 | **Complete** | 11-01 ✓ |
+| **12** | **QuickBooks / Xero Integration** | 2 | **Complete** | 12-01 ✓ 12-02 ✓ |
 
 ## Phase Details
 
@@ -154,6 +161,105 @@ Phases: 6 of 6 complete
 - [x] 06-01: Multi-tenant data isolation + RLS
 - [x] 06-02: Onboarding flow
 - [x] 06-03: Stripe subscription billing + tier gates
+
+---
+
+### Phase 7: Manager Role
+
+**Goal:** Add manager tier with elevated access to production, timecards, and customers — without billing or employee management access
+**Depends on:** Phase 2.2 (employee management must exist)
+
+**Scope:**
+- `manager` added to public.user_role enum
+- Route guards updated across all affected pages and actions
+- Admin can assign/revoke manager role via employee edit page
+- Nav shows correct items per role
+
+**Plans:**
+- [ ] 07-01: Manager role — DB migration + route guards + nav
+
+---
+
+### Phase 8: Quote Reminders + Expiry
+
+**Goal:** Quotes have expiry dates; admins can send follow-up reminder emails to customers
+**Depends on:** Phase 7
+
+**Scope:**
+- `expires_at` column on quotes; default 30 days
+- Expiry badge on quote list and detail; extend expiry form
+- Portal blocks approval on expired quotes
+- Manual "Send Reminder" button on sent quotes → n8n webhook
+- 48h reminder cooldown tracked via `reminder_sent_at`
+
+**Plans:**
+- [ ] 08-01: Quote expiry — migration + UI + portal enforcement
+- [ ] 08-02: Quote reminders — send reminder action + n8n hook
+
+---
+
+### Phase 9: Digital Asset Management
+
+**Goal:** Customer artwork is stored and accessible across all their jobs — never lost, always ready for reorder
+**Depends on:** Phase 8
+
+**Scope:**
+- `is_customer_asset` flag on files table
+- Admin customer detail: Assets tab aggregating all customer files; mark/unmark artwork
+- Customer portal: Assets tab showing marked files with downloads
+
+**Plans:**
+- [ ] 09-01: Customer files view + asset tagging (admin)
+- [ ] 09-02: Portal assets tab (customer-facing)
+
+---
+
+### Phase 10: One-Click Reorder
+
+**Goal:** Customers reorder past jobs with one click from the portal — specs pre-filled, artwork ready
+**Depends on:** Phase 9 (asset files must be linkable)
+
+**Scope:**
+- Reorder button on completed portal orders
+- Server action duplicates line items JSONB, links customer asset files
+- New quote created in pending state; admin notified via n8n
+- Reorder badge in admin quote list
+
+**Plans:**
+- [ ] 10-01: Reorder action + portal button + admin notification
+
+---
+
+### Phase 11: QR Scanning (Shop Floor)
+
+**Goal:** Staff scan job tickets with phone to advance production stage — no desk trips
+**Depends on:** Phase 10
+
+**Scope:**
+- QR code generated per job (encodes /scan/[jobId])
+- Displayed on job detail page for printing
+- /scan/[jobId] route: staff-authenticated, mobile-optimized
+- Advance Stage button updates job stage in real time
+
+**Plans:**
+- [ ] 11-01: QR generation + scan route + mobile UI
+
+---
+
+### Phase 12: QuickBooks / Xero Integration
+
+**Goal:** Invoice data syncs to accounting software via n8n — eliminates manual re-entry
+**Depends on:** Phase 11
+**Architecture:** CRM fires webhooks → n8n handles QB/Xero API; no direct OAuth in this app
+
+**Scope:**
+- Accounting Settings page: webhook URL + enabled toggle + test connection
+- Webhook fires on invoice create and payment recorded
+- Sync status tracked per invoice; manual resync available
+
+**Plans:**
+- [ ] 12-01: Accounting settings page + webhook infrastructure
+- [ ] 12-02: Invoice + payment sync with status tracking
 
 ---
 *Roadmap created: 2026-03-26*

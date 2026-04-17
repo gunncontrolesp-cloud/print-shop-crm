@@ -44,7 +44,7 @@ export default async function TimeClockReportsPage({
     .eq('id', user.id)
     .single()
 
-  if (profile?.role !== 'admin') redirect('/dashboard/timeclock')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard/timeclock')
 
   const params = await searchParams
   const fromParam = params.from

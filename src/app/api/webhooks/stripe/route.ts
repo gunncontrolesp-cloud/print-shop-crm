@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyInvoicePaid } from '@/lib/n8n'
+import { fireAccountingWebhook } from '@/lib/accounting'
 
 function planTierFromPriceId(priceId: string): string {
   if (priceId === process.env.STRIPE_PRICE_PREMIUM_ID) return 'premium'
@@ -112,6 +113,29 @@ export async function POST(request: Request) {
         : typedOrder?.customers
 
       await notifyInvoicePaid(invoice.id, customer?.email ?? '', customer?.name ?? '')
+
+      // Fire accounting webhook if configured for this tenant
+      const { data: invoiceRow } = await supabase
+        .from('invoices')
+        .select('tenant_id, amount')
+        .eq('id', invoice.id)
+        .single()
+      if (invoiceRow?.tenant_id) {
+        const syncStatus = await fireAccountingWebhook(invoiceRow.tenant_id, 'invoice.paid', {
+          invoiceId: invoice.id,
+          orderId: invoice.order_id,
+          amount: Number(invoiceRow.amount),
+          customerName: customer?.name ?? '',
+          customerEmail: customer?.email ?? '',
+        })
+        await supabase
+          .from('invoices')
+          .update({
+            accounting_sync_status: syncStatus,
+            accounting_synced_at: syncStatus === 'synced' ? new Date().toISOString() : null,
+          })
+          .eq('id', invoice.id)
+      }
 
       revalidatePath('/dashboard/invoices/' + invoice.id)
       revalidatePath('/dashboard/orders/' + invoice.order_id)

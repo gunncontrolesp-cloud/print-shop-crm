@@ -18,6 +18,7 @@ import {
   UserCog,
   Monitor,
   Settings,
+  BookOpen,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -27,6 +28,7 @@ type NavItem = {
   icon: LucideIcon
   exact?: boolean
   adminOnly?: boolean
+  strictAdminOnly?: boolean
 }
 
 const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
@@ -58,9 +60,10 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
     items: [
       { label: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp, adminOnly: true },
       { label: 'Product Catalog', href: '/dashboard/settings/catalog', icon: Package, adminOnly: true },
-      { label: 'Employees', href: '/dashboard/settings/employees', icon: UserCog, adminOnly: true },
+      { label: 'Employees', href: '/dashboard/settings/employees', icon: UserCog, strictAdminOnly: true },
       { label: 'Kiosk Staff', href: '/dashboard/settings/staff', icon: Monitor, adminOnly: true },
-      { label: 'Settings', href: '/dashboard/settings/pricing', icon: Settings, adminOnly: true },
+      { label: 'Settings', href: '/dashboard/settings/pricing', icon: Settings, strictAdminOnly: true },
+      { label: 'Accounting', href: '/dashboard/settings/accounting', icon: BookOpen, strictAdminOnly: true },
     ],
   },
 ]
@@ -68,11 +71,14 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
 export function NavSidebar({ role }: { role: string }) {
   const pathname = usePathname()
   const isAdmin = role === 'admin'
+  const isElevated = ['admin', 'manager'].includes(role)
 
   return (
     <nav className="space-y-5">
       {NAV_GROUPS.map((group, gi) => {
-        const visibleItems = group.items.filter((item) => !item.adminOnly || isAdmin)
+        const visibleItems = group.items.filter(
+          (item) => (!item.adminOnly || isElevated) && (!item.strictAdminOnly || isAdmin)
+        )
         if (visibleItems.length === 0) return null
 
         return (

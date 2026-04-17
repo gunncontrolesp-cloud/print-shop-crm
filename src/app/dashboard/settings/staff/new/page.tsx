@@ -14,7 +14,7 @@ export default async function NewStaffProfilePage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/dashboard')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard')
 
   const inputClass =
     'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring'

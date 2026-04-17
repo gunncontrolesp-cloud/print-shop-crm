@@ -10,7 +10,7 @@ async function requireAdmin() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') throw new Error('Admin access required')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) throw new Error('Manager access required')
 }
 
 function hashPin(pin: string): string {

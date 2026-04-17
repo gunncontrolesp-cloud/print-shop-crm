@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { updateQuoteStatus, deleteQuote } from '@/lib/actions/quotes'
+import { updateQuoteStatus, deleteQuote, updateQuoteExpiryAction, sendQuoteReminder } from '@/lib/actions/quotes'
 import type { LineItem } from '@/lib/types'
 import { convertQuoteToOrder } from '@/lib/actions/orders'
 import { buttonVariants } from '@/components/ui/button-variants'
@@ -27,12 +27,14 @@ export default async function QuoteDetailPage({
     .eq('id', id)
     .single()
 
+
   if (!quote) notFound()
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
   let isAdmin = false
+  let isElevated = false
   if (user) {
     const { data: profile } = await supabase
       .from('users')
@@ -40,6 +42,7 @@ export default async function QuoteDetailPage({
       .eq('id', user.id)
       .single()
     isAdmin = profile?.role === 'admin'
+    isElevated = ['admin', 'manager'].includes(profile?.role ?? '')
   }
 
   const lineItems = (quote.line_items ?? []) as LineItem[]
@@ -50,6 +53,12 @@ export default async function QuoteDetailPage({
   const rejectAction = updateQuoteStatus.bind(null, id, 'rejected')
   const deleteAction = deleteQuote.bind(null, id)
   const convertAction = convertQuoteToOrder.bind(null, id)
+  const sendReminderAction = sendQuoteReminder.bind(null, id)
+
+  const reminderSentAt = quote.reminder_sent_at ? new Date(quote.reminder_sent_at as string) : null
+  const hoursSinceReminder = reminderSentAt ? (Date.now() - reminderSentAt.getTime()) / 3600000 : null
+  const canRemind = ['pending', 'sent'].includes(quote.status) && (hoursSinceReminder === null || hoursSinceReminder >= 48)
+  const reminderCoolingDown = ['pending', 'sent'].includes(quote.status) && hoursSinceReminder !== null && hoursSinceReminder < 48
 
   return (
     <div className="p-8 max-w-4xl">
@@ -62,7 +71,7 @@ export default async function QuoteDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-semibold text-gray-900">
               {customer?.name ?? 'Unknown Customer'}
             </h1>
@@ -71,6 +80,14 @@ export default async function QuoteDetailPage({
             >
               {quote.status}
             </span>
+            {quote.expires_at && (() => {
+              const now = Date.now()
+              const exp = new Date(quote.expires_at).getTime()
+              const sevenDays = 7 * 24 * 60 * 60 * 1000
+              if (exp < now) return <span className="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-600">Expired</span>
+              if (exp < now + sevenDays) return <span className="text-xs px-2 py-0.5 rounded font-medium bg-amber-100 text-amber-700">Expires soon</span>
+              return <span className="text-xs px-2 py-0.5 rounded font-medium bg-gray-100 text-gray-500">Expires {new Date(quote.expires_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            })()}
           </div>
           {customer?.business_name && (
             <p className="text-gray-500 mt-0.5 text-sm">{customer.business_name}</p>
@@ -116,6 +133,21 @@ export default async function QuoteDetailPage({
                 </button>
               </form>
             </>
+          )}
+          {isElevated && canRemind && (
+            <form action={sendReminderAction}>
+              <button
+                type="submit"
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                Send Reminder
+              </button>
+            </form>
+          )}
+          {isElevated && reminderCoolingDown && (
+            <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-400 border border-gray-200 rounded-md">
+              Sent {Math.floor(hoursSinceReminder!)}h ago
+            </span>
           )}
           {isAdmin && (
             <form action={deleteAction}>
@@ -193,6 +225,28 @@ export default async function QuoteDetailPage({
         <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 mb-6">
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Notes</p>
           <p className="text-sm text-gray-900 whitespace-pre-wrap">{quote.notes}</p>
+        </div>
+      )}
+
+      {/* Extend expiry — elevated only */}
+      {isElevated && quote.status !== 'approved' && quote.status !== 'rejected' && (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 mb-6">
+          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Expiry Date</p>
+          <form action={updateQuoteExpiryAction} className="flex items-center gap-3">
+            <input type="hidden" name="id" value={id} />
+            <input
+              type="date"
+              name="expires_at"
+              defaultValue={quote.expires_at ? new Date(quote.expires_at).toISOString().slice(0, 10) : ''}
+              className="rounded border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400"
+            />
+            <button
+              type="submit"
+              className="px-3 py-1.5 text-xs font-medium text-white bg-gray-800 rounded hover:bg-gray-700 transition-colors"
+            >
+              Save
+            </button>
+          </form>
         </div>
       )}
 

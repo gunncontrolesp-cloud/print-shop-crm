@@ -111,6 +111,30 @@ export async function createPresignedDownloadUrl(fileId: string): Promise<string
   return data.signedUrl
 }
 
+export async function toggleCustomerAsset(fileId: string, isAsset: boolean) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) throw new Error('Manager access required')
+
+  const { error } = await supabase
+    .from('files')
+    .update({ is_customer_asset: isAsset })
+    .eq('id', fileId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/dashboard/customers')
+}
+
 export async function deleteFile(fileId: string) {
   const supabase = await createClient()
 

@@ -52,7 +52,8 @@ export default function LoginPage() {
     if (error) {
       setError(error.message)
     } else {
-      router.push('/dashboard')
+      const next = new URLSearchParams(window.location.search).get('next')
+      router.push(next ?? '/dashboard')
     }
 
     setLoading(false)
