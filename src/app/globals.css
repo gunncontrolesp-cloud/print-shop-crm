@@ -128,3 +128,48 @@
     @apply font-sans;
   }
 }
+
+/* Dark mode overrides for raw Tailwind color classes used throughout the app */
+.dark .bg-white { background-color: oklch(0.205 0 0) !important; }
+.dark .bg-gray-50,
+.dark .bg-slate-50,
+.dark .bg-zinc-50 { background-color: oklch(0.17 0 0) !important; }
+.dark .bg-gray-100,
+.dark .bg-slate-100 { background-color: oklch(0.245 0 0) !important; }
+.dark .bg-gray-200,
+.dark .bg-slate-200 { background-color: oklch(0.29 0 0) !important; }
+
+.dark .text-gray-900,
+.dark .text-slate-900 { color: oklch(0.97 0 0) !important; }
+.dark .text-gray-700,
+.dark .text-slate-700 { color: oklch(0.87 0 0) !important; }
+.dark .text-gray-600,
+.dark .text-slate-600 { color: oklch(0.75 0 0) !important; }
+.dark .text-gray-500,
+.dark .text-slate-500 { color: oklch(0.63 0 0) !important; }
+.dark .text-gray-400,
+.dark .text-slate-400 { color: oklch(0.52 0 0) !important; }
+
+.dark .border-gray-100,
+.dark .border-slate-100 { border-color: oklch(1 0 0 / 8%) !important; }
+.dark .border-gray-200,
+.dark .border-slate-200 { border-color: oklch(1 0 0 / 12%) !important; }
+.dark .border-gray-300,
+.dark .border-slate-300 { border-color: oklch(1 0 0 / 18%) !important; }
+
+.dark .divide-gray-100 > * + * { border-color: oklch(1 0 0 / 8%) !important; }
+.dark .divide-gray-200 > * + * { border-color: oklch(1 0 0 / 12%) !important; }
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: oklch(0.245 0 0) !important;
+  color: oklch(0.97 0 0) !important;
+  border-color: oklch(1 0 0 / 18%) !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder { color: oklch(0.52 0 0) !important; }
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-gray-50:hover { background-color: oklch(0.245 0 0) !important; }
+.dark .hover\:bg-gray-100:hover { background-color: oklch(0.27 0 0) !important; }

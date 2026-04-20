@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { NavSidebar } from '@/components/nav-sidebar'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { LogOut, PrinterIcon } from 'lucide-react'
 
 export default async function DashboardLayout({
@@ -68,6 +69,7 @@ export default async function DashboardLayout({
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-slate-200 truncate">{displayName}</p>
             </div>
+            <ThemeToggle />
             <form action={signOut}>
               <button
                 type="submit"
