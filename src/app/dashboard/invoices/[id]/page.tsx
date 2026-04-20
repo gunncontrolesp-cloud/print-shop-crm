@@ -5,6 +5,7 @@ import { sendPaymentLink, deleteInvoice } from '@/lib/actions/invoices'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { ResyncButton } from './ResyncButton'
 import type { InvoiceStatus } from '@/lib/types'
+import { Printer } from 'lucide-react'
 
 const statusBadge: Record<InvoiceStatus, string> = {
   draft: 'bg-gray-100 text-gray-600',
@@ -75,6 +76,14 @@ export default async function InvoiceDetailPage({
         </div>
 
         <div className="flex gap-2">
+          <Link
+            href={`/print/invoice/${id}`}
+            target="_blank"
+            className={buttonVariants({ variant: 'outline' })}
+          >
+            <Printer className="h-4 w-4 mr-1.5" />
+            Print Invoice
+          </Link>
           {isAdmin && (currentStatus === 'draft' || currentStatus === 'sent') && (
             <form action={sendPaymentLinkAction}>
               <button type="submit" className={buttonVariants()}>
