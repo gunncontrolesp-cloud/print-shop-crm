@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { FileText, Plus, ArrowRight } from 'lucide-react'
+import { SearchInput } from '@/components/search-input'
 
 function ExpiryBadge({ expiresAt }: { expiresAt: string | null }) {
   if (!expiresAt) return <span className="text-xs text-slate-400">—</span>
@@ -27,7 +29,12 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   rejected: { label: 'Rejected', className: 'bg-rose-50 text-rose-700 ring-1 ring-rose-200' },
 }
 
-export default async function QuotesPage() {
+export default async function QuotesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q = '' } = await searchParams
   const supabase = await createClient()
 
   const { data: quotes } = await supabase
@@ -35,36 +42,61 @@ export default async function QuotesPage() {
     .select('id, status, subtotal, created_at, expires_at, is_reorder, customers(name, business_name)')
     .order('created_at', { ascending: false })
 
+  const ql = q.toLowerCase()
+  const filtered = (quotes ?? []).filter((quote) => {
+    if (!ql) return true
+    const customer = Array.isArray(quote.customers) ? quote.customers[0] : quote.customers
+    return (
+      customer?.name?.toLowerCase().includes(ql) ||
+      customer?.business_name?.toLowerCase().includes(ql) ||
+      quote.id.toLowerCase().includes(ql) ||
+      quote.status.toLowerCase().includes(ql)
+    )
+  })
+
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Quotes</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{quotes?.length ?? 0} total</p>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {filtered.length} {ql ? 'results' : 'total'}
+          </p>
         </div>
-        <Link
-          href="/dashboard/quotes/new"
-          className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
-        >
-          <Plus className="h-3.5 w-3.5" /> New Quote
-        </Link>
+        <div className="flex items-center gap-3">
+          <Suspense fallback={<div className="w-64 h-9 bg-slate-100 rounded-lg animate-pulse" />}>
+            <SearchInput placeholder="Search by customer or status…" />
+          </Suspense>
+          <Link
+            href="/dashboard/quotes/new"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+          >
+            <Plus className="h-3.5 w-3.5" /> New Quote
+          </Link>
+        </div>
       </div>
 
-      {!quotes || quotes.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-col items-center py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
               <FileText className="h-6 w-6 text-slate-400" />
             </div>
-            <p className="text-sm font-medium text-slate-700 mb-1">No quotes yet</p>
-            <p className="text-sm text-slate-400 mb-4">Create a quote to start the sales process</p>
-            <Link
-              href="/dashboard/quotes/new"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" /> New Quote
-            </Link>
+            <p className="text-sm font-medium text-slate-700 mb-1">
+              {ql ? 'No quotes match your search' : 'No quotes yet'}
+            </p>
+            <p className="text-sm text-slate-400 mb-4">
+              {ql ? 'Try a different search term.' : 'Create a quote to start the sales process'}
+            </p>
+            {!ql && (
+              <Link
+                href="/dashboard/quotes/new"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" /> New Quote
+              </Link>
+            )}
           </div>
         </div>
       ) : (
@@ -81,7 +113,7 @@ export default async function QuotesPage() {
               </tr>
             </thead>
             <tbody>
-              {quotes.map((quote) => {
+              {filtered.map((quote) => {
                 const customer = (
                   Array.isArray(quote.customers) ? quote.customers[0] : quote.customers
                 ) as { name: string; business_name: string | null } | null

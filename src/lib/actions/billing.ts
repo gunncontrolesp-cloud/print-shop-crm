@@ -2,6 +2,7 @@
 
 import Stripe from 'stripe'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getTenantId } from '@/lib/tenant'
 
@@ -65,6 +66,47 @@ export async function createSubscriptionCheckout() {
 
   if (!session.url) throw new Error('Failed to create checkout session')
   redirect(session.url)
+}
+
+export async function changePlan(newTier: string) {
+  if (!['starter', 'pro', 'premium'].includes(newTier)) throw new Error('Invalid plan')
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'admin') throw new Error('Not authorized')
+
+  const tenantId = await getTenantId()
+  const service = createServiceClient()
+
+  const { data: tenant } = await service
+    .from('tenants')
+    .select('plan_tier, stripe_customer_id, stripe_subscription_id')
+    .eq('id', tenantId)
+    .single()
+
+  if (!tenant) throw new Error('Tenant not found')
+  if (tenant.plan_tier === newTier) return
+  if (!tenant.stripe_subscription_id) throw new Error('No active subscription found')
+
+  const newPriceId = PRICE_IDS[newTier]
+  if (!newPriceId) throw new Error(`No price configured for tier: ${newTier}`)
+
+  const stripe = getStripe()
+  const subscription = await stripe.subscriptions.retrieve(tenant.stripe_subscription_id)
+  const itemId = subscription.items.data[0]?.id
+  if (!itemId) throw new Error('Subscription item not found')
+
+  await stripe.subscriptions.update(tenant.stripe_subscription_id, {
+    items: [{ id: itemId, price: newPriceId }],
+    proration_behavior: 'create_prorations',
+  })
+
+  // Optimistically update DB — webhook will confirm shortly after
+  await service.from('tenants').update({ plan_tier: newTier }).eq('id', tenantId)
+  revalidatePath('/dashboard/settings/billing')
 }
 
 export async function createBillingPortalSession() {

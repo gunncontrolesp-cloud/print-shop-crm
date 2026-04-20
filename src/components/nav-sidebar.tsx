@@ -19,6 +19,7 @@ import {
   Monitor,
   Settings,
   BookOpen,
+  CreditCard,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -64,6 +65,7 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       { label: 'Kiosk Staff', href: '/dashboard/settings/staff', icon: Monitor, adminOnly: true },
       { label: 'Settings', href: '/dashboard/settings/pricing', icon: Settings, strictAdminOnly: true },
       { label: 'Accounting', href: '/dashboard/settings/accounting', icon: BookOpen, strictAdminOnly: true },
+      { label: 'Billing', href: '/dashboard/settings/billing', icon: CreditCard, strictAdminOnly: true },
     ],
   },
 ]

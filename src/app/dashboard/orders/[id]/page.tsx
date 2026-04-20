@@ -64,6 +64,7 @@ export default async function OrderDetailPage({
     data: { user },
   } = await supabase.auth.getUser()
   let isAdmin = false
+  let isElevated = false
   if (user) {
     const { data: profile } = await supabase
       .from('users')
@@ -71,6 +72,7 @@ export default async function OrderDetailPage({
       .eq('id', user.id)
       .single()
     isAdmin = profile?.role === 'admin'
+    isElevated = ['admin', 'manager'].includes(profile?.role ?? '')
   }
 
   const currentStatus = order.status as OrderStatus
@@ -112,7 +114,7 @@ export default async function OrderDetailPage({
 
   const canAdvance =
     nextStatus !== null &&
-    (nextStatus !== 'approved' || isAdmin)
+    (nextStatus !== 'approved' || isElevated)
 
   return (
     <div className="p-8 max-w-4xl">

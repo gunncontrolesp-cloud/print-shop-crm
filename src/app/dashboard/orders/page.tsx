@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { ShoppingCart, ArrowRight } from 'lucide-react'
+import { SearchInput } from '@/components/search-input'
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   pending:  { label: 'Pending',   className: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200' },
@@ -11,7 +13,12 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   delivered:{ label: 'Delivered', className: 'bg-teal-50 text-teal-700 ring-1 ring-teal-200' },
 }
 
-export default async function OrdersPage() {
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q = '' } = await searchParams
   const supabase = await createClient()
 
   const { data: orders } = await supabase
@@ -20,26 +27,47 @@ export default async function OrdersPage() {
     .is('archived_at', null)
     .order('created_at', { ascending: false })
 
+  const ql = q.toLowerCase()
+  const filtered = (orders ?? []).filter((order) => {
+    if (!ql) return true
+    const customer = Array.isArray(order.customers) ? order.customers[0] : order.customers
+    return (
+      customer?.name?.toLowerCase().includes(ql) ||
+      customer?.business_name?.toLowerCase().includes(ql) ||
+      order.id.toLowerCase().includes(ql) ||
+      order.status.toLowerCase().includes(ql)
+    )
+  })
+
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{orders?.length ?? 0} active orders</p>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {filtered.length} {ql ? 'results' : 'active orders'}
+          </p>
         </div>
+        <Suspense fallback={<div className="w-64 h-9 bg-slate-100 rounded-lg animate-pulse" />}>
+          <SearchInput placeholder="Search by customer or status…" />
+        </Suspense>
       </div>
 
-      {!orders || orders.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-col items-center py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
               <ShoppingCart className="h-6 w-6 text-slate-400" />
             </div>
-            <p className="text-sm font-medium text-slate-700 mb-1">No orders yet</p>
+            <p className="text-sm font-medium text-slate-700 mb-1">
+              {ql ? 'No orders match your search' : 'No orders yet'}
+            </p>
             <p className="text-sm text-slate-400">
-              Orders are created by converting an{' '}
-              <Link href="/dashboard/quotes" className="text-indigo-600 hover:underline">approved quote</Link>.
+              {ql ? 'Try a different search term.' : (
+                <>Orders are created by converting an{' '}
+                <Link href="/dashboard/quotes" className="text-indigo-600 hover:underline">approved quote</Link>.</>
+              )}
             </p>
           </div>
         </div>
@@ -57,7 +85,7 @@ export default async function OrdersPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => {
+              {filtered.map((order) => {
                 const customer = (
                   Array.isArray(order.customers) ? order.customers[0] : order.customers
                 ) as { name: string; business_name: string | null } | null

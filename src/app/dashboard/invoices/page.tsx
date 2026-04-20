@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { Receipt, ArrowRight } from 'lucide-react'
 import type { InvoiceStatus } from '@/lib/types'
+import { SearchInput } from '@/components/search-input'
 
 const STATUS_CONFIG: Record<InvoiceStatus, { label: string; className: string }> = {
   draft: { label: 'Draft', className: 'bg-slate-100 text-slate-600 ring-1 ring-slate-200' },
@@ -9,7 +11,12 @@ const STATUS_CONFIG: Record<InvoiceStatus, { label: string; className: string }>
   paid:  { label: 'Paid',  className: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
 }
 
-export default async function InvoicesPage() {
+export default async function InvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q = '' } = await searchParams
   const supabase = await createClient()
 
   const { data: invoices } = await supabase
@@ -17,25 +24,45 @@ export default async function InvoicesPage() {
     .select('id, amount, status, due_date, created_at, accounting_sync_status, orders(id, customers(name, business_name))')
     .order('created_at', { ascending: false })
 
+  const ql = q.toLowerCase()
+  const filtered = (invoices ?? []).filter((inv) => {
+    if (!ql) return true
+    const order = Array.isArray(inv.orders) ? inv.orders[0] : inv.orders
+    const customer = Array.isArray(order?.customers) ? order.customers[0] : order?.customers
+    return (
+      customer?.name?.toLowerCase().includes(ql) ||
+      customer?.business_name?.toLowerCase().includes(ql) ||
+      inv.id.toLowerCase().includes(ql) ||
+      inv.status.toLowerCase().includes(ql)
+    )
+  })
+
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Invoices</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{invoices?.length ?? 0} total</p>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {filtered.length} {ql ? 'results' : 'total'}
+          </p>
         </div>
+        <Suspense fallback={<div className="w-64 h-9 bg-slate-100 rounded-lg animate-pulse" />}>
+          <SearchInput placeholder="Search by customer or status…" />
+        </Suspense>
       </div>
 
-      {!invoices || invoices.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-col items-center py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
               <Receipt className="h-6 w-6 text-slate-400" />
             </div>
-            <p className="text-sm font-medium text-slate-700 mb-1">No invoices yet</p>
+            <p className="text-sm font-medium text-slate-700 mb-1">
+              {ql ? 'No invoices match your search' : 'No invoices yet'}
+            </p>
             <p className="text-sm text-slate-400">
-              Invoices are generated from completed orders.
+              {ql ? 'Try a different search term.' : 'Invoices are generated from completed orders.'}
             </p>
           </div>
         </div>
@@ -55,7 +82,7 @@ export default async function InvoicesPage() {
               </tr>
             </thead>
             <tbody>
-              {invoices.map((inv) => {
+              {filtered.map((inv) => {
                 const order = Array.isArray(inv.orders) ? inv.orders[0] : inv.orders
                 const customer = Array.isArray(order?.customers) ? order.customers[0] : order?.customers
                 const cfg = STATUS_CONFIG[inv.status as InvoiceStatus] ?? { label: inv.status, className: 'bg-slate-100 text-slate-600' }

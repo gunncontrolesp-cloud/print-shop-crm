@@ -114,7 +114,7 @@ export default async function QuoteDetailPage({
               </button>
             </form>
           )}
-          {quote.status === 'sent' && isAdmin && (
+          {quote.status === 'sent' && isElevated && (
             <>
               <form action={approveAction}>
                 <button
