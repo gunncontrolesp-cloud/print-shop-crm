@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import {
   Users, ShoppingCart, AlertCircle, Layers, Receipt,
-  AlertTriangle, FileText, ArrowRight, Plus,
+  AlertTriangle, FileText, ArrowRight, Plus, CheckCircle2,
 } from 'lucide-react'
 import type { OrderStatus } from '@/lib/types'
 
@@ -15,29 +15,83 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string }> =
   delivered:{ label: 'Delivered', className: 'bg-teal-50 text-teal-700 ring-1 ring-teal-200' },
 }
 
-const COLOR_MAP = {
-  slate:  { bg: 'bg-slate-100',  icon: 'text-slate-600',  value: 'text-slate-900' },
-  indigo: { bg: 'bg-indigo-100', icon: 'text-indigo-600', value: 'text-indigo-700' },
-  amber:  { bg: 'bg-amber-100',  icon: 'text-amber-600',  value: 'text-amber-700' },
-  violet: { bg: 'bg-violet-100', icon: 'text-violet-600', value: 'text-violet-700' },
-  rose:   { bg: 'bg-rose-100',   icon: 'text-rose-600',   value: 'text-rose-700' },
-  orange: { bg: 'bg-orange-100', icon: 'text-orange-600', value: 'text-orange-700' },
+function SectionLabel({ children, variant = 'default' }: {
+  children: React.ReactNode
+  variant?: 'default' | 'urgent' | 'clear'
+}) {
+  const colors = {
+    default: 'text-slate-400 [--rule:theme(colors.slate.200)]',
+    urgent:  'text-amber-500 [--rule:theme(colors.amber.200)]',
+    clear:   'text-emerald-600 [--rule:theme(colors.emerald.200)]',
+  }
+  return (
+    <div className={`flex items-center gap-3 mb-4 ${colors[variant]}`}>
+      <div className="h-px flex-1 bg-[--rule]" />
+      <p className="text-[10px] font-mono font-semibold uppercase tracking-widest shrink-0">{children}</p>
+      <div className="h-px flex-1 bg-[--rule]" />
+    </div>
+  )
 }
 
-function StatCard({
-  label, value, href, icon: Icon, color,
-}: {
+function ActionCard({ label, value, href, icon: Icon, variant }: {
   label: string; value: number; href: string
-  icon: React.ElementType; color: keyof typeof COLOR_MAP
+  icon: React.ElementType; variant: 'amber' | 'rose' | 'clear'
 }) {
-  const c = COLOR_MAP[color]
+  const styles = {
+    amber: {
+      wrap: 'border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 hover:border-amber-300 hover:shadow-md',
+      icon: 'bg-amber-100 text-amber-600',
+      num:  'text-amber-900',
+      label: 'text-amber-700',
+      arrow: 'text-amber-300',
+    },
+    rose: {
+      wrap: 'border-rose-200 bg-gradient-to-br from-rose-50 to-pink-50 hover:border-rose-300 hover:shadow-md',
+      icon: 'bg-rose-100 text-rose-600',
+      num:  'text-rose-900',
+      label: 'text-rose-700',
+      arrow: 'text-rose-300',
+    },
+    clear: {
+      wrap: 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm',
+      icon: 'bg-slate-100 text-slate-400',
+      num:  'text-slate-300',
+      label: 'text-slate-400',
+      arrow: 'text-slate-200',
+    },
+  }
+  const s = styles[variant]
   return (
-    <Link href={href} className="animate-fade-up block bg-white rounded-xl border border-slate-200 shadow-sm p-4 hover:shadow-md hover:border-slate-300 active:scale-[0.97] transition-[box-shadow,border-color,transform] duration-200">
-      <div className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${c.bg} mb-3`}>
-        <Icon className={`h-4 w-4 ${c.icon}`} />
+    <Link
+      href={href}
+      className={`animate-fade-up flex items-center gap-4 rounded-xl border-2 p-5 active:scale-[0.97] transition-[box-shadow,border-color,transform] duration-200 ${s.wrap}`}
+    >
+      <div className={`flex h-11 w-11 items-center justify-center rounded-xl shrink-0 ${s.icon}`}>
+        <Icon className="h-5 w-5" />
       </div>
-      <p className={`text-2xl font-bold ${c.value}`}>{value}</p>
-      <p className="text-xs text-slate-500 mt-0.5 leading-tight">{label}</p>
+      <div className="flex-1 min-w-0">
+        <p className={`text-4xl font-mono font-bold tabular-nums leading-none ${s.num}`}>{value}</p>
+        <p className={`text-sm font-medium mt-1.5 ${s.label}`}>{label}</p>
+      </div>
+      <ArrowRight className={`h-4 w-4 shrink-0 ${s.arrow}`} />
+    </Link>
+  )
+}
+
+function StatCard({ label, value, href, icon: Icon }: {
+  label: string; value: number; href: string; icon: React.ElementType
+}) {
+  return (
+    <Link
+      href={href}
+      className="animate-fade-up group block bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3.5 hover:border-slate-300 hover:shadow-md active:scale-[0.97] transition-[box-shadow,border-color,transform] duration-200"
+    >
+      <div className="flex items-center justify-between mb-2">
+        <Icon className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600 transition-colors duration-150" />
+        <ArrowRight className="h-3 w-3 text-slate-200 group-hover:text-slate-400 transition-colors duration-150" />
+      </div>
+      <p className="text-2xl font-mono font-bold text-slate-800 tabular-nums leading-none">{value}</p>
+      <p className="text-[11px] text-slate-400 mt-1 leading-tight">{label}</p>
     </Link>
   )
 }
@@ -69,34 +123,73 @@ export default async function DashboardPage() {
   const inProductionCount = allOrders.filter((o) => o.status === 'printing' || o.status === 'finishing').length
   const recentOrders      = allOrders.slice(0, 6)
 
+  const hasActions = pendingCount > 0 || (unpaidInvoiceCount ?? 0) > 0
+  const actionSectionVariant = hasActions ? 'urgent' : 'clear'
+  const actionSectionLabel   = hasActions ? 'Action Required' : 'All Clear'
+
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-8 max-w-5xl mx-auto">
       {/* Page header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 mb-1">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
+          <h1 className="text-2xl font-bold text-slate-900 leading-tight">Dashboard</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/customers/new" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm">
+        <div className="flex items-center gap-2 pt-1">
+          <Link
+            href="/dashboard/customers/new"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm"
+          >
             <Plus className="h-3.5 w-3.5" /> New Customer
           </Link>
-          <Link href="/dashboard/quotes/new" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm">
+          <Link
+            href="/dashboard/quotes/new"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm"
+          >
             <Plus className="h-3.5 w-3.5" /> New Quote
           </Link>
         </div>
       </div>
 
-      {/* Stat cards */}
-      <div className="stagger grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 mb-8">
-        <StatCard label="Customers"       value={customerCount ?? 0}     href="/dashboard/customers"   icon={Users}         color="slate"  />
-        <StatCard label="Open Orders"     value={openOrderCount}          href="/dashboard/orders"      icon={ShoppingCart}  color="indigo" />
-        <StatCard label="Needs Approval"  value={pendingCount}            href="/dashboard/orders"      icon={AlertCircle}   color="amber"  />
-        <StatCard label="In Production"   value={inProductionCount}       href="/dashboard/production"  icon={Layers}        color="violet" />
-        <StatCard label="Unpaid Invoices" value={unpaidInvoiceCount ?? 0} href="/dashboard/invoices"    icon={Receipt}       color="rose"   />
-        <StatCard label="Low Stock"       value={lowStockCount}           href="/dashboard/inventory"   icon={AlertTriangle} color="orange" />
+      {/* Action Required — dominant, state-aware */}
+      <div className="mb-8">
+        <SectionLabel variant={actionSectionVariant}>
+          {hasActions ? actionSectionLabel : (
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="h-3 w-3" />
+              {actionSectionLabel}
+            </span>
+          )}
+        </SectionLabel>
+        <div className="stagger grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <ActionCard
+            label="Orders Awaiting Approval"
+            value={pendingCount}
+            href="/dashboard/orders"
+            icon={AlertCircle}
+            variant={pendingCount > 0 ? 'amber' : 'clear'}
+          />
+          <ActionCard
+            label="Unpaid Invoices"
+            value={unpaidInvoiceCount ?? 0}
+            href="/dashboard/invoices"
+            icon={Receipt}
+            variant={(unpaidInvoiceCount ?? 0) > 0 ? 'rose' : 'clear'}
+          />
+        </div>
+      </div>
+
+      {/* At a Glance — secondary stats */}
+      <div className="mb-8">
+        <SectionLabel>At a Glance</SectionLabel>
+        <div className="stagger grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <StatCard label="Customers"    value={customerCount ?? 0}  href="/dashboard/customers"  icon={Users}         />
+          <StatCard label="Open Orders"  value={openOrderCount}       href="/dashboard/orders"     icon={ShoppingCart}  />
+          <StatCard label="In Production" value={inProductionCount}   href="/dashboard/production" icon={Layers}        />
+          <StatCard label="Low Stock"    value={lowStockCount}        href="/dashboard/inventory"  icon={AlertTriangle} />
+        </div>
       </div>
 
       {/* Main grid */}
@@ -105,27 +198,27 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 className="text-sm font-semibold text-slate-800">Recent Orders</h2>
-            <Link href="/dashboard/orders" className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+            <Link href="/dashboard/orders" className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-150">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+                <th className="px-5 py-3 text-left text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Customer</th>
+                <th className="px-5 py-3 text-left text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="px-5 py-3 text-right text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Total</th>
+                <th className="px-5 py-3 text-right text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Date</th>
                 <th className="sr-only">View</th>
               </tr>
             </thead>
             <tbody>
               {recentOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-5 py-10 text-center text-slate-400 text-sm">
-                    No orders yet.{' '}
-                    <Link href="/dashboard/quotes/new" className="text-indigo-600 hover:underline">
-                      Create a quote to get started.
+                  <td colSpan={5} className="px-5 py-12 text-center">
+                    <p className="text-slate-400 text-sm mb-1">No orders yet.</p>
+                    <Link href="/dashboard/quotes/new" className="text-sm text-indigo-600 hover:underline font-medium">
+                      Create a quote to get started →
                     </Link>
                   </td>
                 </tr>
@@ -136,21 +229,21 @@ export default async function DashboardPage() {
                   const status = order.status as OrderStatus
                   const cfg = STATUS_CONFIG[status]
                   return (
-                    <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                    <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors duration-100">
                       <td className="px-5 py-3.5 font-medium text-slate-900">{customerName}</td>
                       <td className="px-5 py-3.5">
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cfg.className}`}>
                           {cfg.label}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-right text-slate-700 font-medium">
+                      <td className="px-5 py-3.5 text-right font-mono text-slate-700 font-medium">
                         ${Number(order.total).toFixed(2)}
                       </td>
                       <td className="px-5 py-3.5 text-right text-slate-400 text-xs">
                         {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </td>
                       <td className="px-5 py-3.5 text-right">
-                        <Link href={`/dashboard/orders/${order.id}`} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                        <Link href={`/dashboard/orders/${order.id}`} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-100">
                           View
                         </Link>
                       </td>
@@ -165,23 +258,21 @@ export default async function DashboardPage() {
         {/* Right column */}
         <div className="space-y-4">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100">
-                  <FileText className="h-4 w-4 text-slate-600" />
-                </div>
+                <FileText className="h-4 w-4 text-slate-400" />
                 <p className="text-sm font-semibold text-slate-800">Open Quotes</p>
               </div>
-              <span className="text-2xl font-bold text-slate-900">{openQuoteCount ?? 0}</span>
+              <span className="text-2xl font-mono font-bold text-slate-900 tabular-nums">{openQuoteCount ?? 0}</span>
             </div>
-            <p className="text-xs text-slate-400 mb-3">Draft and sent — awaiting approval</p>
-            <Link href="/dashboard/quotes" className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+            <p className="text-xs text-slate-400 mb-4">Draft and sent — awaiting approval</p>
+            <Link href="/dashboard/quotes" className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-100">
               View all quotes <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Quick Actions</p>
+            <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-3">Quick Actions</p>
             <div className="space-y-2">
               <Link href="/dashboard/quotes/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Plus className="h-4 w-4" /> New Quote
