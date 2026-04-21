@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { sendPaymentLink, deleteInvoice } from '@/lib/actions/invoices'
 import { buttonVariants } from '@/components/ui/button-variants'
+import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
 import { ResyncButton } from './ResyncButton'
 import type { InvoiceStatus } from '@/lib/types'
 import { Printer } from 'lucide-react'
@@ -92,11 +93,7 @@ export default async function InvoiceDetailPage({
             </form>
           )}
           {isAdmin && currentStatus === 'draft' && (
-            <form action={deleteAction}>
-              <button type="submit" className={buttonVariants({ variant: 'destructive' })}>
-                Delete
-              </button>
-            </form>
+            <ConfirmDeleteButton action={deleteAction} />
           )}
         </div>
       </div>

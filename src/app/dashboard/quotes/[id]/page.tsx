@@ -5,6 +5,7 @@ import { updateQuoteStatus, deleteQuote, updateQuoteExpiryAction, sendQuoteRemin
 import type { LineItem } from '@/lib/types'
 import { convertQuoteToOrder } from '@/lib/actions/orders'
 import { buttonVariants } from '@/components/ui/button-variants'
+import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
 
 const statusStyles: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
@@ -150,14 +151,7 @@ export default async function QuoteDetailPage({
             </span>
           )}
           {isAdmin && (
-            <form action={deleteAction}>
-              <button
-                type="submit"
-                className={buttonVariants({ variant: 'destructive' })}
-              >
-                Delete
-              </button>
-            </form>
+            <ConfirmDeleteButton action={deleteAction} />
           )}
         </div>
       </div>

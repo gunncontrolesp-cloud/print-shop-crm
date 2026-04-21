@@ -1,21 +1,7 @@
 'use client'
 
-import { buttonVariants } from '@/components/ui/button-variants'
+import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
 
 export function DeleteCustomerButton({ action }: { action: () => Promise<void> }) {
-  return (
-    <form action={action}>
-      <button
-        type="submit"
-        className={buttonVariants({ variant: 'destructive' })}
-        onClick={(e) => {
-          if (!confirm('Delete this customer? This cannot be undone.')) {
-            e.preventDefault()
-          }
-        }}
-      >
-        Delete
-      </button>
-    </form>
-  )
+  return <ConfirmDeleteButton action={action} />
 }

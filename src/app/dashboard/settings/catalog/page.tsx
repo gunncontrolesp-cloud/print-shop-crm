@@ -143,6 +143,7 @@ export default async function CatalogPage({
                         <input type="hidden" name="id" value={product.id} />
                         <button
                           type="submit"
+                          onClick={(e) => { if (!confirm('Delete this product? This cannot be undone.')) e.preventDefault() }}
                           className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                         >
                           Delete
@@ -182,7 +183,11 @@ export default async function CatalogPage({
                         </form>
                         <form action={deleteProduct}>
                           <input type="hidden" name="id" value={product.id} />
-                          <button type="submit" className="text-xs text-rose-600 hover:underline">
+                          <button
+                            type="submit"
+                            onClick={(e) => { if (!confirm('Delete this product? This cannot be undone.')) e.preventDefault() }}
+                            className="text-xs text-rose-600 hover:underline"
+                          >
                             Delete
                           </button>
                         </form>

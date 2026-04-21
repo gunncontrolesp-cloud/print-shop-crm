@@ -7,6 +7,7 @@ import { resetProofDecision } from '@/lib/actions/proof'
 import type { OrderStatus, LineItem, InvoiceStatus } from '@/lib/types'
 import { getNextStatus } from '@/lib/types'
 import { buttonVariants } from '@/components/ui/button-variants'
+import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
 import { OrderFilesPanel } from '@/components/file-uploader'
 
 const STATUS_SEQUENCE: OrderStatus[] = [
@@ -168,11 +169,7 @@ export default async function OrderDetailPage({
             </form>
           )}
           {isAdmin && (
-            <form action={deleteAction}>
-              <button type="submit" className={buttonVariants({ variant: 'destructive' })}>
-                Delete
-              </button>
-            </form>
+            <ConfirmDeleteButton action={deleteAction} />
           )}
         </div>
       </div>
