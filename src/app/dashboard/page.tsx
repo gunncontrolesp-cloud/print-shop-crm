@@ -127,6 +127,38 @@ export default async function DashboardPage() {
   const actionSectionVariant = hasActions ? 'urgent' : 'clear'
   const actionSectionLabel   = hasActions ? 'Action Required' : 'All Clear'
 
+  const isNewShop = allOrders.length === 0
+  const workflowSteps = [
+    {
+      done: (customerCount ?? 0) > 0,
+      label: 'Add your first customer',
+      description: 'Customers are the starting point — every quote and order links back to one.',
+      href: '/dashboard/customers/new',
+      action: 'Add customer',
+    },
+    {
+      done: (openQuoteCount ?? 0) > 0 || allOrders.length > 0,
+      label: 'Build and send a quote',
+      description: 'Price out a job with line items, set a due date, and send it for approval.',
+      href: '/dashboard/quotes/new',
+      action: 'New quote',
+    },
+    {
+      done: allOrders.length > 0,
+      label: 'Convert an approved quote to an order',
+      description: 'Once a customer approves, one click turns it into a production order.',
+      href: '/dashboard/quotes',
+      action: 'View quotes',
+    },
+    {
+      done: false,
+      label: 'Complete the job and send an invoice',
+      description: 'Move the order through production, then generate and send the invoice.',
+      href: '/dashboard/orders',
+      action: 'View orders',
+    },
+  ]
+
   return (
     <div className="p-8 max-w-5xl mx-auto">
       {/* Page header */}
@@ -152,6 +184,48 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Getting Started — shown until first order exists */}
+      {isNewShop && (
+        <div className="mb-8">
+          <SectionLabel>Getting Started</SectionLabel>
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-50">
+            {workflowSteps.map((step, i) => {
+              const isActive = !step.done && workflowSteps.slice(0, i).every((s) => s.done)
+              return (
+                <div key={i} className={`flex items-start gap-4 px-5 py-4 ${isActive ? 'bg-indigo-50/40' : ''}`}>
+                  <div className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full shrink-0 ${
+                    step.done ? 'bg-emerald-100' : isActive ? 'bg-indigo-100' : 'bg-slate-100'
+                  }`}>
+                    {step.done
+                      ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                      : <span className={`text-[10px] font-mono font-bold ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>{i + 1}</span>
+                    }
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-medium leading-tight ${step.done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>
+                      {step.label}
+                    </p>
+                    {!step.done && (
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">{step.description}</p>
+                    )}
+                  </div>
+                  {!step.done && (
+                    <Link
+                      href={step.href}
+                      className={`flex items-center gap-1 text-xs font-medium shrink-0 mt-0.5 transition-colors duration-100 ${
+                        isActive ? 'text-indigo-600 hover:text-indigo-700' : 'text-slate-400 hover:text-slate-600'
+                      }`}
+                    >
+                      {step.action} <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Action Required — dominant, state-aware */}
       <div className="mb-8">

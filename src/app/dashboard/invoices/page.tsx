@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { Receipt, ArrowRight } from 'lucide-react'
+import { Receipt, ArrowRight, ShoppingCart } from 'lucide-react'
 import type { InvoiceStatus } from '@/lib/types'
 import { SearchInput } from '@/components/search-input'
 
@@ -61,9 +61,17 @@ export default async function InvoicesPage({
             <p className="text-sm font-medium text-slate-700 mb-1">
               {ql ? 'No invoices match your search' : 'No invoices yet'}
             </p>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-400 mb-4">
               {ql ? 'Try a different search term.' : 'Invoices are generated from completed orders.'}
             </p>
+            {!ql && (
+              <Link
+                href="/dashboard/orders"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              >
+                <ShoppingCart className="h-3.5 w-3.5" /> View Orders
+              </Link>
+            )}
           </div>
         </div>
       ) : (
