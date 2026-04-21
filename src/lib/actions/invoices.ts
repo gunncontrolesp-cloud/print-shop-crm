@@ -141,7 +141,7 @@ export async function markInvoiceSent(invoiceId: string) {
 
   revalidatePath(`/dashboard/invoices/${invoiceId}`)
   revalidatePath(`/dashboard/orders/${invoice.order_id}`)
-  redirect(`/dashboard/invoices/${invoiceId}`)
+  redirect(`/dashboard/invoices/${invoiceId}?flash=invoice_sent`)
 }
 
 export async function deleteInvoice(invoiceId: string) {
@@ -208,5 +208,5 @@ export async function sendPaymentLink(invoiceId: string) {
 
   revalidatePath('/dashboard/invoices/' + invoiceId)
   revalidatePath('/dashboard/orders/' + invoice.order_id)
-  redirect('/dashboard/invoices/' + invoiceId)
+  redirect('/dashboard/invoices/' + invoiceId + '?flash=payment_link_sent')
 }

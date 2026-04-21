@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { NavSidebar } from '@/components/nav-sidebar'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { MobileHeader } from '@/components/mobile-header'
 import { LogOut, PrinterIcon } from 'lucide-react'
 
 export default async function DashboardLayout({
@@ -42,8 +43,8 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-zinc-50">
-      {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 flex flex-col shrink-0">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-64 bg-slate-900 flex-col shrink-0">
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-5 py-5 border-b border-slate-800">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
@@ -84,9 +85,17 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <MobileHeader
+          role={profile?.role ?? 'staff'}
+          displayName={displayName}
+          initials={initials}
+          signOut={signOut}
+        />
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

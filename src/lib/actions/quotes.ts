@@ -145,7 +145,7 @@ export async function sendQuoteReminder(id: string) {
   await supabase.from('quotes').update({ reminder_sent_at: new Date().toISOString() }).eq('id', id)
 
   revalidatePath(`/dashboard/quotes/${id}`)
-  redirect(`/dashboard/quotes/${id}`)
+  redirect(`/dashboard/quotes/${id}?flash=reminder_sent`)
 }
 
 export async function deleteQuote(id: string) {

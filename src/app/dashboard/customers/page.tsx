@@ -1,8 +1,15 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { Users, Plus, Mail, Phone, Building2, ArrowRight } from 'lucide-react'
+import { SearchInput } from '@/components/search-input'
 
-export default async function CustomersPage() {
+export default async function CustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  const { q = '' } = await searchParams
   const supabase = await createClient()
 
   const { data: customers } = await supabase
@@ -10,20 +17,35 @@ export default async function CustomersPage() {
     .select('id, name, business_name, email, phone')
     .order('name', { ascending: true })
 
+  const ql = q.toLowerCase()
+  const filtered = (customers ?? []).filter((c) =>
+    !ql ||
+    c.name.toLowerCase().includes(ql) ||
+    (c.business_name ?? '').toLowerCase().includes(ql) ||
+    (c.email ?? '').toLowerCase().includes(ql)
+  )
+
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6 sm:mb-8 gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Customers</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{customers?.length ?? 0} total</p>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {ql ? `${filtered.length} of ${customers?.length ?? 0}` : `${customers?.length ?? 0} total`}
+          </p>
         </div>
-        <Link
-          href="/dashboard/customers/new"
-          className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
-        >
-          <Plus className="h-3.5 w-3.5" /> New Customer
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Suspense fallback={<div className="w-48 h-9 bg-slate-100 rounded-lg animate-pulse" />}>
+            <SearchInput placeholder="Search by name or email…" />
+          </Suspense>
+          <Link
+            href="/dashboard/customers/new"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+          >
+            <Plus className="h-3.5 w-3.5" /> New Customer
+          </Link>
+        </div>
       </div>
 
       {!customers || customers.length === 0 ? (
@@ -42,30 +64,45 @@ export default async function CustomersPage() {
             </Link>
           </div>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex flex-col items-center py-20 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
+              <Users className="h-6 w-6 text-slate-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-700 mb-1">No customers match your search</p>
+            <p className="text-sm text-slate-400">Try a different name or email.</p>
+          </div>
+        </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Name</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Business</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Phone</th>
+                <th className="hidden sm:table-cell px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Business</th>
+                <th className="hidden md:table-cell px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                <th className="hidden lg:table-cell px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Phone</th>
                 <th className="w-16" />
               </tr>
             </thead>
             <tbody>
-              {customers.map((customer) => (
+              {filtered.map((customer) => (
                 <tr key={customer.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
                         {customer.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="font-medium text-slate-900">{customer.name}</span>
+                      <div className="min-w-0">
+                        <span className="font-medium text-slate-900">{customer.name}</span>
+                        {customer.business_name && (
+                          <p className="text-xs text-slate-400 sm:hidden truncate">{customer.business_name}</p>
+                        )}
+                      </div>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="hidden sm:table-cell px-5 py-3.5">
                     {customer.business_name ? (
                       <span className="flex items-center gap-1.5 text-slate-600">
                         <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
@@ -75,7 +112,7 @@ export default async function CustomersPage() {
                       <span className="text-slate-300">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="hidden md:table-cell px-5 py-3.5">
                     {customer.email ? (
                       <span className="flex items-center gap-1.5 text-slate-600">
                         <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
@@ -85,7 +122,7 @@ export default async function CustomersPage() {
                       <span className="text-slate-300">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="hidden lg:table-cell px-5 py-3.5">
                     {customer.phone ? (
                       <span className="flex items-center gap-1.5 text-slate-600">
                         <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />

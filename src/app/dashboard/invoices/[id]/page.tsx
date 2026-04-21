@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { sendPaymentLink, deleteInvoice } from '@/lib/actions/invoices'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
+import { FlashMessage } from '@/components/flash-message'
 import { ResyncButton } from './ResyncButton'
 import type { InvoiceStatus } from '@/lib/types'
 import { Printer } from 'lucide-react'
@@ -16,10 +17,13 @@ const statusBadge: Record<InvoiceStatus, string> = {
 
 export default async function InvoiceDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ flash?: string }>
 }) {
   const { id } = await params
+  const { flash } = await searchParams
   const supabase = await createClient()
 
   const { data: invoice } = await supabase
@@ -51,12 +55,13 @@ export default async function InvoiceDetailPage({
   const deleteAction = deleteInvoice.bind(null, id)
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-8 max-w-2xl">
       <div className="mb-4">
         <Link href="/dashboard/invoices" className="text-sm text-gray-500 hover:text-gray-900">
           ← Invoices
         </Link>
       </div>
+      <FlashMessage message={flash} />
 
       {/* Header */}
       <div className="flex items-start justify-between mb-8">

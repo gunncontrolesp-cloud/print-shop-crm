@@ -6,6 +6,7 @@ import type { LineItem } from '@/lib/types'
 import { convertQuoteToOrder } from '@/lib/actions/orders'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
+import { FlashMessage } from '@/components/flash-message'
 
 const statusStyles: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-600',
@@ -16,10 +17,13 @@ const statusStyles: Record<string, string> = {
 
 export default async function QuoteDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ flash?: string }>
 }) {
   const { id } = await params
+  const { flash } = await searchParams
   const supabase = await createClient()
 
   const { data: quote } = await supabase
@@ -62,12 +66,13 @@ export default async function QuoteDetailPage({
   const reminderCoolingDown = ['pending', 'sent'].includes(quote.status) && hoursSinceReminder !== null && hoursSinceReminder < 48
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-4 sm:p-8 max-w-4xl">
       <div className="mb-4">
         <Link href="/dashboard/quotes" className="text-sm text-gray-500 hover:text-gray-900">
           ← Quotes
         </Link>
       </div>
+      <FlashMessage message={flash} />
 
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
