@@ -64,7 +64,7 @@ export default async function TimeClockPage() {
   const weekHours = (weekMinutes / 60).toFixed(1)
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-8 flex flex-col items-center">
+    <div className="min-h-screen bg-zinc-50 p-4 sm:p-8 flex flex-col items-center">
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-bold text-slate-900 mb-8 text-center">Time Clock</h1>
 
@@ -137,8 +137,8 @@ export default async function TimeClockPage() {
                 <thead>
                   <tr className="border-b border-slate-100">
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">In</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Out</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">In</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Out</th>
                     <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Duration</th>
                   </tr>
                 </thead>
@@ -146,8 +146,8 @@ export default async function TimeClockPage() {
                   {entries.map((entry) => (
                     <tr key={entry.id} className="border-b border-slate-50">
                       <td className="px-4 py-3 text-slate-600 text-xs">{formatDate(entry.clocked_in_at)}</td>
-                      <td className="px-4 py-3 text-slate-600 text-xs">{formatTime(entry.clocked_in_at)}</td>
-                      <td className="px-4 py-3 text-slate-600 text-xs">
+                      <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">{formatTime(entry.clocked_in_at)}</td>
+                      <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">
                         {entry.clocked_out_at ? formatTime(entry.clocked_out_at) : '—'}
                       </td>
                       <td className="px-4 py-3 text-right font-medium text-slate-800 text-xs tabular-nums">
