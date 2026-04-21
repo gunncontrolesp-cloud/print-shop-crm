@@ -154,7 +154,7 @@ export default async function AdminTimeClockPage() {
       {/* Currently clocked in */}
       <section className="mb-8">
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Currently Clocked In</p>
-        {open.filter((e) => new Date(e.clocked_in_at).toDateString() === todayStr).length === 0 ? (
+        {open.filter((e) => isTodayInTz(e.clocked_in_at, tz)).length === 0 ? (
           <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm shadow-sm">
             No one is currently clocked in
           </div>
