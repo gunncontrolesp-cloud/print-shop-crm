@@ -276,7 +276,7 @@ export default async function OrderDetailPage({
               <div className="space-y-2">
                 <p className="text-sm text-orange-700 font-medium">Customer requested changes</p>
                 {job.proof_comments && (
-                  <p className="text-sm text-gray-600 bg-orange-50 rounded px-3 py-2">
+                  <p className="text-sm text-orange-800 bg-orange-50 rounded px-3 py-2">
                     {job.proof_comments}
                   </p>
                 )}

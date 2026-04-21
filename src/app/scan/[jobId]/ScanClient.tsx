@@ -57,7 +57,7 @@ export function ScanClient({
 
       <div className="mb-8 text-center">
         <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Current Stage</p>
-        <span className="text-2xl font-semibold text-indigo-400">
+        <span className="text-2xl font-mono font-semibold text-white">
           {STAGE_LABELS[currentStage]}
         </span>
       </div>
