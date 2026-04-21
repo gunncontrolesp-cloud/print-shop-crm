@@ -69,12 +69,12 @@ export default async function AdminTimeClockPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Timecard Admin</h1>
           <p className="text-sm text-slate-500 mt-0.5">Manage employee time entries</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <a
             href="/dashboard/timeclock/reports"
             className="flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
@@ -170,7 +170,7 @@ export default async function AdminTimeClockPage() {
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className={thClass}>Employee</th>
-                  <th className={thClass}>Clocked In</th>
+                  <th className={`${thClass} hidden sm:table-cell`}>Clocked In</th>
                   <th className={thClass}>Duration</th>
                   <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Action</th>
                 </tr>
@@ -179,7 +179,7 @@ export default async function AdminTimeClockPage() {
                 {open.filter((e) => new Date(e.clocked_in_at).toDateString() === todayStr).map((entry) => (
                   <tr key={entry.id} className="border-b border-slate-50">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{formatTime(entry.clocked_in_at)}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs tabular-nums">{formatDuration(entry.clocked_in_at, null)}</td>
                     <td className="px-5 py-3.5 text-right">
                       <form action={adminClockOut.bind(null, entry.id)}>
@@ -210,8 +210,8 @@ export default async function AdminTimeClockPage() {
                 <tr className="border-b border-slate-100">
                   <th className={thClass}>Employee</th>
                   <th className={thClass}>Date</th>
-                  <th className={thClass}>In</th>
-                  <th className={thClass}>Out</th>
+                  <th className={`${thClass} hidden sm:table-cell`}>In</th>
+                  <th className={`${thClass} hidden sm:table-cell`}>Out</th>
                   <th className={thClass}>Duration</th>
                   <th className={thClass}>Status</th>
                   <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
@@ -222,8 +222,8 @@ export default async function AdminTimeClockPage() {
                   <tr key={entry.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs">{formatDate(entry.clocked_in_at)}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatTime(entry.clocked_in_at)}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs">
+                    <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">
                       {entry.clocked_out_at ? formatTime(entry.clocked_out_at) : '—'}
                     </td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs tabular-nums">
