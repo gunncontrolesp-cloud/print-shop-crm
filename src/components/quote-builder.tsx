@@ -61,7 +61,7 @@ export function QuoteBuilder({
               <tr>
                 <th className="px-3 py-2 text-left font-medium text-gray-600">Description</th>
                 <th className="px-3 py-2 text-right font-medium text-gray-600">Qty</th>
-                <th className="px-3 py-2 text-right font-medium text-gray-600">Unit</th>
+                <th className="px-3 py-2 text-right font-medium text-gray-600 hidden sm:table-cell">Unit</th>
                 <th className="px-3 py-2 text-right font-medium text-gray-600">Total</th>
                 <th className="px-3 py-2 w-8" />
               </tr>
@@ -71,7 +71,7 @@ export function QuoteBuilder({
                 <tr key={item.id} className="bg-white">
                   <td className="px-3 py-2">{item.description}</td>
                   <td className="px-3 py-2 text-right text-gray-600">{item.qty}</td>
-                  <td className="px-3 py-2 text-right text-gray-600">
+                  <td className="px-3 py-2 text-right text-gray-600 hidden sm:table-cell">
                     ${item.unit_price.toFixed(2)}
                   </td>
                   <td className="px-3 py-2 text-right font-medium">

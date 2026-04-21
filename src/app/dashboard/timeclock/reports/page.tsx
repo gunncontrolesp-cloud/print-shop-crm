@@ -153,13 +153,13 @@ export default async function TimeClockReportsPage({
   const exportTo = toParam ?? new Date().toISOString().split('T')[0]
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-8 max-w-5xl mx-auto">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Timecard Reports</h1>
           <p className="text-sm text-gray-500 mt-0.5">Closed entries only</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <a
             href={`/api/timeclock/export?from=${exportFrom}&to=${exportTo}`}
             className={buttonVariants({ variant: 'outline' })}
@@ -263,8 +263,8 @@ export default async function TimeClockReportsPage({
                 <tr>
                   <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Employee</th>
                   <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Date</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">In</th>
-                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium">Out</th>
+                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium hidden sm:table-cell">In</th>
+                  <th className="px-4 py-2.5 text-left text-gray-500 font-medium hidden sm:table-cell">Out</th>
                   <th className="px-4 py-2.5 text-right text-gray-500 font-medium">Hours</th>
                   <th className="px-4 py-2.5 text-right text-gray-500 font-medium">Status</th>
                 </tr>
@@ -274,8 +274,8 @@ export default async function TimeClockReportsPage({
                   <tr key={i} className={row.overtimeDay ? 'bg-orange-50' : ''}>
                     <td className="px-4 py-3 font-medium text-gray-800">{row.employee}</td>
                     <td className="px-4 py-3 text-gray-600">{row.date}</td>
-                    <td className="px-4 py-3 text-gray-600">{row.clockIn}</td>
-                    <td className="px-4 py-3 text-gray-600">{row.clockOut}</td>
+                    <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{row.clockIn}</td>
+                    <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{row.clockOut}</td>
                     <td className={`px-4 py-3 text-right font-semibold ${row.overtimeDay ? 'text-orange-600' : 'text-gray-900'}`}>
                       {formatHours(row.minutes)}
                       {row.overtimeDay && <span className="ml-1 text-xs font-normal">OT</span>}

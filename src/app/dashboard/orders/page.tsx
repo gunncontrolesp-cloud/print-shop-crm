@@ -76,11 +76,11 @@ export default async function OrdersPage({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Order</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Order</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
                 <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</th>
-                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">Date</th>
                 <th className="w-16" />
               </tr>
             </thead>
@@ -92,7 +92,7 @@ export default async function OrdersPage({
                 const cfg = STATUS_CONFIG[order.status] ?? { label: order.status, className: 'bg-slate-100 text-slate-600' }
                 return (
                   <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-3.5 font-mono text-xs text-slate-400">
+                    <td className="px-5 py-3.5 font-mono text-xs text-slate-400 hidden sm:table-cell">
                       #{order.id.slice(0, 8).toUpperCase()}
                     </td>
                     <td className="px-5 py-3.5">
@@ -100,6 +100,9 @@ export default async function OrdersPage({
                       {customer?.business_name && (
                         <span className="block text-xs text-slate-400">{customer.business_name}</span>
                       )}
+                      <span className="block text-xs text-slate-300 font-mono sm:hidden">
+                        #{order.id.slice(0, 8).toUpperCase()}
+                      </span>
                     </td>
                     <td className="px-5 py-3.5">
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cfg.className}`}>
@@ -109,7 +112,7 @@ export default async function OrdersPage({
                     <td className="px-5 py-3.5 text-right font-medium text-slate-900">
                       ${Number(order.total).toFixed(2)}
                     </td>
-                    <td className="px-5 py-3.5 text-slate-500 text-xs">
+                    <td className="px-5 py-3.5 text-slate-500 text-xs hidden md:table-cell">
                       {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </td>
                     <td className="px-5 py-3.5 text-right">
