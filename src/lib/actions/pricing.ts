@@ -27,6 +27,7 @@ export async function updateShopSettings(formData: FormData): Promise<void> {
   const deposit_percent = isNaN(deposit_percent_raw)
     ? 50
     : Math.min(Math.max(deposit_percent_raw, 1), 100)
+  const timezone = ((formData.get('timezone') as string) ?? '').trim() || 'America/Chicago'
   const logoFile = formData.get('logo') as File | null
 
   await requireAdmin()
@@ -35,7 +36,7 @@ export async function updateShopSettings(formData: FormData): Promise<void> {
 
   const updateData: Record<string, unknown> = {
     shop_name, shop_address, shop_phone, shop_email, tax_rate, payment_terms,
-    payment_mode, deposit_percent,
+    payment_mode, deposit_percent, timezone,
   }
 
   if (logoFile && logoFile.size > 0) {

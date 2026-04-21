@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { buttonVariants } from '@/components/ui/button-variants'
 import type { TimeEntry } from '@/lib/types'
 import DateRangeForm from './DateRangeForm'
+import { fmtTime, fmtDateLong, localMidnightToUTC } from '@/lib/tz'
 
 function durationMinutes(start: string, end: string): number {
   return Math.max(0, Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 60000))
@@ -13,14 +14,6 @@ function formatHours(minutes: number): string {
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
   return `${h}h ${m.toString().padStart(2, '0')}m`
-}
-
-function formatDate(ts: string): string {
-  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-
-function formatTime(ts: string): string {
-  return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 }
 
 const OVERTIME_DAY_MINUTES = 8 * 60   // 8h/day
@@ -46,15 +39,20 @@ export default async function TimeClockReportsPage({
 
   if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard/timeclock')
 
+  const { data: tenantRow } = await supabase.from('tenants').select('timezone').single()
+  const tz = tenantRow?.timezone ?? 'America/Chicago'
+
   const params = await searchParams
   const fromParam = params.from
   const toParam = params.to
 
-  // Default: last 28 days
-  const defaultFrom = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)
-  const fromDate = fromParam ? new Date(fromParam) : defaultFrom
-  const toDate = toParam ? new Date(toParam) : new Date()
-  toDate.setHours(23, 59, 59, 999)
+  // Default: last 28 days. Interpret date params as midnight in the tenant's timezone
+  const defaultFromStr = new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)
+    .toLocaleDateString('en-CA', { timeZone: tz })
+  const fromDate = fromParam ? localMidnightToUTC(fromParam, tz) : localMidnightToUTC(defaultFromStr, tz)
+  const toDate = toParam
+    ? new Date(localMidnightToUTC(toParam, tz).getTime() + 24 * 60 * 60 * 1000 - 1)
+    : new Date()
 
   let query = supabase
     .from('time_entries')
@@ -117,9 +115,9 @@ export default async function TimeClockReportsPage({
       const mins = durationMinutes(e.clocked_in_at, e.clocked_out_at!)
       return {
         employee: userMap[e.user_id] ?? e.user_id,
-        date: formatDate(e.clocked_in_at),
-        clockIn: formatTime(e.clocked_in_at),
-        clockOut: formatTime(e.clocked_out_at!),
+        date: fmtDateLong(e.clocked_in_at, tz),
+        clockIn: fmtTime(e.clocked_in_at, tz),
+        clockOut: fmtTime(e.clocked_out_at!, tz),
         minutes: mins,
         status: e.status,
         overtimeDay: mins > OVERTIME_DAY_MINUTES,

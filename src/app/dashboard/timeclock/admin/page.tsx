@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { adminClockOut, adminApproveEntry } from '@/lib/actions/timeclock'
 import type { TimeEntry } from '@/lib/types'
+import { fmtTime, fmtDate, isTodayInTz, startOfTodayInTz } from '@/lib/tz'
 
 function formatDuration(start: string, end: string | null): string {
   const ms = (end ? new Date(end) : new Date()).getTime() - new Date(start).getTime()
@@ -9,14 +10,6 @@ function formatDuration(start: string, end: string | null): string {
   const hours = Math.floor(totalMinutes / 60)
   const minutes = totalMinutes % 60
   return `${hours}h ${minutes.toString().padStart(2, '0')}m`
-}
-
-function formatTime(ts: string): string {
-  return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-}
-
-function formatDate(ts: string): string {
-  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
 export default async function AdminTimeClockPage() {
@@ -27,6 +20,9 @@ export default async function AdminTimeClockPage() {
 
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
   if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard/timeclock')
+
+  const { data: tenantRow } = await supabase.from('tenants').select('timezone').single()
+  const tz = tenantRow?.timezone ?? 'America/Chicago'
 
   const { data: openEntries } = await supabase
     .from('time_entries')
@@ -52,11 +48,9 @@ export default async function AdminTimeClockPage() {
   const open = (openEntries ?? []) as TimeEntry[]
   const closed = (closedEntries ?? []) as TimeEntry[]
 
-  const todayStr = new Date().toDateString()
-  const missingPunches = open.filter((e) => new Date(e.clocked_in_at).toDateString() !== todayStr)
+  const missingPunches = open.filter((e) => !isTodayInTz(e.clocked_in_at, tz))
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
+  const todayStart = startOfTodayInTz(tz)
   const todayEntries = closed.filter((e) => new Date(e.clocked_in_at) >= todayStart)
   const totalMinutesToday = todayEntries.reduce((sum, e) => {
     if (!e.clocked_out_at) return sum
@@ -132,7 +126,7 @@ export default async function AdminTimeClockPage() {
                 {missingPunches.map((entry) => (
                   <tr key={entry.id} className="border-b border-slate-50">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatDate(entry.clocked_in_at)} {formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs">{fmtDate(entry.clocked_in_at, tz)} {fmtTime(entry.clocked_in_at, tz)}</td>
                     <td className="px-5 py-3.5 text-rose-600 font-medium text-xs tabular-nums">{formatDuration(entry.clocked_in_at, null)}</td>
                     <td className="px-5 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -176,10 +170,10 @@ export default async function AdminTimeClockPage() {
                 </tr>
               </thead>
               <tbody>
-                {open.filter((e) => new Date(e.clocked_in_at).toDateString() === todayStr).map((entry) => (
+                {open.filter((e) => isTodayInTz(e.clocked_in_at, tz)).map((entry) => (
                   <tr key={entry.id} className="border-b border-slate-50">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{fmtTime(entry.clocked_in_at, tz)}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs tabular-nums">{formatDuration(entry.clocked_in_at, null)}</td>
                     <td className="px-5 py-3.5 text-right">
                       <form action={adminClockOut.bind(null, entry.id)}>
@@ -221,10 +215,10 @@ export default async function AdminTimeClockPage() {
                 {closed.map((entry) => (
                   <tr key={entry.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs">{formatDate(entry.clocked_in_at)}</td>
-                    <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{formatTime(entry.clocked_in_at)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs">{fmtDate(entry.clocked_in_at, tz)}</td>
+                    <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{fmtTime(entry.clocked_in_at, tz)}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">
-                      {entry.clocked_out_at ? formatTime(entry.clocked_out_at) : '—'}
+                      {entry.clocked_out_at ? fmtTime(entry.clocked_out_at, tz) : '—'}
                     </td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs tabular-nums">
                       {entry.clocked_out_at ? formatDuration(entry.clocked_in_at, entry.clocked_out_at) : '—'}

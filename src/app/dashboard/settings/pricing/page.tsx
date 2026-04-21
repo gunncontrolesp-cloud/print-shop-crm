@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { updateShopSettings } from '@/lib/actions/pricing'
+import { TZ_OPTIONS } from '@/lib/tz'
 
 export default async function ShopSettingsPage({
   searchParams,
@@ -174,6 +175,20 @@ export default async function ShopSettingsPage({
               Only applies when payment mode is &ldquo;Deposit&rdquo;. Remaining balance is due on pickup.
             </p>
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium text-gray-700">Timezone</label>
+          <select
+            name="timezone"
+            defaultValue={tenant?.timezone ?? 'America/Chicago'}
+            className={inputClass}
+          >
+            {TZ_OPTIONS.map((tz) => (
+              <option key={tz.value} value={tz.value}>{tz.label}</option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-400">Used for timeclock display and reports.</p>
         </div>
 
         <div className="pt-2">

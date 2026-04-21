@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { clockIn, clockOut } from '@/lib/actions/timeclock'
 import type { TimeEntry } from '@/lib/types'
+import { fmtTime, fmtDate, startOfTodayInTz, startOfWeekInTz } from '@/lib/tz'
 
 function formatDuration(start: string, end: string | null): string {
   const ms = (end ? new Date(end) : new Date()).getTime() - new Date(start).getTime()
@@ -10,18 +11,13 @@ function formatDuration(start: string, end: string | null): string {
   return `${hours}h ${minutes.toString().padStart(2, '0')}m`
 }
 
-function formatTime(ts: string): string {
-  return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-}
-
-function formatDate(ts: string): string {
-  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
 export default async function TimeClockPage() {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
+
+  const { data: tenantRow } = await supabase.from('tenants').select('timezone').single()
+  const tz = tenantRow?.timezone ?? 'America/Chicago'
 
   const { data: openEntry } = await supabase
     .from('time_entries')
@@ -43,17 +39,14 @@ export default async function TimeClockPage() {
   const isClockedIn = !!openEntry
   const entries = (recentEntries ?? []) as TimeEntry[]
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
+  const todayStart = startOfTodayInTz(tz)
   const todayMinutes = entries
     .filter((e) => new Date(e.clocked_in_at) >= todayStart && !!e.clocked_out_at)
     .reduce((sum, e) => sum + Math.floor(
       (new Date(e.clocked_out_at!).getTime() - new Date(e.clocked_in_at).getTime()) / 60000
     ), 0)
 
-  const weekStart = new Date()
-  weekStart.setHours(0, 0, 0, 0)
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1))
+  const weekStart = startOfWeekInTz(tz)
   const weekMinutes = entries
     .filter((e) => new Date(e.clocked_in_at) >= weekStart && !!e.clocked_out_at)
     .reduce((sum, e) => sum + Math.floor(
@@ -87,7 +80,7 @@ export default async function TimeClockPage() {
                 {formatDuration(openEntry.clocked_in_at, null)}
               </p>
               <p className="text-sm text-emerald-600">
-                Since {formatTime(openEntry.clocked_in_at)}
+                Since {fmtTime(openEntry.clocked_in_at, tz)}
               </p>
             </div>
           ) : (
@@ -145,10 +138,10 @@ export default async function TimeClockPage() {
                 <tbody>
                   {entries.map((entry) => (
                     <tr key={entry.id} className="border-b border-slate-50">
-                      <td className="px-4 py-3 text-slate-600 text-xs">{formatDate(entry.clocked_in_at)}</td>
-                      <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">{formatTime(entry.clocked_in_at)}</td>
+                      <td className="px-4 py-3 text-slate-600 text-xs">{fmtDate(entry.clocked_in_at, tz)}</td>
+                      <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">{fmtTime(entry.clocked_in_at, tz)}</td>
                       <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">
-                        {entry.clocked_out_at ? formatTime(entry.clocked_out_at) : '—'}
+                        {entry.clocked_out_at ? fmtTime(entry.clocked_out_at, tz) : '—'}
                       </td>
                       <td className="px-4 py-3 text-right font-medium text-slate-800 text-xs tabular-nums">
                         {entry.clocked_out_at
