@@ -44,7 +44,7 @@ export default async function InvoiceDetailPage({
       .select('role')
       .eq('id', user.id)
       .single()
-    isAdmin = profile?.role === 'admin'
+    isAdmin = ['admin', 'manager'].includes(profile?.role ?? '')
   }
 
   const order = Array.isArray(invoice.orders) ? invoice.orders[0] : invoice.orders

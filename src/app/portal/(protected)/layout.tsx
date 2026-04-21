@@ -11,11 +11,14 @@ export default async function PortalProtectedLayout({ children }: { children: Re
   if (!user) redirect('/portal/login')
 
   const serviceClient = createServiceClient()
-  const { data: customer } = await serviceClient
-    .from('customers')
-    .select('name, business_name')
-    .eq('auth_user_id', user.id)
-    .single()
+  const [{ data: customer }, { data: tenant }] = await Promise.all([
+    serviceClient
+      .from('customers')
+      .select('name, business_name, tenant_id')
+      .eq('auth_user_id', user.id)
+      .single(),
+    serviceClient.from('tenants').select('shop_name').limit(1).single(),
+  ])
 
   async function signOut() {
     'use server'
@@ -28,7 +31,7 @@ export default async function PortalProtectedLayout({ children }: { children: Re
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <span className="text-sm font-semibold text-gray-900">Print Shop Portal</span>
+          <span className="text-sm font-semibold text-gray-900">{tenant?.shop_name ?? 'Customer Portal'}</span>
           <nav className="flex gap-4">
             <Link href="/portal" className="text-sm text-gray-600 hover:text-gray-900">
               Orders

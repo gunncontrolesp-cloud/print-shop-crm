@@ -72,8 +72,8 @@ export default async function OrderDetailPage({
       .select('role')
       .eq('id', user.id)
       .single()
-    isAdmin = profile?.role === 'admin'
-    isElevated = ['admin', 'manager'].includes(profile?.role ?? '')
+    isAdmin = ['admin', 'manager'].includes(profile?.role ?? '')
+    isElevated = isAdmin
   }
 
   const currentStatus = order.status as OrderStatus

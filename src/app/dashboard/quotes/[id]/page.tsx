@@ -46,8 +46,8 @@ export default async function QuoteDetailPage({
       .select('role')
       .eq('id', user.id)
       .single()
-    isAdmin = profile?.role === 'admin'
-    isElevated = ['admin', 'manager'].includes(profile?.role ?? '')
+    isAdmin = ['admin', 'manager'].includes(profile?.role ?? '')
+    isElevated = isAdmin
   }
 
   const lineItems = (quote.line_items ?? []) as LineItem[]

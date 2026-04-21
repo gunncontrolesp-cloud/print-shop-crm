@@ -19,12 +19,15 @@ export default async function PortalHomePage({
 
   const serviceClient = createServiceClient()
 
-  // Find customer by auth_user_id
-  let { data: customer } = await serviceClient
-    .from('customers')
-    .select('id, name, business_name, email, auth_user_id')
-    .eq('auth_user_id', user.id)
-    .single()
+  const [{ data: rawCustomer }, { data: tenant }] = await Promise.all([
+    serviceClient
+      .from('customers')
+      .select('id, name, business_name, email, auth_user_id')
+      .eq('auth_user_id', user.id)
+      .single(),
+    serviceClient.from('tenants').select('shop_email, shop_name').limit(1).single(),
+  ])
+  let customer = rawCustomer
 
   // Auto-link on first visit: find by email match
   if (!customer) {
@@ -47,11 +50,13 @@ export default async function PortalHomePage({
     return (
       <div className="text-center py-16">
         <p className="text-gray-500">
-          Your account isn&apos;t linked yet. Contact us at{' '}
-          <a href="mailto:hello@printshop.com" className="text-blue-600 hover:underline">
-            hello@printshop.com
-          </a>{' '}
-          to get access.
+          Your account isn&apos;t linked yet.{tenant?.shop_email ? (
+            <> Contact us at{' '}
+              <a href={`mailto:${tenant.shop_email}`} className="text-blue-600 hover:underline">
+                {tenant.shop_email}
+              </a>{' '}
+              to get access.</>
+          ) : ' Contact your print shop to get access.'}
         </p>
       </div>
     )
