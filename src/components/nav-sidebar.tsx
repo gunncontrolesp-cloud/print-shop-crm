@@ -102,10 +102,10 @@ export function NavSidebar({ role }: { role: string }) {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                      'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-[background-color,color] duration-150',
                       isActive
                         ? 'bg-white/10 text-white'
-                        : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                        : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 active:scale-[0.98]'
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />

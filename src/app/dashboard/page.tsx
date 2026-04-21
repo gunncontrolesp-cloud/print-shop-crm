@@ -32,7 +32,7 @@ function StatCard({
 }) {
   const c = COLOR_MAP[color]
   return (
-    <Link href={href} className="block bg-white rounded-xl border border-slate-200 shadow-sm p-4 hover:shadow-md hover:border-slate-300 transition-all">
+    <Link href={href} className="animate-fade-up block bg-white rounded-xl border border-slate-200 shadow-sm p-4 hover:shadow-md hover:border-slate-300 active:scale-[0.97] transition-[box-shadow,border-color,transform] duration-200">
       <div className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${c.bg} mb-3`}>
         <Icon className={`h-4 w-4 ${c.icon}`} />
       </div>
@@ -80,17 +80,17 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/dashboard/customers/new" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
+          <Link href="/dashboard/customers/new" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm">
             <Plus className="h-3.5 w-3.5" /> New Customer
           </Link>
-          <Link href="/dashboard/quotes/new" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+          <Link href="/dashboard/quotes/new" className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm">
             <Plus className="h-3.5 w-3.5" /> New Quote
           </Link>
         </div>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 mb-8">
+      <div className="stagger grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 mb-8">
         <StatCard label="Customers"       value={customerCount ?? 0}     href="/dashboard/customers"   icon={Users}         color="slate"  />
         <StatCard label="Open Orders"     value={openOrderCount}          href="/dashboard/orders"      icon={ShoppingCart}  color="indigo" />
         <StatCard label="Needs Approval"  value={pendingCount}            href="/dashboard/orders"      icon={AlertCircle}   color="amber"  />
@@ -183,13 +183,13 @@ export default async function DashboardPage() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Quick Actions</p>
             <div className="space-y-2">
-              <Link href="/dashboard/quotes/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+              <Link href="/dashboard/quotes/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Plus className="h-4 w-4" /> New Quote
               </Link>
-              <Link href="/dashboard/customers/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
+              <Link href="/dashboard/customers/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Plus className="h-4 w-4" /> New Customer
               </Link>
-              <Link href="/dashboard/production" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
+              <Link href="/dashboard/production" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Layers className="h-4 w-4" /> Production Board
               </Link>
             </div>
