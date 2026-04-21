@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { addProduct, archiveProduct, restoreProduct, deleteProductById } from '@/lib/actions/catalog'
 import { Package } from 'lucide-react'
 import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
+import { BulkImportProducts } from '@/components/bulk-import-products'
 
 export default async function CatalogPage({
   searchParams,
@@ -88,6 +89,9 @@ export default async function CatalogPage({
           </div>
         </form>
       </div>
+
+      {/* Bulk import */}
+      <BulkImportProducts />
 
       {/* Active products */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-4">

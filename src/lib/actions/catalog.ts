@@ -95,6 +95,28 @@ export async function deleteProduct(formData: FormData): Promise<void> {
   redirect('/dashboard/settings/catalog?success=deleted')
 }
 
+export async function bulkImportProducts(
+  products: Array<{ name: string; category: string; unit_price: number; description: string | null }>
+): Promise<{ imported: number; error?: string }> {
+  await requireAdmin()
+  const tenantId = await getTenantId()
+  const supabase = await createClient()
+
+  const rows = products.map((p) => ({
+    tenant_id: tenantId,
+    name: p.name,
+    category: p.category,
+    unit_price: p.unit_price,
+    description: p.description,
+  }))
+
+  const { error } = await supabase.from('products').insert(rows)
+  if (error) return { imported: 0, error: error.message }
+
+  revalidatePath('/dashboard/settings/catalog')
+  return { imported: rows.length }
+}
+
 export async function deleteProductById(id: string): Promise<void> {
   await requireAdmin()
   const supabase = await createClient()
