@@ -123,3 +123,22 @@ export async function deleteStaffProfile(formData: FormData): Promise<void> {
   revalidatePath('/dashboard/settings/staff')
   redirect('/dashboard/settings/staff?success=deleted')
 }
+
+export async function deleteStaffProfileById(id: string): Promise<void> {
+  if (!id) throw new Error('Missing staff profile ID')
+
+  await requireAdmin()
+  const tenantId = await getTenantId()
+  const service = createServiceClient()
+
+  const { error } = await service
+    .from('staff_profiles')
+    .delete()
+    .eq('id', id)
+    .eq('tenant_id', tenantId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/dashboard/settings/staff')
+  redirect('/dashboard/settings/staff?success=deleted')
+}

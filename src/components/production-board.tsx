@@ -44,12 +44,26 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
   const [, startTransition] = useTransition()
 
   function handleMoveStage(jobId: string, stage: JobStage) {
+    const snapshot = jobs
+    setJobs((prev) => prev.map((j) => (j.id === jobId ? { ...j, stage } : j)))
     startTransition(async () => {
       const result = await updateJobStage(jobId, stage)
       if (result?.error) {
+        setJobs(snapshot)
         setActionError(result.error)
         setTimeout(() => setActionError(null), 5000)
       }
+    })
+  }
+
+  function handleComplete(jobId: string) {
+    setJobs((prev) =>
+      prev.map((j) =>
+        j.id === jobId ? { ...j, completed_at: new Date().toISOString() } : j
+      )
+    )
+    startTransition(async () => {
+      await completeJob(jobId)
     })
   }
 
@@ -181,7 +195,7 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                         {stage.id === 'ready_for_pickup' && (
                           <button
                             type="button"
-                            onClick={() => completeJob(job.id)}
+                            onClick={() => handleComplete(job.id)}
                             className="w-full text-xs px-2 py-1 rounded font-medium bg-green-600 text-white hover:bg-green-700 transition-colors"
                           >
                             Mark Complete

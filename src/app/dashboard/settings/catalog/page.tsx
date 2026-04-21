@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { addProduct, archiveProduct, restoreProduct, deleteProduct } from '@/lib/actions/catalog'
+import { addProduct, archiveProduct, restoreProduct, deleteProductById } from '@/lib/actions/catalog'
 import { Package } from 'lucide-react'
+import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
 
 export default async function CatalogPage({
   searchParams,
@@ -139,16 +140,7 @@ export default async function CatalogPage({
                           Archive
                         </button>
                       </form>
-                      <form action={deleteProduct}>
-                        <input type="hidden" name="id" value={product.id} />
-                        <button
-                          type="submit"
-                          onClick={(e) => { if (!confirm('Delete this product? This cannot be undone.')) e.preventDefault() }}
-                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </form>
+                      <ConfirmDeleteButton action={deleteProductById.bind(null, product.id)} label="Delete" />
                     </div>
                   </td>
                 </tr>
@@ -181,16 +173,7 @@ export default async function CatalogPage({
                             Restore
                           </button>
                         </form>
-                        <form action={deleteProduct}>
-                          <input type="hidden" name="id" value={product.id} />
-                          <button
-                            type="submit"
-                            onClick={(e) => { if (!confirm('Delete this product? This cannot be undone.')) e.preventDefault() }}
-                            className="text-xs text-rose-600 hover:underline"
-                          >
-                            Delete
-                          </button>
-                        </form>
+                        <ConfirmDeleteButton action={deleteProductById.bind(null, product.id)} label="Delete" />
                       </div>
                     </td>
                   </tr>

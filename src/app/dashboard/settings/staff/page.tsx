@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { getTenantId } from '@/lib/tenant'
-import { deleteStaffProfile } from '@/lib/actions/staff-profiles'
+import { deleteStaffProfileById } from '@/lib/actions/staff-profiles'
+import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
 
 export default async function StaffProfilesPage({
   searchParams,
@@ -93,18 +94,7 @@ export default async function StaffProfilesPage({
                 >
                   Edit
                 </Link>
-                <form action={deleteStaffProfile}>
-                  <input type="hidden" name="id" value={sp.id} />
-                  <button
-                    type="submit"
-                    className="text-xs text-red-500 hover:underline"
-                    onClick={e => {
-                      if (!confirm(`Delete ${sp.name}?`)) e.preventDefault()
-                    }}
-                  >
-                    Delete
-                  </button>
-                </form>
+                <ConfirmDeleteButton action={deleteStaffProfileById.bind(null, sp.id)} label="Delete" />
               </div>
             </div>
           ))}
