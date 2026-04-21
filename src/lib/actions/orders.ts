@@ -204,7 +204,7 @@ export async function archiveOrder(id: string) {
     .select('role')
     .eq('id', user.id)
     .single()
-  if (profile?.role !== 'admin') throw new Error('Admin only')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) throw new Error('Manager access required')
 
   const { error } = await supabase
     .from('orders')
@@ -228,7 +228,7 @@ export async function deleteOrder(id: string) {
     .select('role')
     .eq('id', user.id)
     .single()
-  if (profile?.role !== 'admin') throw new Error('Admin only')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) throw new Error('Manager access required')
 
   const { error } = await supabase.from('orders').delete().eq('id', id)
 

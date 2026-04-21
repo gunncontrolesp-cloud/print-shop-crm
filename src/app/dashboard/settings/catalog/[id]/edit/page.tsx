@@ -13,7 +13,7 @@ export default async function EditProductPage({
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/dashboard')
+  if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard')
 
   const { data: product } = await supabase.from('products').select('*').eq('id', id).single()
   if (!product) redirect('/dashboard/settings/catalog')
