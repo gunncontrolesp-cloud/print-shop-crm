@@ -22,7 +22,7 @@ export default async function EditCustomerPage({
   const action = updateCustomer.bind(null, id)
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <h1 className="text-2xl font-semibold text-gray-900 mb-1">Edit Customer</h1>
       <p className="text-gray-500 text-sm mb-6">{customer.name}</p>
       <CustomerForm

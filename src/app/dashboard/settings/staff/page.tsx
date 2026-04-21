@@ -30,7 +30,7 @@ export default async function StaffProfilesPage({
   const kioskUrl = tenant ? `/timeclock/${tenant.id}` : null
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 sm:p-8 max-w-2xl">
       {errorMsg && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {decodeURIComponent(errorMsg)}

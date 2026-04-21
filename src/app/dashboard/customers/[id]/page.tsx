@@ -106,7 +106,7 @@ export default async function CustomerDetailPage({
     'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900'
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="mb-6">
         <Link href="/dashboard/customers" className="text-sm text-gray-500 hover:text-gray-900">
           ← Customers

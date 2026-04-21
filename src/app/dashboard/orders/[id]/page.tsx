@@ -118,7 +118,7 @@ export default async function OrderDetailPage({
     (nextStatus !== 'approved' || isElevated)
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-4 sm:p-8 max-w-4xl">
       <div className="mb-4">
         <Link href="/dashboard/orders" className="text-sm text-gray-500 hover:text-gray-900">
           ← Orders

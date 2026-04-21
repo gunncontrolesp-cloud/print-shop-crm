@@ -22,7 +22,7 @@ export default async function EditProductPage({
     'w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring'
 
   return (
-    <div className="p-8 max-w-lg">
+    <div className="p-4 sm:p-8 max-w-lg">
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">Edit Product</h1>
       <form action={updateProduct} className="space-y-4">
         <input type="hidden" name="id" value={product.id} />

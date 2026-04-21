@@ -49,7 +49,7 @@ export default async function JobDetailPage({
   }
 
   return (
-    <div className="p-8 max-w-2xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-2xl mx-auto">
       <div className="mb-6">
         <a href="/dashboard/production" className="text-sm text-indigo-600 hover:underline">
           ← Back to Production Board

@@ -7,66 +7,66 @@
 **Skill Loadout:** PAUL (required), ui-ux-pro-max (recommended), AEGIS (recommended post-build)
 **Quality Gates:** API test coverage, security scan (pre-payments, pre-SaaS), WCAG AA (customer portal), LCP < 2.5s (dashboard)
 
----
+***
 
 ## Overview
 
 Print shops are production-heavy businesses that generic CRMs don't serve. The gap: tools like HubSpot track contacts and leads but can't manage the full lifecycle of a print job — quoting, production stages, file management, invoicing, and customer notifications in one place.
 
-This CRM is built single-tenant first, designed to evolve into a SaaS product ($99/$149/$299/mo) for other print shops in Phase 6.
+This CRM is built single-tenant first, designed to evolve into a SaaS product ($99/$149/\$299/mo) for other print shops in Phase 6.
 
----
+***
 
 ## Stack
 
-| Layer | Choice | Rationale |
-|-------|--------|-----------|
-| Frontend | Next.js (App Router) | Full-stack React with API routes — no separate backend |
-| Backend | Next.js API Routes | Unified stack; REST endpoints co-located with frontend |
-| Database | Supabase (PostgreSQL) | Managed Postgres + auth + RLS + realtime in one service |
-| Auth | Supabase Auth | JWT + magic link; admin and staff roles |
-| File Storage | AWS S3 (presigned URLs) | Browser uploads directly to S3 — server never touches file bytes |
-| Automation | n8n Cloud | Managed automations; no ops burden. Self-hosted for local dev only |
-| Payments | Stripe (via PaymentProvider abstraction) | Stripe first; PayPal/Clover pluggable without restructure |
-| Deployment | Vercel | Zero-config deploys; preview environments from PRs |
-| UI | Tailwind + shadcn/ui | Desktop-first; accessible components; no custom design system |
+| Layer        | Choice                                   | Rationale                                                          |
+| ------------ | ---------------------------------------- | ------------------------------------------------------------------ |
+| Frontend     | Next.js (App Router)                     | Full-stack React with API routes — no separate backend             |
+| Backend      | Next.js API Routes                       | Unified stack; REST endpoints co-located with frontend             |
+| Database     | Supabase (PostgreSQL)                    | Managed Postgres + auth + RLS + realtime in one service            |
+| Auth         | Supabase Auth                            | JWT + magic link; admin and staff roles                            |
+| File Storage | AWS S3 (presigned URLs)                  | Browser uploads directly to S3 — server never touches file bytes   |
+| Automation   | n8n Cloud                                | Managed automations; no ops burden. Self-hosted for local dev only |
+| Payments     | Stripe (via PaymentProvider abstraction) | Stripe first; PayPal/Clover pluggable without restructure          |
+| Deployment   | Vercel                                   | Zero-config deploys; preview environments from PRs                 |
+| UI           | Tailwind + shadcn/ui                     | Desktop-first; accessible components; no custom design system      |
 
----
+***
 
 ## Data Model
 
-| Entity | Key Fields | Relationships |
-|--------|-----------|---------------|
-| User | id, email, role (admin/staff), name | Assigned to Orders |
-| Customer | id, name, business_name, email, phone, preferences (JSON) | Has many Quotes, Orders |
-| Quote | id, customer_id, status, line_items (JSON), total | Belongs to Customer → converts to Order |
-| Order | id, quote_id, customer_id, status, assigned_to, due_date | Has many Jobs, Files, Invoices |
-| Job | id, order_id, stage (design/proofing/printing/finishing/ready_for_pickup) | Belongs to Order |
-| File | id, order_id, file_url, file_name, file_type | Belongs to Order |
-| Invoice | id, order_id, amount, paid_status, stripe_payment_intent_id | Belongs to Order |
+| Entity   | Key Fields                                                                   | Relationships                           |
+| -------- | ---------------------------------------------------------------------------- | --------------------------------------- |
+| User     | id, email, role (admin/staff), name                                          | Assigned to Orders                      |
+| Customer | id, name, business\_name, email, phone, preferences (JSON)                   | Has many Quotes, Orders                 |
+| Quote    | id, customer\_id, status, line\_items (JSON), total                          | Belongs to Customer → converts to Order |
+| Order    | id, quote\_id, customer\_id, status, assigned\_to, due\_date                 | Has many Jobs, Files, Invoices          |
+| Job      | id, order\_id, stage (design/proofing/printing/finishing/ready\_for\_pickup) | Belongs to Order                        |
+| File     | id, order\_id, file\_url, file\_name, file\_type                             | Belongs to Order                        |
+| Invoice  | id, order\_id, amount, paid\_status, stripe\_payment\_intent\_id             | Belongs to Order                        |
 
 **Notes:** `Quote.line_items` as JSON. Soft deletes on Customer + Order. RLS enforces role access at DB layer.
 
----
+***
 
 ## API Surface
 
 **Auth:** Supabase JWT. Two roles: `admin` (full access) and `staff` (job/order updates, read-only invoices/quotes).
 
-| Group | Methods | Auth | Purpose |
-|-------|---------|------|---------|
-| /api/customers | GET, POST, PATCH, DELETE | admin | Customer CRUD |
-| /api/quotes | GET, POST, PATCH | admin | Quote management |
-| /api/quotes/[id]/convert | POST | admin | Quote → Order |
-| /api/orders | GET, POST, PATCH | required | Order tracking |
-| /api/orders/[id]/jobs | GET, PATCH | required | Job stage updates |
-| /api/files/presign | POST | required | S3 presigned upload URL |
-| /api/invoices | GET, POST, PATCH | admin | Invoice management |
-| /api/invoices/[id]/pay | POST | required | Initiate payment |
-| /api/webhooks/stripe | POST | public (signature verified) | Payment events |
-| /api/webhooks/n8n | POST | internal (secret header) | Notification triggers |
+| Group                     | Methods                  | Auth                        | Purpose                 |
+| ------------------------- | ------------------------ | --------------------------- | ----------------------- |
+| /api/customers            | GET, POST, PATCH, DELETE | admin                       | Customer CRUD           |
+| /api/quotes               | GET, POST, PATCH         | admin                       | Quote management        |
+| /api/quotes/\[id]/convert | POST                     | admin                       | Quote → Order           |
+| /api/orders               | GET, POST, PATCH         | required                    | Order tracking          |
+| /api/orders/\[id]/jobs    | GET, PATCH               | required                    | Job stage updates       |
+| /api/files/presign        | POST                     | required                    | S3 presigned upload URL |
+| /api/invoices             | GET, POST, PATCH         | admin                       | Invoice management      |
+| /api/invoices/\[id]/pay   | POST                     | required                    | Initiate payment        |
+| /api/webhooks/stripe      | POST                     | public (signature verified) | Payment events          |
+| /api/webhooks/n8n         | POST                     | internal (secret header)    | Notification triggers   |
 
----
+***
 
 ## Architecture
 
@@ -78,65 +78,65 @@ This CRM is built single-tenant first, designed to evolve into a SaaS product ($
 
 **File uploads:** Presigned S3 URLs (5-min expiry, content-type allowlist: PDF, PNG, JPG, AI, EPS). Server generates URL; client uploads directly.
 
----
+***
 
 ## UI/UX
 
 Desktop-first. Mobile-responsive for owner status checks. Production board is desktop-only (drag-and-drop).
 
-| View | Complexity | Notes |
-|------|-----------|-------|
-| Dashboard | Medium | Open orders, unpaid invoices, jobs by stage |
-| Quote Builder | High | Dynamic line items, formula pricing |
-| Order Detail | High | Central hub — status, jobs, files, invoice |
-| Production Board | High | Trello-style, Supabase Realtime |
-| Customer Detail | Medium | History, preferences |
-| Invoice View | Medium | Generate, send, track payment |
-| File Manager | Medium | Upload + view per order |
-| Settings / Pricing Table | Low | Admin-editable multipliers |
+| View                     | Complexity | Notes                                       |
+| ------------------------ | ---------- | ------------------------------------------- |
+| Dashboard                | Medium     | Open orders, unpaid invoices, jobs by stage |
+| Quote Builder            | High       | Dynamic line items, formula pricing         |
+| Order Detail             | High       | Central hub — status, jobs, files, invoice  |
+| Production Board         | High       | Trello-style, Supabase Realtime             |
+| Customer Detail          | Medium     | History, preferences                        |
+| Invoice View             | Medium     | Generate, send, track payment               |
+| File Manager             | Medium     | Upload + view per order                     |
+| Settings / Pricing Table | Low        | Admin-editable multipliers                  |
 
----
+***
 
 ## Deployment
 
-| Environment | Platform | Notes |
-|-------------|----------|-------|
-| Production | Vercel | Auto-deploy from `main` |
-| Preview | Vercel | Auto-deploy from PRs |
-| Database | Supabase cloud | Migrations via Supabase CLI |
-| Automation | n8n Cloud | Production; self-hosted Docker for local dev |
-| File Storage | AWS S3 | Single bucket, path-prefixed by order ID |
+| Environment  | Platform       | Notes                                        |
+| ------------ | -------------- | -------------------------------------------- |
+| Production   | Vercel         | Auto-deploy from `main`                      |
+| Preview      | Vercel         | Auto-deploy from PRs                         |
+| Database     | Supabase cloud | Migrations via Supabase CLI                  |
+| Automation   | n8n Cloud      | Production; self-hosted Docker for local dev |
+| File Storage | AWS S3         | Single bucket, path-prefixed by order ID     |
 
 Secrets in Vercel dashboard. Migrations in `supabase/migrations/`.
 
----
+***
 
 ## Integrations
 
-| Integration | Purpose |
-|------------|---------|
-| Supabase | DB, auth, realtime, RLS |
-| AWS S3 | File storage (presigned uploads) |
-| Stripe | Payments + webhooks |
-| n8n Cloud | Email + SMS automations |
+| Integration      | Purpose                               |
+| ---------------- | ------------------------------------- |
+| Supabase         | DB, auth, realtime, RLS               |
+| AWS S3           | File storage (presigned uploads)      |
+| Stripe           | Payments + webhooks                   |
+| n8n Cloud        | Email + SMS automations               |
 | Twilio (via n8n) | SMS — job completed, ready for pickup |
 
 **Automation flows:** Quote created → email customer · Order approved → notify staff · Job ready for pickup → email + SMS customer · Payment received → mark paid + notify owner
 
----
+***
 
 ## Implementation Phases
 
-| Phase | Scope | Outcome |
-|-------|-------|---------|
-| 1 | Customer DB, Quote Builder (formula pricing), Order tracking, Auth | Replace the spreadsheet |
-| 2 | Production board (Realtime), File uploads, Email + SMS notifications | Live board + automated comms |
-| 3 | Invoicing, Stripe payments (PaymentProvider abstraction) | Full order-to-cash automation |
-| 4 | Customer portal, proof approval, embedded checkout | Customers self-serve |
-| 5 | Analytics dashboard, inventory tracking | Business intelligence |
-| 6 | Multi-tenant, SaaS billing ($99/$149/$299/mo tiers) | Sellable product |
+| Phase | Scope                                                                | Outcome                       |
+| ----- | -------------------------------------------------------------------- | ----------------------------- |
+| 1     | Customer DB, Quote Builder (formula pricing), Order tracking, Auth   | Replace the spreadsheet       |
+| 2     | Production board (Realtime), File uploads, Email + SMS notifications | Live board + automated comms  |
+| 3     | Invoicing, Stripe payments (PaymentProvider abstraction)             | Full order-to-cash automation |
+| 4     | Customer portal, proof approval, embedded checkout                   | Customers self-serve          |
+| 5     | Analytics dashboard, inventory tracking                              | Business intelligence         |
+| 6     | Multi-tenant, SaaS billing ($99/$149/\$299/mo tiers)                 | Sellable product              |
 
----
+***
 
 ## Design Decisions
 
@@ -150,22 +150,22 @@ Secrets in Vercel dashboard. Migrations in `supabase/migrations/`.
 8. **Formula-based pricing** — `base × qty multiplier × material multiplier × finishing multiplier`; admin-configurable; eliminates manual pricing errors
 9. **PaymentProvider abstraction** — Stripe first, PayPal/Clover pluggable; future-proofs payment layer without lock-in
 
----
+***
 
 ## Open Questions
 
 All resolved during ideation. None outstanding.
 
----
+***
 
 ## References
 
-- [Supabase RLS docs](https://supabase.com/docs/guides/database/row-level-security)
-- [Supabase local dev CLI](https://supabase.com/docs/guides/local-development)
-- [shadcn/ui components](https://ui.shadcn.com)
-- [n8n Cloud](https://n8n.io)
-- [Stripe webhook verification](https://stripe.com/docs/webhooks/signatures)
+* [Supabase RLS docs](https://supabase.com/docs/guides/database/row-level-security)
+* [Supabase local dev CLI](https://supabase.com/docs/guides/local-development)
+* [shadcn/ui components](https://ui.shadcn.com)
+* [n8n Cloud](https://n8n.io)
+* [Stripe webhook verification](https://stripe.com/docs/webhooks/signatures)
 
----
+***
 
 *Graduated: 2026-03-26*

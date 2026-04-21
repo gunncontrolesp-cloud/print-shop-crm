@@ -79,7 +79,7 @@ export default async function AnalyticsPage() {
   const totalOrders = Object.values(volumeByMonth).reduce((sum, v) => sum + v, 0)
 
   return (
-    <div className="p-8 max-w-5xl">
+    <div className="p-4 sm:p-8 max-w-5xl">
       <h1 className="text-2xl font-semibold text-gray-900 mb-8">Analytics</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
