@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { adminClockOut, adminApproveEntry } from '@/lib/actions/timeclock'
 import type { TimeEntry } from '@/lib/types'
 import { fmtTime, fmtDate, isTodayInTz, startOfTodayInTz } from '@/lib/tz'
@@ -39,8 +39,9 @@ export default async function AdminTimeClockPage() {
 
   const allEntries = [...(openEntries ?? []), ...(closedEntries ?? [])]
   const userIds = [...new Set(allEntries.map((e) => e.user_id))]
+  const service = createServiceClient()
   const { data: usersData } = userIds.length
-    ? await supabase.from('users').select('id, name, email').in('id', userIds)
+    ? await service.from('users').select('id, name, email').in('id', userIds)
     : { data: [] }
 
   const userMap = Object.fromEntries((usersData ?? []).map((u) => [u.id, u.name || u.email]))
@@ -71,13 +72,13 @@ export default async function AdminTimeClockPage() {
         <div className="flex flex-wrap gap-2">
           <a
             href="/dashboard/timeclock/reports"
-            className="flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+            className="flex items-center px-3 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted/60 transition-colors shadow-sm"
           >
             Reports
           </a>
           <a
             href="/dashboard/timeclock"
-            className="flex items-center px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+            className="flex items-center px-3 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted/60 transition-colors shadow-sm"
           >
             My Clock
           </a>
@@ -86,21 +87,21 @@ export default async function AdminTimeClockPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4">
+        <div className="bg-card rounded-xl border border-border px-4 py-4">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Clocked In Now</p>
           <p className="text-3xl font-bold text-slate-900 tabular-nums">{open.length - missingPunches.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-4">
+        <div className="bg-card rounded-xl border border-border px-4 py-4">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Total Hours Today</p>
           <p className="text-3xl font-bold text-slate-900 tabular-nums">{totalHoursToday}</p>
         </div>
-        <div className={`rounded-xl border shadow-sm px-4 py-4 ${missingPunches.length > 0 ? 'bg-rose-50 border-rose-200' : 'bg-white border-slate-200'}`}>
+        <div className={`rounded-xl border shadow-sm px-4 py-4 ${missingPunches.length > 0 ? 'bg-rose-50 border-rose-200' : 'bg-card border-border'}`}>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Missing Punches</p>
           <p className={`text-3xl font-bold tabular-nums ${missingPunches.length > 0 ? 'text-rose-600' : 'text-slate-900'}`}>
             {missingPunches.length}
           </p>
         </div>
-        <div className={`rounded-xl border shadow-sm px-4 py-4 ${pendingCount > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'}`}>
+        <div className={`rounded-xl border shadow-sm px-4 py-4 ${pendingCount > 0 ? 'bg-amber-50 border-amber-200' : 'bg-card border-border'}`}>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Pending Approvals</p>
           <p className={`text-3xl font-bold tabular-nums ${pendingCount > 0 ? 'text-amber-700' : 'text-slate-900'}`}>
             {pendingCount}
@@ -112,7 +113,7 @@ export default async function AdminTimeClockPage() {
       {missingPunches.length > 0 && (
         <section className="mb-8">
           <p className="text-xs font-semibold text-rose-500 uppercase tracking-wide mb-3">Missing Clock-Outs</p>
-          <div className="bg-white rounded-xl border border-rose-200 overflow-hidden">
+          <div className="bg-card rounded-xl border border-rose-200 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-rose-100 bg-rose-50/50">
@@ -124,7 +125,7 @@ export default async function AdminTimeClockPage() {
               </thead>
               <tbody>
                 {missingPunches.map((entry) => (
-                  <tr key={entry.id} className="border-b border-slate-50">
+                  <tr key={entry.id} className="border-b border-border/30">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs">{fmtDate(entry.clocked_in_at, tz)} {fmtTime(entry.clocked_in_at, tz)}</td>
                     <td className="px-5 py-3.5 text-rose-600 font-medium text-xs tabular-nums">{formatDuration(entry.clocked_in_at, null)}</td>
@@ -132,7 +133,7 @@ export default async function AdminTimeClockPage() {
                       <div className="flex items-center justify-end gap-2">
                         <a
                           href={`/dashboard/timeclock/admin/${entry.id}/edit`}
-                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted/60 transition-colors"
                         >
                           Edit
                         </a>
@@ -155,14 +156,14 @@ export default async function AdminTimeClockPage() {
       <section className="mb-8">
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Currently Clocked In</p>
         {open.filter((e) => isTodayInTz(e.clocked_in_at, tz)).length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm shadow-sm">
+          <div className="bg-card rounded-xl border border-border p-6 text-center text-slate-400 text-sm shadow-sm">
             No one is currently clocked in
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-border/50">
                   <th className={thClass}>Employee</th>
                   <th className={`${thClass} hidden sm:table-cell`}>Clocked In</th>
                   <th className={thClass}>Duration</th>
@@ -171,7 +172,7 @@ export default async function AdminTimeClockPage() {
               </thead>
               <tbody>
                 {open.filter((e) => isTodayInTz(e.clocked_in_at, tz)).map((entry) => (
-                  <tr key={entry.id} className="border-b border-slate-50">
+                  <tr key={entry.id} className="border-b border-border/30">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{fmtTime(entry.clocked_in_at, tz)}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs tabular-nums">{formatDuration(entry.clocked_in_at, null)}</td>
@@ -194,14 +195,14 @@ export default async function AdminTimeClockPage() {
       <section>
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">All Timecards</p>
         {closed.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-400 text-sm shadow-sm">
+          <div className="bg-card rounded-xl border border-border p-6 text-center text-slate-400 text-sm shadow-sm">
             No completed time entries yet
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100">
+                <tr className="border-b border-border/50">
                   <th className={thClass}>Employee</th>
                   <th className={thClass}>Date</th>
                   <th className={`${thClass} hidden sm:table-cell`}>In</th>
@@ -213,7 +214,7 @@ export default async function AdminTimeClockPage() {
               </thead>
               <tbody>
                 {closed.map((entry) => (
-                  <tr key={entry.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                  <tr key={entry.id} className="border-b border-border/30 hover:bg-muted/40 transition-colors">
                     <td className="px-5 py-3.5 font-medium text-slate-800">{userMap[entry.user_id] ?? entry.user_id}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs">{fmtDate(entry.clocked_in_at, tz)}</td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs hidden sm:table-cell">{fmtTime(entry.clocked_in_at, tz)}</td>
@@ -238,13 +239,13 @@ export default async function AdminTimeClockPage() {
                       <div className="flex items-center justify-end gap-2">
                         <a
                           href={`/dashboard/timeclock/admin/${entry.id}/edit`}
-                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                          className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted/60 transition-colors"
                         >
                           Edit
                         </a>
                         {entry.status === 'pending' && (
                           <form action={adminApproveEntry.bind(null, entry.id)}>
-                            <button type="submit" className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
+                            <button type="submit" className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors">
                               Approve
                             </button>
                           </form>

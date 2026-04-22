@@ -99,6 +99,9 @@ export async function removeEmployee(formData: FormData): Promise<void> {
 
   const serviceClient = createServiceClient()
 
+  // Delete related records first to avoid FK constraint violations
+  await serviceClient.from('time_entries').delete().eq('user_id', id)
+
   // Try deleting from auth (handles proper accounts)
   const { error: authError } = await serviceClient.auth.admin.deleteUser(id)
 
@@ -111,6 +114,12 @@ export async function removeEmployee(formData: FormData): Promise<void> {
 
   revalidatePath('/dashboard/settings/employees')
   redirect('/dashboard/settings/employees?success=removed')
+}
+
+export async function removeEmployeeById(id: string): Promise<void> {
+  const formData = new FormData()
+  formData.set('id', id)
+  return removeEmployee(formData)
 }
 
 export async function inviteEmployee(formData: FormData): Promise<void> {

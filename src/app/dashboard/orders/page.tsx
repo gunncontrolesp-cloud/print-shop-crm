@@ -55,7 +55,7 @@ export default async function OrdersPage({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-card rounded-xl border border-border">
           <div className="flex flex-col items-center py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
               <ShoppingCart className="h-6 w-6 text-slate-400" />
@@ -72,10 +72,10 @@ export default async function OrdersPage({
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100">
+              <tr className="border-b border-border/50">
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Order</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Customer</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
@@ -91,7 +91,7 @@ export default async function OrdersPage({
                 ) as { name: string; business_name: string | null } | null
                 const cfg = STATUS_CONFIG[order.status] ?? { label: order.status, className: 'bg-slate-100 text-slate-600' }
                 return (
-                  <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                  <tr key={order.id} className="border-b border-border/30 hover:bg-muted/40 transition-colors">
                     <td className="px-5 py-3.5 font-mono text-xs text-slate-400 hidden sm:table-cell">
                       #{order.id.slice(0, 8).toUpperCase()}
                     </td>
@@ -118,7 +118,7 @@ export default async function OrdersPage({
                     <td className="px-5 py-3.5 text-right">
                       <Link
                         href={`/dashboard/orders/${order.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80"
                       >
                         View <ArrowRight className="h-3 w-3" />
                       </Link>

@@ -29,7 +29,7 @@ export default async function CatalogPage({
   const archivedProducts = products?.filter((p) => !p.active) ?? []
 
   const inputClass =
-    'w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500'
+    'w-full rounded-lg border border-border bg-card px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40'
 
   return (
     <div className="p-4 sm:p-8 max-w-4xl mx-auto">
@@ -55,7 +55,7 @@ export default async function CatalogPage({
       </p>
 
       {/* Add product form */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-6">
+      <div className="bg-card rounded-xl border border-border p-5 mb-6">
         <h2 className="text-sm font-semibold text-slate-800 mb-4">Add Product</h2>
         <form action={addProduct} className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
@@ -82,7 +82,7 @@ export default async function CatalogPage({
           <div>
             <button
               type="submit"
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
             >
               Add Product
             </button>
@@ -94,10 +94,10 @@ export default async function CatalogPage({
       <BulkImportProducts />
 
       {/* Active products */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-4">
+      <div className="bg-card rounded-xl border border-border overflow-hidden mb-4">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100">
+            <tr className="border-b border-border/50">
               <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Name</th>
               <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Category</th>
               <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Unit Price</th>
@@ -116,7 +116,7 @@ export default async function CatalogPage({
               </tr>
             ) : (
               activeProducts.map((product) => (
-                <tr key={product.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                <tr key={product.id} className="border-b border-border/30 hover:bg-muted/40 transition-colors">
                   <td className="px-5 py-3.5">
                     <span className="font-medium text-slate-900">{product.name}</span>
                     {product.description && (
@@ -131,7 +131,7 @@ export default async function CatalogPage({
                     <div className="flex items-center justify-end gap-2">
                       <a
                         href={`/dashboard/settings/catalog/${product.id}/edit`}
-                        className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted/60 transition-colors"
                       >
                         Edit
                       </a>
@@ -159,11 +159,11 @@ export default async function CatalogPage({
           <summary className="cursor-pointer text-slate-500 hover:text-slate-900 select-none text-xs font-medium uppercase tracking-wide">
             {archivedProducts.length} archived product{archivedProducts.length !== 1 ? 's' : ''}
           </summary>
-          <div className="mt-3 bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="mt-3 bg-card rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <tbody>
                 {archivedProducts.map((product) => (
-                  <tr key={product.id} className="border-b border-slate-50 opacity-60">
+                  <tr key={product.id} className="border-b border-border/30 opacity-60">
                     <td className="px-5 py-3 text-slate-700">{product.name}</td>
                     <td className="px-5 py-3 text-slate-400 text-xs">{product.category}</td>
                     <td className="px-5 py-3 text-right text-slate-500 text-xs">
@@ -173,7 +173,7 @@ export default async function CatalogPage({
                       <div className="flex items-center justify-end gap-3">
                         <form action={restoreProduct}>
                           <input type="hidden" name="id" value={product.id} />
-                          <button type="submit" className="text-xs text-indigo-600 hover:underline">
+                          <button type="submit" className="text-xs text-primary hover:underline">
                             Restore
                           </button>
                         </form>

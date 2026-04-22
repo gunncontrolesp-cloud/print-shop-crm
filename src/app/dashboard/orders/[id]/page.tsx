@@ -37,12 +37,12 @@ const NEXT_ACTION_LABELS: Partial<Record<OrderStatus, string>> = {
 }
 
 const statusBadge: Record<OrderStatus, string> = {
-  pending: 'bg-gray-100 text-gray-600',
-  approved: 'bg-blue-100 text-blue-700',
-  printing: 'bg-yellow-100 text-yellow-700',
-  finishing: 'bg-orange-100 text-orange-700',
-  completed: 'bg-green-100 text-green-700',
-  delivered: 'bg-teal-100 text-teal-700',
+  pending: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
+  approved: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200',
+  printing: 'bg-violet-50 text-violet-700 ring-1 ring-violet-200',
+  finishing: 'bg-orange-50 text-orange-700 ring-1 ring-orange-200',
+  completed: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
+  delivered: 'bg-teal-50 text-teal-700 ring-1 ring-teal-200',
 }
 
 export default async function OrderDetailPage({
@@ -120,7 +120,7 @@ export default async function OrderDetailPage({
   return (
     <div className="p-4 sm:p-8 max-w-4xl">
       <div className="mb-4">
-        <Link href="/dashboard/orders" className="text-sm text-gray-500 hover:text-gray-900">
+        <Link href="/dashboard/orders" className="text-sm text-muted-foreground hover:text-foreground">
           ← Orders
         </Link>
       </div>
@@ -129,7 +129,7 @@ export default async function OrderDetailPage({
       <div className="flex items-start justify-between mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-2xl font-semibold text-foreground">
               {customer?.name ?? 'Unknown Customer'}
             </h1>
             <span
@@ -139,9 +139,9 @@ export default async function OrderDetailPage({
             </span>
           </div>
           {customer?.business_name && (
-            <p className="text-gray-500 mt-0.5 text-sm">{customer.business_name}</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">{customer.business_name}</p>
           )}
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-muted-foreground/70 mt-1">
             Order #{id.slice(0, 8).toUpperCase()} ·{' '}
             {new Date(order.created_at).toLocaleDateString('en-US')}
           </p>
@@ -185,17 +185,17 @@ export default async function OrderDetailPage({
               <div
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                   isCurrent
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-foreground text-background'
                     : isPast
-                    ? 'bg-gray-200 text-gray-600'
-                    : 'bg-gray-50 text-gray-300 border border-gray-200'
+                    ? 'bg-muted text-muted-foreground'
+                    : 'bg-muted/40 text-muted-foreground/40 border border-border'
                 }`}
               >
                 {isPast && <span>✓</span>}
                 {STATUS_LABELS[stage]}
               </div>
               {idx < STATUS_SEQUENCE.length - 1 && (
-                <span className={`text-xs ${isPast ? 'text-gray-400' : 'text-gray-200'}`}>
+                <span className={`text-xs ${isPast ? 'text-muted-foreground' : 'text-border'}`}>
                   →
                 </span>
               )}
@@ -205,29 +205,29 @@ export default async function OrderDetailPage({
       </div>
 
       {/* Line Items */}
-      <div className="rounded-lg border border-gray-200 overflow-hidden mb-6">
+      <div className="rounded-lg border border-border overflow-hidden mb-6">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-muted/40">
             <tr>
-              <th className="px-4 py-2.5 text-left font-medium text-gray-600">Description</th>
-              <th className="px-4 py-2.5 text-right font-medium text-gray-600">Qty</th>
-              <th className="px-4 py-2.5 text-right font-medium text-gray-600">Unit Price</th>
-              <th className="px-4 py-2.5 text-right font-medium text-gray-600">Total</th>
+              <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Description</th>
+              <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Qty</th>
+              <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Unit Price</th>
+              <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Total</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border/50">
             {lineItems.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground/60">
                   No line items
                 </td>
               </tr>
             ) : (
               lineItems.map((item) => (
-                <tr key={item.id} className="bg-white">
+                <tr key={item.id} className="bg-card">
                   <td className="px-4 py-3">{item.description}</td>
-                  <td className="px-4 py-3 text-right text-gray-600">{item.qty}</td>
-                  <td className="px-4 py-3 text-right text-gray-600">
+                  <td className="px-4 py-3 text-right text-muted-foreground">{item.qty}</td>
+                  <td className="px-4 py-3 text-right text-muted-foreground">
                     ${item.unit_price.toFixed(4)}
                   </td>
                   <td className="px-4 py-3 text-right font-medium">
@@ -238,11 +238,11 @@ export default async function OrderDetailPage({
             )}
           </tbody>
           <tfoot>
-            <tr className="bg-gray-50 border-t border-gray-200">
-              <td colSpan={3} className="px-4 py-3 text-right font-semibold text-gray-700">
+            <tr className="bg-muted/40 border-t border-border">
+              <td colSpan={3} className="px-4 py-3 text-right font-semibold text-muted-foreground">
                 Total
               </td>
-              <td className="px-4 py-3 text-right font-bold text-gray-900 text-base">
+              <td className="px-4 py-3 text-right font-bold text-foreground text-base">
                 ${Number(order.total).toFixed(2)}
               </td>
             </tr>
@@ -252,19 +252,19 @@ export default async function OrderDetailPage({
 
       {/* Notes */}
       {order.notes && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 mb-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Notes</p>
-          <p className="text-sm text-gray-900 whitespace-pre-wrap">{order.notes}</p>
+        <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 mb-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes</p>
+          <p className="text-sm text-foreground whitespace-pre-wrap">{order.notes}</p>
         </div>
       )}
 
       {/* Proof status */}
       {job && job.stage === 'proofing' && (
         <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Proof Approval</h2>
-          <div className="rounded-lg border border-gray-200 bg-white px-4 py-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Proof Approval</h2>
+          <div className="rounded-lg border border-border bg-card px-4 py-3">
             {!job.proof_decision && (
-              <p className="text-sm text-gray-500">Awaiting customer review.</p>
+              <p className="text-sm text-muted-foreground">Awaiting customer review.</p>
             )}
             {job.proof_decision === 'approved' && (
               <p className="text-sm text-green-700 font-medium">✓ Customer approved the proof</p>
@@ -281,7 +281,7 @@ export default async function OrderDetailPage({
                   <form action={resetProofAction}>
                     <button
                       type="submit"
-                      className="mt-1 text-xs px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                      className="mt-1 text-xs px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-muted/60 font-medium transition-colors"
                     >
                       Upload new proof &amp; reset for review
                     </button>
@@ -295,34 +295,34 @@ export default async function OrderDetailPage({
 
       {/* Invoice */}
       <div className="mb-6">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Invoice</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Invoice</h2>
         {invoice ? (
-          <div className="rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between">
+          <div className="rounded-lg border border-border px-4 py-3 flex items-center justify-between">
             <div>
-              <span className="text-sm font-medium text-gray-900">
+              <span className="text-sm font-medium text-foreground">
                 #{invoice.id.slice(0, 8).toUpperCase()}
               </span>
-              <span className="ml-3 text-sm text-gray-700">${Number(invoice.amount).toFixed(2)}</span>
+              <span className="ml-3 text-sm text-foreground">${Number(invoice.amount).toFixed(2)}</span>
               <span
                 className={`ml-3 text-xs px-2 py-0.5 rounded capitalize font-medium ${
                   (invoice.status as InvoiceStatus) === 'paid'
-                    ? 'bg-green-100 text-green-700'
+                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
                     : (invoice.status as InvoiceStatus) === 'sent'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-200'
+                    : 'bg-slate-100 text-slate-600'
                 }`}
               >
                 {invoice.status}
               </span>
               {invoice.due_date && (
-                <span className="ml-3 text-xs text-gray-400">
+                <span className="ml-3 text-xs text-muted-foreground/60">
                   Due {new Date(invoice.due_date).toLocaleDateString('en-US')}
                 </span>
               )}
             </div>
             <Link
               href={`/dashboard/invoices/${invoice.id}`}
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-primary hover:underline"
             >
               View invoice →
             </Link>
@@ -334,13 +334,13 @@ export default async function OrderDetailPage({
             </button>
           </form>
         ) : (
-          <p className="text-sm text-gray-400">No invoice yet.</p>
+          <p className="text-sm text-muted-foreground/60">No invoice yet.</p>
         )}
       </div>
 
       {/* Files */}
       <div className="mb-6">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Files</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Files</h2>
         <OrderFilesPanel
           orderId={id}
           files={files ?? []}
@@ -353,7 +353,7 @@ export default async function OrderDetailPage({
         {customer && (
           <Link
             href={`/dashboard/customers/${customer.id}`}
-            className="text-blue-600 hover:underline"
+            className="text-primary hover:underline"
           >
             View customer →
           </Link>
@@ -361,7 +361,7 @@ export default async function OrderDetailPage({
         {order.quote_id && (
           <Link
             href={`/dashboard/quotes/${order.quote_id}`}
-            className="text-blue-600 hover:underline"
+            className="text-primary hover:underline"
           >
             View source quote →
           </Link>

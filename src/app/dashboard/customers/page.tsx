@@ -41,7 +41,7 @@ export default async function CustomersPage({
           </Suspense>
           <Link
             href="/dashboard/customers/new"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
           >
             <Plus className="h-3.5 w-3.5" /> New Customer
           </Link>
@@ -49,7 +49,7 @@ export default async function CustomersPage({
       </div>
 
       {!customers || customers.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-card rounded-xl border border-border">
           <div className="flex flex-col items-center py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
               <Users className="h-6 w-6 text-slate-400" />
@@ -58,14 +58,14 @@ export default async function CustomersPage({
             <p className="text-sm text-slate-400 mb-4">Add your first customer to get started</p>
             <Link
               href="/dashboard/customers/new"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
             >
               <Plus className="h-3.5 w-3.5" /> Add Customer
             </Link>
           </div>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-card rounded-xl border border-border">
           <div className="flex flex-col items-center py-20 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
               <Users className="h-6 w-6 text-slate-400" />
@@ -75,10 +75,10 @@ export default async function CustomersPage({
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100">
+              <tr className="border-b border-border/50">
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Name</th>
                 <th className="hidden sm:table-cell px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Business</th>
                 <th className="hidden md:table-cell px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
@@ -88,10 +88,10 @@ export default async function CustomersPage({
             </thead>
             <tbody>
               {filtered.map((customer) => (
-                <tr key={customer.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                <tr key={customer.id} className="border-b border-border/30 hover:bg-muted/40 transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
                         {customer.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -135,7 +135,7 @@ export default async function CustomersPage({
                   <td className="px-5 py-3.5 text-right">
                     <Link
                       href={`/dashboard/customers/${customer.id}`}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80"
                     >
                       View <ArrowRight className="h-3 w-3" />
                     </Link>

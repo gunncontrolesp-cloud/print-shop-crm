@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { buttonVariants } from '@/components/ui/button-variants'
 import type { TimeEntry } from '@/lib/types'
 import DateRangeForm from './DateRangeForm'
@@ -67,8 +67,9 @@ export default async function TimeClockReportsPage({
 
   // Fetch user names
   const userIds = [...new Set(entries.map((e) => e.user_id))]
+  const service = createServiceClient()
   const { data: usersData } = userIds.length
-    ? await supabase.from('users').select('id, name, email').in('id', userIds)
+    ? await service.from('users').select('id, name, email').in('id', userIds)
     : { data: [] }
   const userMap = Object.fromEntries(
     (usersData ?? []).map((u) => [u.id, u.name || u.email])

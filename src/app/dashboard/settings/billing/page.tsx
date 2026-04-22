@@ -78,8 +78,8 @@ export default async function BillingPage({
   return (
     <div className="p-4 sm:p-8 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Billing & Plan</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-2xl font-semibold text-foreground">Billing & Plan</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
           Manage your subscription. Changes take effect immediately with prorated billing.
         </p>
       </div>
@@ -96,12 +96,12 @@ export default async function BillingPage({
       )}
 
       {/* Current plan badge */}
-      <div className="mb-6 rounded-lg border border-indigo-100 bg-indigo-50 px-4 py-3 flex items-center justify-between">
+      <div className="mb-6 rounded-lg border border-border bg-primary/5 px-4 py-3 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-indigo-900">
+          <p className="text-sm font-medium text-foreground">
             Current plan: <span className="capitalize">{currentTier}</span>
           </p>
-          <p className="text-xs text-indigo-600 mt-0.5">
+          <p className="text-xs text-primary mt-0.5">
             {hasSubscription ? 'Active subscription' : 'No active subscription'}
           </p>
         </div>
@@ -109,7 +109,7 @@ export default async function BillingPage({
           <form action={createBillingPortalSession}>
             <button
               type="submit"
-              className="text-xs font-medium text-indigo-700 border border-indigo-200 bg-white rounded-lg px-3 py-1.5 hover:bg-indigo-50 transition-colors"
+              className="text-xs font-medium text-primary border border-primary/20 bg-card rounded-lg px-3 py-1.5 hover:bg-primary/5 transition-colors"
             >
               Manage billing →
             </button>
@@ -132,28 +132,28 @@ export default async function BillingPage({
               key={plan.tier}
               className={`relative rounded-xl border p-5 flex flex-col ${
                 isCurrent
-                  ? 'border-indigo-400 bg-indigo-50 shadow-sm'
-                  : 'border-gray-200 bg-white'
+                  ? 'border-primary/40 bg-primary/5'
+                  : 'border-border bg-card'
               }`}
             >
               {isCurrent && (
-                <span className="absolute -top-3 left-4 inline-flex items-center rounded-full bg-indigo-600 px-2.5 py-0.5 text-[10px] font-semibold text-white uppercase tracking-wide">
+                <span className="absolute -top-3 left-4 inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground uppercase tracking-wide">
                   Current
                 </span>
               )}
 
               <div className="mb-4">
-                <p className="text-base font-semibold text-gray-900">{plan.name}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
+                <p className="text-base font-semibold text-foreground">{plan.name}</p>
+                <p className="text-2xl font-bold text-foreground mt-1">
                   {plan.price}
-                  <span className="text-sm font-normal text-gray-400">/mo</span>
+                  <span className="text-sm font-normal text-muted-foreground/60">/mo</span>
                 </p>
-                <p className="text-xs text-gray-500 mt-1">{plan.description}</p>
+                <p className="text-xs text-muted-foreground mt-1">{plan.description}</p>
               </div>
 
               <ul className="space-y-2 flex-1 mb-5">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                  <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                     {f}
                   </li>
@@ -161,7 +161,7 @@ export default async function BillingPage({
               </ul>
 
               {isCurrent ? (
-                <div className="rounded-lg border border-indigo-200 bg-white px-3 py-2 text-center text-xs font-medium text-indigo-600">
+                <div className="rounded-lg border border-primary/20 bg-card px-3 py-2 text-center text-xs font-medium text-primary">
                   Your current plan
                 </div>
               ) : hasSubscription ? (
@@ -170,22 +170,22 @@ export default async function BillingPage({
                     type="submit"
                     className={`w-full rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       isUpgrade
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                        : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        : 'border border-border bg-card text-foreground hover:bg-muted/60'
                     }`}
                   >
                     {isUpgrade ? `Upgrade to ${plan.name}` : `Downgrade to ${plan.name}`}
                   </button>
                 </form>
               ) : (
-                <p className="text-xs text-center text-gray-400">No active subscription</p>
+                <p className="text-xs text-center text-muted-foreground/60">No active subscription</p>
               )}
             </div>
           )
         })}
       </div>
 
-      <p className="mt-6 text-xs text-gray-400">
+      <p className="mt-6 text-xs text-muted-foreground/60">
         Upgrades are charged immediately on a prorated basis. Downgrades take effect at the next billing cycle.
         Questions? Contact support.
       </p>

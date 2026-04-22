@@ -14,9 +14,9 @@ function formatBytes(bytes: number): string {
 }
 
 const TYPE_BADGE: Record<string, { label: string; classes: string }> = {
-  note:  { label: 'Note',  classes: 'bg-gray-100 text-gray-600' },
-  call:  { label: 'Call',  classes: 'bg-blue-100 text-blue-700' },
-  email: { label: 'Email', classes: 'bg-green-100 text-green-700' },
+  note:  { label: 'Note',  classes: 'bg-slate-100 text-slate-600' },
+  call:  { label: 'Call',  classes: 'bg-sky-50 text-sky-700 ring-1 ring-sky-200' },
+  email: { label: 'Email', classes: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' },
 }
 
 export default async function CustomerDetailPage({
@@ -103,21 +103,21 @@ export default async function CustomerDetailPage({
   const deleteAction = deleteCustomer.bind(null, id)
 
   const inputClass =
-    'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900'
+    'w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-card'
 
   return (
     <div className="p-4 sm:p-8">
       <div className="mb-6">
-        <Link href="/dashboard/customers" className="text-sm text-gray-500 hover:text-gray-900">
+        <Link href="/dashboard/customers" className="text-sm text-muted-foreground hover:text-foreground">
           ← Customers
         </Link>
       </div>
 
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">{customer.name}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{customer.name}</h1>
           {customer.business_name && (
-            <p className="text-gray-500 mt-1">{customer.business_name}</p>
+            <p className="text-muted-foreground mt-1">{customer.business_name}</p>
           )}
         </div>
         <div className="flex gap-2">
@@ -149,31 +149,31 @@ export default async function CustomerDetailPage({
           { label: 'Phone', value: customer.phone },
           { label: 'Address', value: customer.address },
         ].map(({ label, value }) => (
-          <div key={label} className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-            <dt className="text-xs text-gray-500 uppercase tracking-wide mb-1">{label}</dt>
-            <dd className="text-sm text-gray-900">{value || '—'}</dd>
+          <div key={label} className="bg-card rounded-lg border border-border px-4 py-3">
+            <dt className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{label}</dt>
+            <dd className="text-sm text-foreground">{value || '—'}</dd>
           </div>
         ))}
 
-        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-          <dt className="text-xs text-gray-500 uppercase tracking-wide mb-1">Created</dt>
-          <dd className="text-sm text-gray-900">
+        <div className="bg-card rounded-lg border border-border px-4 py-3">
+          <dt className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Created</dt>
+          <dd className="text-sm text-foreground">
             {new Date(customer.created_at).toLocaleDateString('en-US')}
           </dd>
         </div>
       </dl>
 
       {customer.notes && (
-        <div className="mt-4 max-w-2xl bg-white rounded-lg border border-gray-200 px-4 py-3">
-          <dt className="text-xs text-gray-500 uppercase tracking-wide mb-1">Notes</dt>
-          <dd className="text-sm text-gray-900 whitespace-pre-wrap">{customer.notes}</dd>
+        <div className="mt-4 max-w-2xl bg-card rounded-lg border border-border px-4 py-3">
+          <dt className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Notes</dt>
+          <dd className="text-sm text-foreground whitespace-pre-wrap">{customer.notes}</dd>
         </div>
       )}
 
       {customer.preferences && Object.keys(customer.preferences).length > 0 && (
-        <div className="mt-4 max-w-2xl bg-white rounded-lg border border-gray-200 px-4 py-3">
-          <dt className="text-xs text-gray-500 uppercase tracking-wide mb-1">Preferences</dt>
-          <pre className="text-sm text-gray-900 overflow-auto">
+        <div className="mt-4 max-w-2xl bg-card rounded-lg border border-border px-4 py-3">
+          <dt className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Preferences</dt>
+          <pre className="text-sm text-foreground overflow-auto">
             {JSON.stringify(customer.preferences, null, 2)}
           </pre>
         </div>
@@ -182,19 +182,19 @@ export default async function CustomerDetailPage({
       {/* Digital Assets */}
       {allFiles.length > 0 && (
         <div className="mt-8 max-w-2xl">
-          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
             Customer Assets
           </h2>
 
           {artworkFiles.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs text-gray-500 mb-2">Artwork</p>
+              <p className="text-xs text-muted-foreground mb-2">Artwork</p>
               <div className="rounded-lg border border-emerald-200 overflow-hidden">
                 {artworkFiles.map((file) => (
                   <div key={file.id} className="flex items-center justify-between px-4 py-3 bg-emerald-50 border-b border-emerald-100 last:border-0">
                     <div>
-                      <p className="text-sm font-medium text-gray-800">{file.name}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm font-medium text-foreground">{file.name}</p>
+                      <p className="text-xs text-muted-foreground/60">
                         {formatBytes(file.size_bytes)} ·{' '}
                         <Link href={`/dashboard/orders/${file.order_id}`} className="hover:underline">
                           Order #{file.order_id.slice(0, 8).toUpperCase()}
@@ -203,13 +203,13 @@ export default async function CustomerDetailPage({
                     </div>
                     <div className="flex items-center gap-3">
                       {file.downloadUrl && (
-                        <a href={file.downloadUrl} className="text-xs font-medium text-blue-600 hover:underline">
+                        <a href={file.downloadUrl} className="text-xs font-medium text-primary hover:underline">
                           Download
                         </a>
                       )}
                       {isElevated && (
                         <form action={toggleCustomerAsset.bind(null, file.id, false)}>
-                          <button type="submit" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+                          <button type="submit" className="text-xs text-muted-foreground/60 hover:text-foreground transition-colors">
                             Unmark
                           </button>
                         </form>
@@ -223,13 +223,13 @@ export default async function CustomerDetailPage({
 
           {otherFiles.length > 0 && (
             <div>
-              <p className="text-xs text-gray-500 mb-2">All Files</p>
+              <p className="text-xs text-muted-foreground mb-2">All Files</p>
               <div className="rounded-lg border border-gray-200 overflow-hidden">
                 {otherFiles.map((file) => (
-                  <div key={file.id} className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 last:border-0">
+                  <div key={file.id} className="flex items-center justify-between px-4 py-3 bg-card border-b border-border/50 last:border-0">
                     <div>
-                      <p className="text-sm font-medium text-gray-800">{file.name}</p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-sm font-medium text-foreground">{file.name}</p>
+                      <p className="text-xs text-muted-foreground/60">
                         {formatBytes(file.size_bytes)} ·{' '}
                         <Link href={`/dashboard/orders/${file.order_id}`} className="hover:underline">
                           Order #{file.order_id.slice(0, 8).toUpperCase()}
@@ -238,13 +238,13 @@ export default async function CustomerDetailPage({
                     </div>
                     <div className="flex items-center gap-3">
                       {file.downloadUrl && (
-                        <a href={file.downloadUrl} className="text-xs font-medium text-blue-600 hover:underline">
+                        <a href={file.downloadUrl} className="text-xs font-medium text-primary hover:underline">
                           Download
                         </a>
                       )}
                       {isElevated && (
                         <form action={toggleCustomerAsset.bind(null, file.id, true)}>
-                          <button type="submit" className="text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                          <button type="submit" className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
                             Mark as Asset
                           </button>
                         </form>
@@ -260,7 +260,7 @@ export default async function CustomerDetailPage({
 
       {/* Communication Log */}
       <div className="mt-8 max-w-2xl">
-        <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
           Communication Log
         </h2>
 
@@ -270,12 +270,12 @@ export default async function CustomerDetailPage({
           </div>
         )}
 
-        <form action={addCommEntry} className="mb-4 bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+        <form action={addCommEntry} className="mb-4 bg-card rounded-lg border border-border p-4 space-y-3">
           <input type="hidden" name="customer_id" value={id} />
           <div className="flex gap-3 items-start">
             <select
               name="type"
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+              className="rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-card"
             >
               <option value="note">Note</option>
               <option value="call">Call</option>
@@ -292,7 +292,7 @@ export default async function CustomerDetailPage({
           <div className="flex justify-end">
             <button
               type="submit"
-              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-foreground bg-foreground rounded-lg hover:bg-foreground/80 transition-colors"
             >
               Log Entry
             </button>
@@ -300,7 +300,7 @@ export default async function CustomerDetailPage({
         </form>
 
         {!commLog || commLog.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-4">No entries yet.</p>
+          <p className="text-sm text-muted-foreground/60 text-center py-4">No entries yet.</p>
         ) : (
           <div className="space-y-2">
             {commLog.map((entry) => {
@@ -313,18 +313,18 @@ export default async function CustomerDetailPage({
               return (
                 <div
                   key={entry.id}
-                  className="bg-white rounded-lg border border-gray-200 px-4 py-3"
+                  className="bg-card rounded-lg border border-border px-4 py-3"
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
                       <span className={`text-xs px-2 py-0.5 rounded font-medium ${badge.classes}`}>
                         {badge.label}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground/60">
                         {(author as { name: string } | null)?.name ?? 'Unknown'}
                       </span>
-                      <span className="text-xs text-gray-300">·</span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground/30">·</span>
+                      <span className="text-xs text-muted-foreground/60">
                         {new Date(entry.created_at).toLocaleString('en-US', {
                           month: 'short',
                           day: 'numeric',
@@ -338,14 +338,14 @@ export default async function CustomerDetailPage({
                       <form action={deleteEntryAction}>
                         <button
                           type="submit"
-                          className="text-xs text-gray-300 hover:text-red-500 transition-colors"
+                          className="text-xs text-muted-foreground/30 hover:text-red-500 transition-colors"
                         >
                           Delete
                         </button>
                       </form>
                     )}
                   </div>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{entry.body}</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{entry.body}</p>
                 </div>
               )
             })}

@@ -51,30 +51,30 @@ export default async function JobDetailPage({
   return (
     <div className="p-4 sm:p-8 max-w-2xl mx-auto">
       <div className="mb-6">
-        <a href="/dashboard/production" className="text-sm text-indigo-600 hover:underline">
+        <a href="/dashboard/production" className="text-sm text-primary hover:underline">
           ← Back to Production Board
         </a>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-8 py-6 border-b border-gray-100">
-          <h1 className="text-xl font-bold text-gray-900">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
+        <div className="px-8 py-6 border-b border-border/50">
+          <h1 className="text-xl font-bold text-foreground">
             {customer?.name ?? 'Unknown Customer'}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Order #{job.order_id.slice(0, 8).toUpperCase()} ·{' '}
             Stage:{' '}
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-foreground">
               {STAGE_LABELS[job.stage] ?? job.stage}
             </span>
           </p>
         </div>
 
         <div className="px-8 py-8 flex flex-col items-center gap-4">
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-sm text-muted-foreground text-center">
             Scan to advance this job on the shop floor
           </p>
-          <div className="border-2 border-gray-200 rounded-xl p-4 bg-white">
+          <div className="border-2 border-border rounded-xl p-4 bg-card">
             <Image
               src={qrDataUrl}
               alt={`QR code for job ${job.id}`}
@@ -83,7 +83,7 @@ export default async function JobDetailPage({
               unoptimized
             />
           </div>
-          <p className="text-xs text-gray-400 font-mono break-all text-center max-w-xs">
+          <p className="text-xs text-muted-foreground/60 font-mono break-all text-center max-w-xs">
             {scanUrl}
           </p>
         </div>

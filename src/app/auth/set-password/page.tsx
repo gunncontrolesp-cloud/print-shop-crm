@@ -28,7 +28,8 @@ async function setPassword(formData: FormData): Promise<void> {
   )
   if (upsertError) redirect(`/auth/set-password?error=${encodeURIComponent(upsertError.message)}`)
 
-  redirect('/dashboard')
+  const landingPage = ['admin', 'manager'].includes(role) ? '/dashboard' : '/dashboard/timeclock'
+  redirect(landingPage)
 }
 
 export default async function SetPasswordPage({

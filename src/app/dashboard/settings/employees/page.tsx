@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { inviteEmployee, removeEmployee } from '@/lib/actions/employees'
+import { inviteEmployee, removeEmployeeById } from '@/lib/actions/employees'
 import { UserCog } from 'lucide-react'
+import { ConfirmDeleteButton } from '@/components/ui/confirm-delete-button'
 
 export default async function EmployeesPage({
   searchParams,
@@ -53,11 +54,11 @@ export default async function EmployeesPage({
             name="email"
             required
             placeholder="staff@example.com"
-            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-56 bg-white"
+            className="border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 w-56 bg-card"
           />
           <button
             type="submit"
-            className="flex items-center px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+            className="flex items-center px-3 py-2 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
           >
             Invite
           </button>
@@ -65,7 +66,7 @@ export default async function EmployeesPage({
       </div>
 
       {list.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-card rounded-xl border border-border">
           <div className="flex flex-col items-center py-16 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 mb-4">
               <UserCog className="h-6 w-6 text-slate-400" />
@@ -75,10 +76,10 @@ export default async function EmployeesPage({
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+        <div className="bg-card rounded-xl border border-border overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100">
+              <tr className="border-b border-border/50">
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Employee</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
                 <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Role</th>
@@ -88,10 +89,10 @@ export default async function EmployeesPage({
             </thead>
             <tbody>
               {list.map((emp) => (
-                <tr key={emp.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                <tr key={emp.id} className="border-b border-border/30 hover:bg-muted/40 transition-colors">
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-bold text-indigo-700">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
                         {(emp.name || emp.email).charAt(0).toUpperCase()}
                       </div>
                       <span className="font-medium text-slate-900">{emp.name || emp.email}</span>
@@ -101,7 +102,7 @@ export default async function EmployeesPage({
                   <td className="px-5 py-3.5">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                       emp.role === 'admin'
-                        ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                        ? 'bg-primary/5 text-primary ring-1 ring-primary/20'
                         : 'bg-slate-100 text-slate-600 ring-1 ring-slate-200'
                     }`}>
                       {emp.role}
@@ -114,20 +115,15 @@ export default async function EmployeesPage({
                     <div className="flex items-center justify-end gap-2">
                       <a
                         href={`/dashboard/settings/employees/${emp.id}/edit`}
-                        className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted/60 transition-colors"
                       >
                         Edit
                       </a>
                       {emp.id !== user.id && (
-                        <form action={removeEmployee}>
-                          <input type="hidden" name="id" value={emp.id} />
-                          <button
-                            type="submit"
-                            className="inline-flex items-center px-2.5 py-1.5 text-xs font-medium text-rose-600 bg-white border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors"
-                          >
-                            Remove
-                          </button>
-                        </form>
+                        <ConfirmDeleteButton
+                          action={removeEmployeeById.bind(null, emp.id)}
+                          label="Remove"
+                        />
                       )}
                     </div>
                   </td>

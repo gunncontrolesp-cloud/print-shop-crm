@@ -57,7 +57,7 @@ export default async function TimeClockPage() {
   const weekHours = (weekMinutes / 60).toFixed(1)
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-4 sm:p-8 flex flex-col items-center">
+    <div className="min-h-screen bg-background p-4 sm:p-8 flex flex-col items-center">
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-bold text-slate-900 mb-8 text-center">Time Clock</h1>
 
@@ -65,7 +65,7 @@ export default async function TimeClockPage() {
         <div className={`rounded-2xl p-8 mb-4 text-center shadow-sm border-2 ${
           isClockedIn
             ? 'bg-emerald-50 border-emerald-200'
-            : 'bg-white border-slate-200'
+            : 'bg-card border-border'
         }`}>
           <div className={`inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest mb-4 ${
             isClockedIn ? 'text-emerald-600' : 'text-slate-400'
@@ -90,11 +90,11 @@ export default async function TimeClockPage() {
 
         {/* Today / Week totals */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 text-center">
+          <div className="bg-card rounded-xl border border-border px-4 py-3 text-center">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Today</p>
             <p className="text-2xl font-bold text-slate-900 tabular-nums">{todayHours}h</p>
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3 text-center">
+          <div className="bg-card rounded-xl border border-border px-4 py-3 text-center">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">This Week</p>
             <p className="text-2xl font-bold text-slate-900 tabular-nums">{weekHours}h</p>
           </div>
@@ -114,7 +114,7 @@ export default async function TimeClockPage() {
           <form action={clockIn}>
             <button
               type="submit"
-              className="w-full py-4 text-lg font-semibold rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm"
+              className="w-full py-4 text-lg font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
             >
               Clock In
             </button>
@@ -125,10 +125,10 @@ export default async function TimeClockPage() {
         {entries.length > 0 && (
           <div className="mt-10">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Last 7 Days</p>
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100">
+                  <tr className="border-b border-border/50">
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">In</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Out</th>
@@ -137,7 +137,7 @@ export default async function TimeClockPage() {
                 </thead>
                 <tbody>
                   {entries.map((entry) => (
-                    <tr key={entry.id} className="border-b border-slate-50">
+                    <tr key={entry.id} className="border-b border-border/30">
                       <td className="px-4 py-3 text-slate-600 text-xs">{fmtDate(entry.clocked_in_at, tz)}</td>
                       <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">{fmtTime(entry.clocked_in_at, tz)}</td>
                       <td className="px-4 py-3 text-slate-600 text-xs hidden sm:table-cell">
