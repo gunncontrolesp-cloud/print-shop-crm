@@ -42,42 +42,51 @@ export default async function DashboardLayout({
     .slice(0, 2)
 
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 bg-slate-900 flex-col shrink-0">
+      <aside className="hidden lg:flex w-[216px] bg-sidebar flex-col shrink-0">
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-5 py-5 border-b border-slate-800">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-            <PrinterIcon className="h-4 w-4 text-white" />
+        <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
+          <div className="flex h-7 w-7 items-center justify-center rounded bg-sidebar-primary shrink-0">
+            <PrinterIcon className="h-3.5 w-3.5 text-sidebar-primary-foreground" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white leading-tight">PrintShop CRM</p>
-            <p className="text-[10px] text-slate-500 leading-tight capitalize">{profile?.role ?? 'staff'}</p>
+            <p className="text-sm font-heading font-bold text-sidebar-accent-foreground leading-tight tracking-tight">
+              PrintShop
+            </p>
+            <p className="text-[9px] text-sidebar-foreground leading-tight uppercase tracking-[0.12em]">
+              CRM
+            </p>
           </div>
         </div>
 
         {/* Nav */}
-        <div className="flex-1 px-3 py-5 overflow-y-auto">
+        <div className="flex-1 px-2 py-4 overflow-y-auto">
           <NavSidebar role={profile?.role ?? 'staff'} />
         </div>
 
         {/* User footer */}
-        <div className="px-3 py-4 border-t border-slate-800 space-y-2">
-          <div className="flex items-center gap-3 px-2 py-1 rounded-md">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+        <div className="px-2 pb-3 pt-2 border-t border-sidebar-border space-y-0.5">
+          <div className="flex items-center gap-2 px-2 py-2 rounded">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-[9px] font-bold text-sidebar-primary-foreground">
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-slate-200 truncate">{displayName}</p>
+              <p className="text-[11px] font-medium text-sidebar-accent-foreground truncate leading-tight">
+                {displayName}
+              </p>
+              <p className="text-[9px] text-sidebar-foreground capitalize leading-tight mt-0.5">
+                {profile?.role ?? 'staff'}
+              </p>
             </div>
             <ThemeToggle />
           </div>
-          <form action={signOut} className="px-2">
+          <form action={signOut}>
             <button
               type="submit"
-              className="flex items-center gap-2 w-full px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
+              className="flex items-center gap-2 w-full px-2 py-1.5 rounded text-[11px] font-medium text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-150"
             >
-              <LogOut className="h-3.5 w-3.5 shrink-0" />
+              <LogOut className="h-3 w-3 shrink-0" />
               Sign out
             </button>
           </form>

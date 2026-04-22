@@ -86,7 +86,7 @@ export function NavSidebar({ role }: { role: string }) {
         return (
           <div key={gi}>
             {group.label && (
-              <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              <p className="px-2 mb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/70">
                 {group.label}
               </p>
             )}
@@ -102,13 +102,13 @@ export function NavSidebar({ role }: { role: string }) {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-[background-color,color] duration-150',
+                      'flex items-center gap-2.5 px-2 py-[7px] rounded text-[12px] font-medium transition-[background-color,color] duration-150',
                       isActive
                         ? 'bg-white/10 text-white'
-                        : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 active:scale-[0.98]'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:scale-[0.98]'
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0" />
+                    <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />
                     {item.label}
                   </Link>
                 )

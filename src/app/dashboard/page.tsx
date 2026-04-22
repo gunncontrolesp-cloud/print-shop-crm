@@ -39,25 +39,25 @@ function ActionCard({ label, value, href, icon: Icon, variant }: {
 }) {
   const styles = {
     amber: {
-      wrap: 'border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 hover:border-amber-300 hover:shadow-md',
+      wrap: 'border-amber-200 bg-amber-50 hover:border-amber-300 hover:shadow-md',
       icon: 'bg-amber-100 text-amber-600',
       num:  'text-amber-900',
       label: 'text-amber-700',
       arrow: 'text-amber-300',
     },
     rose: {
-      wrap: 'border-rose-200 bg-gradient-to-br from-rose-50 to-pink-50 hover:border-rose-300 hover:shadow-md',
+      wrap: 'border-rose-200 bg-rose-50 hover:border-rose-300 hover:shadow-md',
       icon: 'bg-rose-100 text-rose-600',
       num:  'text-rose-900',
       label: 'text-rose-700',
       arrow: 'text-rose-300',
     },
     clear: {
-      wrap: 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm',
-      icon: 'bg-slate-100 text-slate-400',
-      num:  'text-slate-300',
-      label: 'text-slate-400',
-      arrow: 'text-slate-200',
+      wrap: 'border-border bg-card hover:border-border/60 hover:shadow-sm',
+      icon: 'bg-muted text-muted-foreground',
+      num:  'text-muted-foreground/40',
+      label: 'text-muted-foreground',
+      arrow: 'text-border',
     },
   }
   const s = styles[variant]
@@ -84,14 +84,14 @@ function StatCard({ label, value, href, icon: Icon }: {
   return (
     <Link
       href={href}
-      className="animate-fade-up group block bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-3.5 hover:border-slate-300 hover:shadow-md active:scale-[0.97] transition-[box-shadow,border-color,transform] duration-200"
+      className="animate-fade-up group block bg-card rounded-xl border border-border px-4 py-3.5 hover:border-border/60 hover:shadow-md active:scale-[0.97] transition-[box-shadow,border-color,transform] duration-200"
     >
       <div className="flex items-center justify-between mb-2">
-        <Icon className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600 transition-colors duration-150" />
-        <ArrowRight className="h-3 w-3 text-slate-200 group-hover:text-slate-400 transition-colors duration-150" />
+        <Icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground transition-colors duration-150" />
+        <ArrowRight className="h-3 w-3 text-border group-hover:text-muted-foreground transition-colors duration-150" />
       </div>
-      <p className="text-2xl font-mono font-bold text-slate-800 tabular-nums leading-none">{value}</p>
-      <p className="text-[11px] text-slate-400 mt-1 leading-tight">{label}</p>
+      <p className="text-2xl font-mono font-bold text-foreground tabular-nums leading-none">{value}</p>
+      <p className="text-[11px] text-muted-foreground mt-1 leading-tight">{label}</p>
     </Link>
   )
 }
@@ -178,7 +178,7 @@ export default async function DashboardPage() {
           </Link>
           <Link
             href="/dashboard/quotes/new"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm"
           >
             <Plus className="h-3.5 w-3.5" /> New Quote
           </Link>
@@ -193,13 +193,13 @@ export default async function DashboardPage() {
             {workflowSteps.map((step, i) => {
               const isActive = !step.done && workflowSteps.slice(0, i).every((s) => s.done)
               return (
-                <div key={i} className={`flex items-start gap-4 px-5 py-4 ${isActive ? 'bg-indigo-50/40' : ''}`}>
+                <div key={i} className={`flex items-start gap-4 px-5 py-4 ${isActive ? 'bg-primary/5' : ''}`}>
                   <div className={`mt-0.5 flex h-6 w-6 items-center justify-center rounded-full shrink-0 ${
-                    step.done ? 'bg-emerald-100' : isActive ? 'bg-indigo-100' : 'bg-slate-100'
+                    step.done ? 'bg-emerald-100' : isActive ? 'bg-primary/10' : 'bg-slate-100'
                   }`}>
                     {step.done
                       ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                      : <span className={`text-[10px] font-mono font-bold ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>{i + 1}</span>
+                      : <span className={`text-[10px] font-mono font-bold ${isActive ? 'text-primary' : 'text-slate-400'}`}>{i + 1}</span>
                     }
                   </div>
                   <div className="flex-1 min-w-0">
@@ -214,7 +214,7 @@ export default async function DashboardPage() {
                     <Link
                       href={step.href}
                       className={`flex items-center gap-1 text-xs font-medium shrink-0 mt-0.5 transition-colors duration-100 ${
-                        isActive ? 'text-indigo-600 hover:text-indigo-700' : 'text-slate-400 hover:text-slate-600'
+                        isActive ? 'text-primary hover:text-primary/80' : 'text-slate-400 hover:text-slate-600'
                       }`}
                     >
                       {step.action} <ArrowRight className="h-3 w-3" />
@@ -272,7 +272,7 @@ export default async function DashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
             <h2 className="text-sm font-semibold text-slate-800">Recent Orders</h2>
-            <Link href="/dashboard/orders" className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-150">
+            <Link href="/dashboard/orders" className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors duration-150">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -291,7 +291,7 @@ export default async function DashboardPage() {
                 <tr>
                   <td colSpan={5} className="px-5 py-12 text-center">
                     <p className="text-slate-400 text-sm mb-1">No orders yet.</p>
-                    <Link href="/dashboard/quotes/new" className="text-sm text-indigo-600 hover:underline font-medium">
+                    <Link href="/dashboard/quotes/new" className="text-sm text-primary hover:underline font-medium">
                       Create a quote to get started →
                     </Link>
                   </td>
@@ -317,7 +317,7 @@ export default async function DashboardPage() {
                         {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </td>
                       <td className="px-5 py-3.5 text-right">
-                        <Link href={`/dashboard/orders/${order.id}`} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-100">
+                        <Link href={`/dashboard/orders/${order.id}`} className="text-xs text-primary hover:text-primary/80 font-medium transition-colors duration-100">
                           View
                         </Link>
                       </td>
@@ -340,7 +340,7 @@ export default async function DashboardPage() {
               <span className="text-2xl font-mono font-bold text-slate-900 tabular-nums">{openQuoteCount ?? 0}</span>
             </div>
             <p className="text-xs text-slate-400 mb-4">Draft and sent — awaiting approval</p>
-            <Link href="/dashboard/quotes" className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-700 font-medium transition-colors duration-100">
+            <Link href="/dashboard/quotes" className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors duration-100">
               View all quotes <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -348,7 +348,7 @@ export default async function DashboardPage() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
             <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-3">Quick Actions</p>
             <div className="space-y-2">
-              <Link href="/dashboard/quotes/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 active:scale-[0.97] transition-[background-color,transform] duration-150">
+              <Link href="/dashboard/quotes/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Plus className="h-4 w-4" /> New Quote
               </Link>
               <Link href="/dashboard/customers/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 active:scale-[0.97] transition-[background-color,transform] duration-150">
