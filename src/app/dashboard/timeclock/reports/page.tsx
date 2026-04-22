@@ -147,7 +147,7 @@ export default async function TimeClockReportsPage({
     }
   }
 
-  const exportFrom = fromParam ?? defaultFrom.toISOString().split('T')[0]
+  const exportFrom = fromParam ?? defaultFromStr
   const exportTo = toParam ?? new Date().toISOString().split('T')[0]
 
   return (
