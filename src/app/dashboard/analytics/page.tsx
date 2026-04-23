@@ -80,36 +80,36 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-8">Analytics</h1>
+      <h1 className="text-2xl font-semibold text-foreground mb-8">Analytics</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Monthly Revenue */}
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+        <div className="rounded-lg border border-border bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Monthly Revenue
           </p>
-          <p className="text-2xl font-bold text-gray-900 mb-4">
+          <p className="text-2xl font-bold text-foreground mb-4">
             ${totalRevenue.toFixed(2)}
-            <span className="text-sm font-normal text-gray-400 ml-2">last 12 months</span>
+            <span className="text-sm font-normal text-muted-foreground ml-2">last 12 months</span>
           </p>
           {monthlyRevenueData.every((d) => d.value === 0) ? (
-            <p className="text-sm text-gray-400 py-8 text-center">No paid invoices yet.</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">No paid invoices yet.</p>
           ) : (
             <BarChart data={monthlyRevenueData} />
           )}
         </div>
 
         {/* Order Volume */}
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+        <div className="rounded-lg border border-border bg-card p-5">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
             Order Volume
           </p>
-          <p className="text-2xl font-bold text-gray-900 mb-4">
+          <p className="text-2xl font-bold text-foreground mb-4">
             {totalOrders}
-            <span className="text-sm font-normal text-gray-400 ml-2">last 12 months</span>
+            <span className="text-sm font-normal text-muted-foreground ml-2">last 12 months</span>
           </p>
           {monthlyVolumeData.every((d) => d.value === 0) ? (
-            <p className="text-sm text-gray-400 py-8 text-center">No orders yet.</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">No orders yet.</p>
           ) : (
             <BarChart data={monthlyVolumeData} />
           )}
@@ -117,29 +117,29 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* Top Customers */}
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">
+      <div className="rounded-lg border border-border bg-card p-5">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-4">
           Top Customers by Revenue
         </p>
         {topCustomers.length === 0 ? (
-          <p className="text-sm text-gray-400 py-4 text-center">No revenue data yet.</p>
+          <p className="text-sm text-muted-foreground py-4 text-center">No revenue data yet.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="pb-2 text-left font-medium text-gray-500 text-xs">Customer</th>
-                <th className="pb-2 text-right font-medium text-gray-500 text-xs">Invoices</th>
-                <th className="pb-2 text-right font-medium text-gray-500 text-xs">
+              <tr className="border-b border-border/50">
+                <th className="pb-2 text-left font-medium text-muted-foreground text-xs">Customer</th>
+                <th className="pb-2 text-right font-medium text-muted-foreground text-xs">Invoices</th>
+                <th className="pb-2 text-right font-medium text-muted-foreground text-xs">
                   Total Revenue
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-border/30">
               {topCustomers.map((c, i) => (
                 <tr key={i}>
-                  <td className="py-2.5 text-gray-900 font-medium">{c.name}</td>
-                  <td className="py-2.5 text-right text-gray-500">{c.orderCount}</td>
-                  <td className="py-2.5 text-right font-semibold text-gray-900">
+                  <td className="py-2.5 text-foreground font-medium">{c.name}</td>
+                  <td className="py-2.5 text-right text-muted-foreground">{c.orderCount}</td>
+                  <td className="py-2.5 text-right font-semibold text-foreground">
                     ${c.revenue.toFixed(2)}
                   </td>
                 </tr>
@@ -159,10 +159,10 @@ function BarChart({ data }: { data: { label: string; value: number }[] }) {
       {data.map((d) => (
         <div key={d.label} className="flex flex-col items-center flex-1 gap-1">
           <div
-            className="w-full bg-gray-900 rounded-t min-h-[2px]"
+            className="w-full bg-primary rounded-t min-h-[2px] opacity-70"
             style={{ height: `${(d.value / max) * 100}%` }}
           />
-          <span className="text-[9px] text-gray-400 truncate w-full text-center leading-tight">
+          <span className="text-[9px] text-muted-foreground truncate w-full text-center leading-tight">
             {d.label}
           </span>
         </div>

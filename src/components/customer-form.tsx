@@ -92,7 +92,7 @@ export function CustomerForm({
         <Button type="submit">Save Customer</Button>
         <Link
           href={cancelHref}
-          className="inline-flex items-center px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900"
+          className="inline-flex items-center px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           Cancel
         </Link>

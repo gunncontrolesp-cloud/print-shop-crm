@@ -22,33 +22,33 @@ export default async function NewStaffProfilePage({
   return (
     <div className="p-4 sm:p-8 max-w-md">
       <div className="mb-6">
-        <Link href="/dashboard/settings/staff" className="text-sm text-gray-500 hover:text-gray-900">
+        <Link href="/dashboard/settings/staff" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           ← Kiosk Staff
         </Link>
       </div>
 
       {errorMsg && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {decodeURIComponent(errorMsg)}
         </div>
       )}
 
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Add Staff Profile</h1>
+      <h1 className="text-2xl font-semibold text-foreground mb-6">Add Staff Profile</h1>
 
       <form action={createStaffProfile} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">Full Name</label>
+          <label className="text-sm font-medium text-foreground">Full Name</label>
           <input name="name" required placeholder="e.g. Maria Lopez" className={inputClass} />
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">Role</label>
+          <label className="text-sm font-medium text-foreground">Role</label>
           <select name="role" className={inputClass} defaultValue="staff">
             <option value="staff">Staff</option>
             <option value="manager">Manager</option>
           </select>
         </div>
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">PIN (4 digits)</label>
+          <label className="text-sm font-medium text-foreground">PIN (4 digits)</label>
           <input
             name="pin"
             type="password"
@@ -60,12 +60,12 @@ export default async function NewStaffProfilePage({
             placeholder="••••"
             className={inputClass}
           />
-          <p className="text-xs text-gray-400">Must be unique among active staff in your shop.</p>
+          <p className="text-xs text-muted-foreground">Must be unique among active staff in your shop.</p>
         </div>
         <div className="pt-2">
           <button
             type="submit"
-            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Create Profile
           </button>

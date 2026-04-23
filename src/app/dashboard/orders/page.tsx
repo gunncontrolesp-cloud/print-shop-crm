@@ -66,7 +66,7 @@ export default async function OrdersPage({
             <p className="text-sm text-slate-400">
               {ql ? 'Try a different search term.' : (
                 <>Orders are created by converting an{' '}
-                <Link href="/dashboard/quotes" className="text-indigo-600 hover:underline">approved quote</Link>.</>
+                <Link href="/dashboard/quotes" className="text-primary hover:underline">approved quote</Link>.</>
               )}
             </p>
           </div>

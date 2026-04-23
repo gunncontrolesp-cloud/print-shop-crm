@@ -44,22 +44,22 @@ export default async function SetPasswordPage({
   if (!user) redirect('/login')
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white rounded-xl border border-gray-200 p-8 w-full max-w-sm">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Welcome — let's get you set up</h1>
-        <p className="text-sm text-gray-500 mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="bg-card rounded-xl border border-border p-8 w-full max-w-sm">
+        <h1 className="text-xl font-bold text-foreground mb-1">Welcome — let&apos;s get you set up</h1>
+        <p className="text-sm text-muted-foreground mb-6">
           Enter your name and choose a password to activate your account.
         </p>
 
         {errorMsg && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
             {decodeURIComponent(errorMsg)}
           </div>
         )}
 
         <form action={setPassword} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
               Your Name
             </label>
             <input
@@ -68,13 +68,13 @@ export default async function SetPasswordPage({
               type="text"
               required
               autoFocus
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background"
               placeholder="First and last name"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
               Password
             </label>
             <input
@@ -83,7 +83,7 @@ export default async function SetPasswordPage({
               type="password"
               required
               minLength={8}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background"
               placeholder="Min. 8 characters"
             />
           </div>

@@ -49,26 +49,29 @@ export default async function EditTimeEntryPage({
 
   const employeeName = entryUser?.name || entryUser?.email || timeEntry.user_id
 
+  const inputClass =
+    'w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background'
+
   return (
     <div className="p-6 max-w-lg mx-auto">
       <div className="mb-6">
         <a
           href="/dashboard/timeclock/admin"
-          className="text-sm text-gray-500 hover:text-gray-700"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           ← Back to Admin
         </a>
       </div>
 
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Edit Time Entry</h1>
-      <p className="text-sm text-gray-500 mb-8">Employee: {employeeName}</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">Edit Time Entry</h1>
+      <p className="text-sm text-muted-foreground mb-8">Employee: {employeeName}</p>
 
       <form action={adminEditEntryForm} className="space-y-5">
         <input type="hidden" name="entryId" value={timeEntry.id} />
 
         <div>
-          <label htmlFor="clockedInAt" className="block text-sm font-medium text-gray-700 mb-1">
-            Clock In <span className="text-gray-400 font-normal">(UTC)</span>
+          <label htmlFor="clockedInAt" className="block text-sm font-medium text-foreground mb-1">
+            Clock In <span className="text-muted-foreground font-normal">(UTC)</span>
           </label>
           <input
             id="clockedInAt"
@@ -76,25 +79,25 @@ export default async function EditTimeEntryPage({
             type="datetime-local"
             required
             defaultValue={toDatetimeLocal(timeEntry.clocked_in_at)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label htmlFor="clockedOutAt" className="block text-sm font-medium text-gray-700 mb-1">
-            Clock Out <span className="text-gray-400 font-normal">(UTC — leave blank if still open)</span>
+          <label htmlFor="clockedOutAt" className="block text-sm font-medium text-foreground mb-1">
+            Clock Out <span className="text-muted-foreground font-normal">(UTC — leave blank if still open)</span>
           </label>
           <input
             id="clockedOutAt"
             name="clockedOutAt"
             type="datetime-local"
             defaultValue={timeEntry.clocked_out_at ? toDatetimeLocal(timeEntry.clocked_out_at) : ''}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="notes" className="block text-sm font-medium text-foreground mb-1">
             Notes
           </label>
           <textarea
@@ -103,7 +106,7 @@ export default async function EditTimeEntryPage({
             rows={3}
             defaultValue={timeEntry.notes ?? ''}
             placeholder="Optional notes..."
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            className={`${inputClass} resize-none`}
           />
         </div>
 

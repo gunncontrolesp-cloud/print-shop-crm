@@ -31,27 +31,27 @@ export default function DateRangeForm({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 px-4 py-4 mb-8">
+    <div className="bg-card rounded-xl border border-border px-4 py-4 mb-8">
       <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">From</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">From</label>
           <input
             type="date"
             value={fromVal}
             max={toVal}
             onChange={(e) => setFromVal(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="rounded-lg border border-border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background"
           />
         </div>
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">To</label>
+          <label className="block text-xs font-medium text-muted-foreground mb-1">To</label>
           <input
             type="date"
             value={toVal}
             min={fromVal}
             max={today}
             onChange={(e) => setToVal(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            className="rounded-lg border border-border px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background"
           />
         </div>
         <button type="submit" className={buttonVariants({ size: 'sm' as 'default' })}>

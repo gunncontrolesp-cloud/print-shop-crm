@@ -33,12 +33,12 @@ export default async function StaffProfilesPage({
   return (
     <div className="p-4 sm:p-8 max-w-2xl">
       {errorMsg && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
           {decodeURIComponent(errorMsg)}
         </div>
       )}
       {success && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           {success === 'created' && 'Staff profile created.'}
           {success === 'updated' && 'Staff profile updated.'}
           {success === 'deleted' && 'Staff profile deleted.'}
@@ -47,50 +47,50 @@ export default async function StaffProfilesPage({
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Kiosk Staff</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-semibold text-foreground">Kiosk Staff</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Employees who clock in via PIN — no app login required.
           </p>
         </div>
         <Link
           href="/dashboard/settings/staff/new"
-          className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+          className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
         >
           Add Staff
         </Link>
       </div>
 
       {kioskUrl && (
-        <div className="mb-6 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Kiosk URL</p>
-          <p className="text-sm text-gray-700 break-all">
+        <div className="mb-6 rounded-lg border border-border bg-muted/40 px-4 py-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Kiosk URL</p>
+          <p className="text-sm text-foreground break-all">
             {`${process.env.NEXT_PUBLIC_APP_URL}${kioskUrl}`}
           </p>
-          <p className="text-xs text-gray-400 mt-1">Bookmark this on the shared kiosk device.</p>
+          <p className="text-xs text-muted-foreground mt-1">Bookmark this on the shared kiosk device.</p>
         </div>
       )}
 
       {!staffProfiles || staffProfiles.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white px-4 py-8 text-center">
-          <p className="text-sm text-gray-400">No kiosk staff profiles yet.</p>
+        <div className="rounded-lg border border-border bg-card px-4 py-8 text-center">
+          <p className="text-sm text-muted-foreground">No kiosk staff profiles yet.</p>
         </div>
       ) : (
-        <div className="rounded-lg border border-gray-200 overflow-hidden">
+        <div className="rounded-lg border border-border overflow-hidden">
           {staffProfiles.map(sp => (
             <div
               key={sp.id}
-              className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 last:border-0"
+              className="flex items-center justify-between px-4 py-3 bg-card border-b border-border/30 last:border-0 hover:bg-muted/40 transition-colors"
             >
               <div>
-                <p className="text-sm font-medium text-gray-900">{sp.name}</p>
-                <p className="text-xs text-gray-400 capitalize">
+                <p className="text-sm font-medium text-foreground">{sp.name}</p>
+                <p className="text-xs text-muted-foreground capitalize">
                   {sp.role} · {sp.active ? 'Active' : 'Inactive'}
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 items-center">
                 <Link
                   href={`/dashboard/settings/staff/${sp.id}/edit`}
-                  className="text-xs text-blue-600 hover:underline"
+                  className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
                 >
                   Edit
                 </Link>

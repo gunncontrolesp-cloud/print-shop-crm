@@ -172,7 +172,7 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-2 pt-1">
           <Link
             href="/dashboard/customers/new"
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground bg-card border border-border rounded-lg hover:bg-muted/60 active:scale-[0.97] transition-[background-color,transform] duration-150 shadow-sm"
           >
             <Plus className="h-3.5 w-3.5" /> New Customer
           </Link>
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
       {isNewShop && (
         <div className="mb-8">
           <SectionLabel>Getting Started</SectionLabel>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm divide-y divide-slate-50">
+          <div className="bg-card rounded-xl border border-border divide-y divide-border/30">
             {workflowSteps.map((step, i) => {
               const isActive = !step.done && workflowSteps.slice(0, i).every((s) => s.done)
               return (
@@ -269,8 +269,8 @@ export default async function DashboardPage() {
       {/* Main grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Recent orders */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+        <div className="lg:col-span-2 bg-card rounded-xl border border-border overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-border/50">
             <h2 className="text-sm font-semibold text-slate-800">Recent Orders</h2>
             <Link href="/dashboard/orders" className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors duration-150">
               View all <ArrowRight className="h-3 w-3" />
@@ -278,11 +278,11 @@ export default async function DashboardPage() {
           </div>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100">
-                <th className="px-5 py-3 text-left text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Customer</th>
-                <th className="px-5 py-3 text-left text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="px-5 py-3 text-right text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Total</th>
-                <th className="px-5 py-3 text-right text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Date</th>
+              <tr className="border-b border-border/50">
+                <th className="px-5 py-3 text-left text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Customer</th>
+                <th className="px-5 py-3 text-left text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Status</th>
+                <th className="px-5 py-3 text-right text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Total</th>
+                <th className="px-5 py-3 text-right text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-widest">Date</th>
                 <th className="sr-only">View</th>
               </tr>
             </thead>
@@ -290,7 +290,7 @@ export default async function DashboardPage() {
               {recentOrders.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-5 py-12 text-center">
-                    <p className="text-slate-400 text-sm mb-1">No orders yet.</p>
+                    <p className="text-muted-foreground text-sm mb-1">No orders yet.</p>
                     <Link href="/dashboard/quotes/new" className="text-sm text-primary hover:underline font-medium">
                       Create a quote to get started →
                     </Link>
@@ -303,17 +303,17 @@ export default async function DashboardPage() {
                   const status = order.status as OrderStatus
                   const cfg = STATUS_CONFIG[status]
                   return (
-                    <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors duration-100">
-                      <td className="px-5 py-3.5 font-medium text-slate-900">{customerName}</td>
+                    <tr key={order.id} className="border-b border-border/30 hover:bg-muted/40 transition-colors duration-100">
+                      <td className="px-5 py-3.5 font-medium text-foreground">{customerName}</td>
                       <td className="px-5 py-3.5">
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cfg.className}`}>
                           {cfg.label}
                         </span>
                       </td>
-                      <td className="px-5 py-3.5 text-right font-mono text-slate-700 font-medium">
+                      <td className="px-5 py-3.5 text-right font-mono text-foreground font-medium">
                         ${Number(order.total).toFixed(2)}
                       </td>
-                      <td className="px-5 py-3.5 text-right text-slate-400 text-xs">
+                      <td className="px-5 py-3.5 text-right text-muted-foreground text-xs">
                         {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </td>
                       <td className="px-5 py-3.5 text-right">
@@ -331,30 +331,30 @@ export default async function DashboardPage() {
 
         {/* Right column */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <div className="bg-card rounded-xl border border-border p-5">
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-slate-400" />
-                <p className="text-sm font-semibold text-slate-800">Open Quotes</p>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm font-semibold text-foreground">Open Quotes</p>
               </div>
-              <span className="text-2xl font-mono font-bold text-slate-900 tabular-nums">{openQuoteCount ?? 0}</span>
+              <span className="text-2xl font-mono font-bold text-foreground tabular-nums">{openQuoteCount ?? 0}</span>
             </div>
-            <p className="text-xs text-slate-400 mb-4">Draft and sent — awaiting approval</p>
+            <p className="text-xs text-muted-foreground mb-4">Draft and sent — awaiting approval</p>
             <Link href="/dashboard/quotes" className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors duration-100">
               View all quotes <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-            <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-3">Quick Actions</p>
+          <div className="bg-card rounded-xl border border-border p-5">
+            <p className="text-[10px] font-mono font-semibold text-muted-foreground uppercase tracking-widest mb-3">Quick Actions</p>
             <div className="space-y-2">
-              <Link href="/dashboard/quotes/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 active:scale-[0.97] transition-[background-color,transform] duration-150">
+              <Link href="/dashboard/quotes/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Plus className="h-4 w-4" /> New Quote
               </Link>
-              <Link href="/dashboard/customers/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 active:scale-[0.97] transition-[background-color,transform] duration-150">
+              <Link href="/dashboard/customers/new" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-foreground bg-muted border border-border rounded-lg hover:bg-muted/60 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Plus className="h-4 w-4" /> New Customer
               </Link>
-              <Link href="/dashboard/production" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 active:scale-[0.97] transition-[background-color,transform] duration-150">
+              <Link href="/dashboard/production" className="flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium text-foreground bg-muted border border-border rounded-lg hover:bg-muted/60 active:scale-[0.97] transition-[background-color,transform] duration-150">
                 <Layers className="h-4 w-4" /> Production Board
               </Link>
             </div>

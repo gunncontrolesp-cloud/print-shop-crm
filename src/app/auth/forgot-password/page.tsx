@@ -29,19 +29,19 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white rounded-xl border border-gray-200 p-8 w-full max-w-sm">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">Reset your password</h1>
-        <p className="text-sm text-gray-500 mb-6">
+    <main className="flex min-h-screen items-center justify-center bg-background p-4">
+      <div className="bg-card rounded-xl border border-border p-8 w-full max-w-sm">
+        <h1 className="text-xl font-bold text-foreground mb-1">Reset your password</h1>
+        <p className="text-sm text-muted-foreground mb-6">
           Enter your email and we&apos;ll send a reset link.
         </p>
 
         {sent ? (
           <div className="space-y-4">
-            <div className="rounded-lg border border-green-200 bg-green-50 px-3 py-3 text-sm text-green-700">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm text-emerald-700">
               Check your email for a password reset link.
             </div>
-            <Link href="/login" className="block text-center text-sm text-gray-500 hover:text-gray-900">
+            <Link href="/login" className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
               Back to sign in
             </Link>
           </div>
@@ -54,17 +54,17 @@ export default function ForgotPasswordPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background"
             />
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gray-900 text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+              className="w-full bg-primary text-primary-foreground rounded-lg py-2 text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
               {loading ? 'Sending...' : 'Send reset link'}
             </button>
-            <Link href="/login" className="block text-center text-sm text-gray-500 hover:text-gray-900">
+            <Link href="/login" className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
               Back to sign in
             </Link>
           </form>
