@@ -45,7 +45,7 @@ export function MobileHeader({
             <PrinterIcon className="h-3.5 w-3.5 text-sidebar-primary-foreground" />
           </div>
           <p className="text-sm font-heading font-bold text-sidebar-accent-foreground tracking-tight">
-            PrintShop
+            ePrintBoss
           </p>
         </div>
         <div className="w-8" />
@@ -73,7 +73,7 @@ export function MobileHeader({
             </div>
             <div>
               <p className="text-sm font-heading font-bold text-sidebar-accent-foreground leading-tight tracking-tight">
-                PrintShop
+                ePrintBoss
               </p>
               <p className="text-[9px] text-sidebar-foreground leading-tight uppercase tracking-[0.12em]">
                 CRM

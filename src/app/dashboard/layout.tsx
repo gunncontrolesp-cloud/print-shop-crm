@@ -52,10 +52,10 @@ export default async function DashboardLayout({
           </div>
           <div>
             <p className="text-sm font-heading font-bold text-sidebar-accent-foreground leading-tight tracking-tight">
-              PrintShop
+              ePrintBoss
             </p>
             <p className="text-[9px] text-sidebar-foreground leading-tight uppercase tracking-[0.12em]">
-              CRM
+              Print Shop CRM
             </p>
           </div>
         </div>
