@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { updateJobStage, completeJob } from '@/lib/actions/jobs'
+import { updateJobStage, completeJob, deleteJob } from '@/lib/actions/jobs'
 import { resetProofDecision } from '@/lib/actions/proof'
 import { JOB_STAGE_SEQUENCE, type JobStage } from '@/lib/types'
 
@@ -38,9 +38,10 @@ const STAGE_BUTTON_CLASSES: Record<JobStage, string> = {
   ready_for_pickup: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200',
 }
 
-export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
+export function ProductionBoard({ initialJobs, isElevated = false }: { initialJobs: Job[]; isElevated?: boolean }) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
   function handleMoveStage(jobId: string, stage: JobStage) {
@@ -50,6 +51,23 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
       const result = await updateJobStage(jobId, stage)
       if (result?.error) {
         setJobs(snapshot)
+        setActionError(result.error)
+        setTimeout(() => setActionError(null), 5000)
+      }
+    })
+  }
+
+  function handleDelete(jobId: string) {
+    if (confirmDeleteId !== jobId) {
+      setConfirmDeleteId(jobId)
+      setTimeout(() => setConfirmDeleteId(null), 4000)
+      return
+    }
+    setConfirmDeleteId(null)
+    setJobs((prev) => prev.filter((j) => j.id !== jobId))
+    startTransition(async () => {
+      const result = await deleteJob(jobId)
+      if (result?.error) {
         setActionError(result.error)
         setTimeout(() => setActionError(null), 5000)
       }
@@ -198,6 +216,19 @@ export function ProductionBoard({ initialJobs }: { initialJobs: Job[] }) {
                               className="w-full text-xs px-2 py-1 rounded font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
                             >
                               Mark Complete
+                            </button>
+                          )}
+                          {isElevated && (
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(job.id)}
+                              className={`w-full text-xs px-2 py-1 rounded font-medium transition-colors ${
+                                confirmDeleteId === job.id
+                                  ? 'bg-rose-600 text-white hover:bg-rose-700'
+                                  : 'bg-transparent text-rose-500 hover:bg-rose-50 border border-rose-200'
+                              }`}
+                            >
+                              {confirmDeleteId === job.id ? 'Confirm delete' : 'Delete job'}
                             </button>
                           )}
                         </div>

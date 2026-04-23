@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { JOB_STAGE_SEQUENCE, type JobStage } from '@/lib/types'
 import { notifyJobReady } from '@/lib/n8n'
 
@@ -70,6 +70,30 @@ export async function updateJobStage(
       )
     }
   }
+
+  revalidatePath('/dashboard/production')
+  revalidatePath('/dashboard/orders')
+  return {}
+}
+
+export async function deleteJob(jobId: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !['admin', 'manager'].includes(profile.role)) {
+    return { error: 'Not authorized' }
+  }
+
+  const serviceClient = createServiceClient()
+  const { error } = await serviceClient.from('jobs').delete().eq('id', jobId)
+  if (error) return { error: error.message }
 
   revalidatePath('/dashboard/production')
   revalidatePath('/dashboard/orders')

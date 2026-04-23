@@ -17,14 +17,6 @@ export default async function JobDetailPage({
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!['admin', 'manager'].includes(profile?.role ?? '')) redirect('/dashboard')
-
   const { data: job } = await supabase
     .from('jobs')
     .select('id, stage, created_at, order_id, orders(total, customers(name))')
