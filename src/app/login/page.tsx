@@ -9,11 +9,13 @@ import { PrinterIcon } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
+  const [signupSent, setSignupSent] = useState(false)
 
   useEffect(() => {
     const hash = window.location.hash
@@ -46,6 +48,18 @@ export default function LoginPage() {
     setLoading(true)
 
     const supabase = createClient()
+
+    if (mode === 'signup') {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        setError(error.message)
+      } else {
+        setSignupSent(true)
+      }
+      setLoading(false)
+      return
+    }
+
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       setError(error.message)
@@ -94,10 +108,10 @@ export default function LoginPage() {
 
         {/* Heading */}
         <h1 className="text-2xl font-heading font-bold text-foreground tracking-tight mb-1">
-          Sign in
+          {mode === 'signin' ? 'Sign in' : 'Create account'}
         </h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Access your shop&apos;s dashboard
+          {mode === 'signin' ? 'Access your shop’s dashboard' : 'Set up your print shop CRM'}
         </p>
 
         {/* Google OAuth */}
@@ -124,42 +138,58 @@ export default function LoginPage() {
         </div>
 
         {/* Email form */}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoComplete="email"
-          />
-          <Input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password"
-          />
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
+        {signupSent ? (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            Check your email for a confirmation link, then sign in.
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+            <Input
+              type="password"
+              placeholder={mode === 'signup' ? 'Password (min. 8 characters)' : 'Password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={mode === 'signup' ? 8 : undefined}
+              autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            />
+            {error && (
+              <p className="text-sm text-destructive">{error}</p>
+            )}
+            <button
+              type="submit"
+              disabled={loading || oauthLoading}
+              className="w-full py-2.5 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-[opacity,transform] duration-150 disabled:opacity-50"
+            >
+              {loading ? (mode === 'signup' ? 'Creating…' : 'Signing in…') : (mode === 'signup' ? 'Create account' : 'Sign in')}
+            </button>
+          </form>
+        )}
+
+        <div className="mt-5 flex flex-col items-center gap-2">
+          {mode === 'signin' && (
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150"
+            >
+              Forgot password?
+            </Link>
           )}
           <button
-            type="submit"
-            disabled={loading || oauthLoading}
-            className="w-full py-2.5 px-4 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-[opacity,transform] duration-150 disabled:opacity-50"
-          >
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-
-        <div className="mt-5 text-center">
-          <Link
-            href="/auth/forgot-password"
+            type="button"
+            onClick={() => { setMode(mode === 'signin' ? 'signup' : 'signin'); setError(null); setSignupSent(false) }}
             className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150"
           >
-            Forgot password?
-          </Link>
+            {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+          </button>
         </div>
 
       </div>
