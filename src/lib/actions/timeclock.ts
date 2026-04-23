@@ -5,24 +5,27 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getTenantId } from '@/lib/tenant'
 
-export async function clockIn(_formData?: FormData, jobId?: string, taskStage?: string): Promise<void> {
+export async function clockIn(_formData?: FormData, jobId?: string, taskStage?: string): Promise<{ error?: string }> {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
-  const tenantId = await getTenantId()
+  let tenantId: string
+  try {
+    tenantId = await getTenantId()
+  } catch {
+    return { error: 'Your account is not linked to a tenant. Contact your admin.' }
+  }
 
   const { data: openEntry } = await supabase
     .from('time_entries')
     .select('id')
     .eq('user_id', user.id)
     .is('clocked_out_at', null)
-    .single()
+    .maybeSingle()
 
-  if (openEntry) throw new Error('Already clocked in')
+  if (openEntry) return { error: 'Already clocked in' }
 
   const { error } = await supabase.from('time_entries').insert({
     tenant_id: tenantId,
@@ -32,18 +35,17 @@ export async function clockIn(_formData?: FormData, jobId?: string, taskStage?: 
     task_stage: taskStage ?? null,
   })
 
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
 
   revalidatePath('/dashboard/timeclock')
+  return {}
 }
 
-export async function clockOut(): Promise<void> {
+export async function clockOut(): Promise<{ error?: string }> {
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
 
   const { data: openEntry } = await supabase
     .from('time_entries')
@@ -52,18 +54,19 @@ export async function clockOut(): Promise<void> {
     .is('clocked_out_at', null)
     .order('clocked_in_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  if (!openEntry) throw new Error('Not clocked in')
+  if (!openEntry) return { error: 'Not clocked in' }
 
   const { error } = await supabase
     .from('time_entries')
     .update({ clocked_out_at: new Date().toISOString() })
     .eq('id', openEntry.id)
 
-  if (error) throw new Error(error.message)
+  if (error) return { error: error.message }
 
   revalidatePath('/dashboard/timeclock')
+  return {}
 }
 
 // ── Admin actions ────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { clockIn, clockOut } from '@/lib/actions/timeclock'
+import { ClockButtons } from './ClockButtons'
 import type { TimeEntry } from '@/lib/types'
 import { fmtTime, fmtDate, startOfTodayInTz, startOfWeekInTz } from '@/lib/tz'
 
@@ -16,7 +16,10 @@ export default async function TimeClockPage() {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: tenantRow } = await supabase.from('tenants').select('timezone').single()
+  const { data: userProfile } = await supabase.from('users').select('tenant_id').eq('id', user!.id).single()
+  const { data: tenantRow } = userProfile?.tenant_id
+    ? await supabase.from('tenants').select('timezone').eq('id', userProfile.tenant_id).single()
+    : { data: null }
   const tz = tenantRow?.timezone ?? 'America/Chicago'
 
   const { data: openEntry } = await supabase
@@ -101,25 +104,7 @@ export default async function TimeClockPage() {
         </div>
 
         {/* Action button */}
-        {isClockedIn ? (
-          <form action={clockOut}>
-            <button
-              type="submit"
-              className="w-full py-4 text-lg font-semibold rounded-xl bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-sm"
-            >
-              Clock Out
-            </button>
-          </form>
-        ) : (
-          <form action={clockIn}>
-            <button
-              type="submit"
-              className="w-full py-4 text-lg font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
-            >
-              Clock In
-            </button>
-          </form>
-        )}
+        <ClockButtons isClockedIn={isClockedIn} />
 
         {/* Recent entries */}
         {entries.length > 0 && (
