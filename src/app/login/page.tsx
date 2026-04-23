@@ -98,7 +98,7 @@ export default function LoginPage() {
           </div>
           <div>
             <p className="text-lg font-heading font-bold text-foreground tracking-tight leading-none">
-              ePrintBoss
+              Print Boss
             </p>
             <p className="text-[9px] text-muted-foreground uppercase tracking-[0.14em] leading-tight mt-0.5">
               Print Shop CRM
