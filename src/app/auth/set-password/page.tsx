@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { buttonVariants } from '@/components/ui/button-variants'
+import { SetPasswordForm } from './SetPasswordForm'
 
 async function setPassword(formData: FormData): Promise<void> {
   'use server'
@@ -57,41 +57,7 @@ export default async function SetPasswordPage({
           </div>
         )}
 
-        <form action={setPassword} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
-              Your Name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              autoFocus
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background"
-              placeholder="First and last name"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              className="w-full border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 bg-background"
-              placeholder="Min. 8 characters"
-            />
-          </div>
-
-          <button type="submit" className={`w-full ${buttonVariants()}`}>
-            Activate Account
-          </button>
-        </form>
+        <SetPasswordForm action={setPassword} />
       </div>
     </div>
   )

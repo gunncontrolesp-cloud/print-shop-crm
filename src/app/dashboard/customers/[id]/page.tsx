@@ -147,13 +147,32 @@ export default async function CustomerDetailPage({
         {[
           { label: 'Email', value: customer.email },
           { label: 'Phone', value: customer.phone },
-          { label: 'Address', value: customer.address },
         ].map(({ label, value }) => (
           <div key={label} className="bg-card rounded-lg border border-border px-4 py-3">
             <dt className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{label}</dt>
             <dd className="text-sm text-foreground">{value || '—'}</dd>
           </div>
         ))}
+
+        {(customer.street_address || customer.address) && (
+          <div className="sm:col-span-2 bg-card rounded-lg border border-border px-4 py-3">
+            <dt className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Address</dt>
+            <dd className="text-sm text-foreground">
+              {customer.street_address ? (
+                <>
+                  <div>{customer.street_address}</div>
+                  {(customer.city || customer.state || customer.zip_code) && (
+                    <div>
+                      {[customer.city, customer.state, customer.zip_code].filter(Boolean).join(', ')}
+                    </div>
+                  )}
+                </>
+              ) : (
+                customer.address
+              )}
+            </dd>
+          </div>
+        )}
 
         <div className="bg-card rounded-lg border border-border px-4 py-3">
           <dt className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Created</dt>

@@ -99,6 +99,12 @@ function StatCard({ label, value, href, icon: Icon }: {
 export default async function DashboardPage() {
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: userProfile } = user
+    ? await supabase.from('users').select('role').eq('id', user.id).single()
+    : { data: null }
+  const isStaff = (userProfile?.role ?? 'staff') === 'staff'
+
   const [
     { count: customerCount },
     { data: orders },
@@ -185,8 +191,8 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Getting Started — shown until first order exists */}
-      {isNewShop && (
+      {/* Getting Started — shown to admin/manager until first order exists */}
+      {isNewShop && !isStaff && (
         <div className="mb-8">
           <SectionLabel>Getting Started</SectionLabel>
           <div className="bg-card rounded-xl border border-border divide-y divide-border/30">

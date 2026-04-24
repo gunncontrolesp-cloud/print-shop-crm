@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import { JOB_STAGE_SEQUENCE, type JobStage } from '@/lib/types'
+import { JOB_STAGE_SEQUENCE, ORDER_STATUS_SEQUENCE, type JobStage, type OrderStatus } from '@/lib/types'
 import { notifyJobReady } from '@/lib/n8n'
 
 export async function updateJobStage(
@@ -68,6 +68,34 @@ export async function updateJobStage(
         customer.name ?? '',
         customer.phone ?? null
       )
+    }
+  }
+
+  // Sync order status when job advances to printing, finishing, or ready_for_pickup
+  const orderStatusMap: Partial<Record<JobStage, OrderStatus>> = {
+    printing: 'printing',
+    finishing: 'finishing',
+    ready_for_pickup: 'completed',
+  }
+  const targetOrderStatus = orderStatusMap[stage]
+  if (targetOrderStatus && job.order_id) {
+    const { data: order } = await supabase
+      .from('orders')
+      .select('status')
+      .eq('id', job.order_id)
+      .single()
+
+    if (order) {
+      const currentIdx = ORDER_STATUS_SEQUENCE.indexOf(order.status as OrderStatus)
+      const targetIdx = ORDER_STATUS_SEQUENCE.indexOf(targetOrderStatus)
+      if (targetIdx > currentIdx) {
+        const serviceClient = createServiceClient()
+        await serviceClient
+          .from('orders')
+          .update({ status: targetOrderStatus })
+          .eq('id', job.order_id)
+        revalidatePath(`/dashboard/orders/${job.order_id}`)
+      }
     }
   }
 

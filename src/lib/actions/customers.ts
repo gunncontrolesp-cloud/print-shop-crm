@@ -17,7 +17,10 @@ export async function createCustomer(formData: FormData) {
       business_name: (formData.get('business_name') as string) || null,
       email: (formData.get('email') as string) || null,
       phone: (formData.get('phone') as string) || null,
-      address: (formData.get('address') as string) || null,
+      street_address: (formData.get('street_address') as string) || null,
+      city: (formData.get('city') as string) || null,
+      state: (formData.get('state') as string) || null,
+      zip_code: (formData.get('zip_code') as string) || null,
       notes: (formData.get('notes') as string) || null,
     })
     .select('id')
@@ -39,7 +42,10 @@ export async function updateCustomer(id: string, formData: FormData) {
       business_name: (formData.get('business_name') as string) || null,
       email: (formData.get('email') as string) || null,
       phone: (formData.get('phone') as string) || null,
-      address: (formData.get('address') as string) || null,
+      street_address: (formData.get('street_address') as string) || null,
+      city: (formData.get('city') as string) || null,
+      state: (formData.get('state') as string) || null,
+      zip_code: (formData.get('zip_code') as string) || null,
       notes: (formData.get('notes') as string) || null,
     })
     .eq('id', id)

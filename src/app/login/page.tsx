@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [oauthLoading, setOauthLoading] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [signupSent, setSignupSent] = useState(false)
 
   useEffect(() => {
@@ -50,6 +51,11 @@ export default function LoginPage() {
     const supabase = createClient()
 
     if (mode === 'signup') {
+      if (password !== confirmPassword) {
+        setError('Passwords do not match')
+        setLoading(false)
+        return
+      }
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) {
         setError(error.message)
@@ -161,6 +167,16 @@ export default function LoginPage() {
               minLength={mode === 'signup' ? 8 : undefined}
               autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
             />
+            {mode === 'signup' && (
+              <Input
+                type="password"
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+              />
+            )}
             {error && (
               <p className="text-sm text-destructive">{error}</p>
             )}

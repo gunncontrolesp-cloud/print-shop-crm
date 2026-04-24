@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
-import type { OrderStatus } from '@/lib/types'
-import { getNextStatus } from '@/lib/types'
+import type { OrderStatus, JobStage } from '@/lib/types'
+import { getNextStatus, JOB_STAGE_SEQUENCE } from '@/lib/types'
 import { notifyOrderApproved, notifyReorder } from '@/lib/n8n'
 import { getTenantId } from '@/lib/tenant'
 
@@ -132,8 +132,34 @@ export async function updateOrderStatus(id: string, status: OrderStatus) {
     }
   }
 
+  // Sync job stage when order advances to printing, finishing, or completed
+  const jobStageMap: Partial<Record<OrderStatus, JobStage>> = {
+    printing: 'printing',
+    finishing: 'finishing',
+    completed: 'ready_for_pickup',
+  }
+  const targetJobStage = jobStageMap[status]
+  if (targetJobStage) {
+    const serviceClient = createServiceClient()
+    const { data: job } = await supabase
+      .from('jobs')
+      .select('id, stage')
+      .eq('order_id', id)
+      .is('completed_at', null)
+      .maybeSingle()
+
+    if (job) {
+      const currentStageIdx = JOB_STAGE_SEQUENCE.indexOf(job.stage as JobStage)
+      const targetStageIdx = JOB_STAGE_SEQUENCE.indexOf(targetJobStage)
+      if (targetStageIdx > currentStageIdx) {
+        await serviceClient.from('jobs').update({ stage: targetJobStage }).eq('id', job.id)
+      }
+    }
+  }
+
   revalidatePath(`/dashboard/orders/${id}`)
   revalidatePath('/dashboard/orders')
+  revalidatePath('/dashboard/production')
   redirect(`/dashboard/orders/${id}`)
 }
 
